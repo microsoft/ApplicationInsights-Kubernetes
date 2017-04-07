@@ -29,7 +29,7 @@
         public async Task<IEnumerable<Pod>> GetPodsAsync()
         {
             string url = Invariant($"api/v1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/pods");
-            Uri requestUri = new Uri(url);
+            Uri requestUri = GetQueryUri(url);
             string resultString = await kubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
             PodList pods = JsonConvert.DeserializeObject<PodList>(resultString);
             return pods.Items;
@@ -55,7 +55,7 @@
         public async Task<IEnumerable<ReplicaSet>> GetReplicasAsync()
         {
             string url = Invariant($"apis/extensions/v1beta1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/replicasets");
-            Uri requestUri = new Uri(url);
+            Uri requestUri = GetQueryUri(url);
             string resultString = await kubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
             ReplicaSetList replicas = JsonConvert.DeserializeObject<ReplicaSetList>(resultString);
             return replicas.Items;
@@ -74,5 +74,10 @@
             return myPod.GetContainerStatus(myContainerId);
         }
         #endregion
+
+        private Uri GetQueryUri(string relativeUrl)
+        {
+            return new Uri(this.kubeHttpClient.Settings.ServiceBaseAddress, relativeUrl);
+        }
     }
 }
