@@ -3,8 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Globalization;
-    using System.Text;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity;
@@ -19,6 +18,7 @@
         // Property holder objects
         private Pod myPod;
         private ContainerStatus myContainerStatus;
+        private ReplicaSet myReplicaSet;
 
         // Waiter to making sure initialization code is run before calling into properties.
         internal EventWaitHandle InitializationWaiter { get; private set; }
@@ -50,13 +50,16 @@
                     {
                         instance = new K8sEnvironment()
                         {
-                            ContainerId = settings.ContainerId
+                            ContainerID = settings.ContainerId
                         };
 
                         Pod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
                         instance.myPod = myPod;
                         Console.WriteLine(Invariant($"Getting container status of container-id: {settings.ContainerId}"));
                         instance.myContainerStatus = myPod.GetContainerStatus(settings.ContainerId);
+
+                        IEnumerable<ReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
+                        instance.myReplicaSet = myPod.GetMyReplicaSet(replicaSetList);
                     }
                     else
                     {
@@ -109,8 +112,11 @@
         /// <summary>
         /// ContainerID for the current K8s entity.
         /// </summary>
-        public string ContainerId { get; private set; }
+        public string ContainerID { get; private set; }
 
+        /// <summary>
+        /// Name of the container specificed in deployment spec.
+        /// </summary>
         public string ContainerName
         {
             get
@@ -119,14 +125,9 @@
             }
         }
 
-        public string Image
-        {
-            get
-            {
-                return this.myContainerStatus?.Image;
-            }
-        }
-
+        /// <summary>
+        /// Name of the Pod
+        /// </summary>
         public string PodName
         {
             get
@@ -135,6 +136,20 @@
             }
         }
 
+        /// <summary>
+        /// GUID for a Pod
+        /// </summary>
+        public string PodID
+        {
+            get
+            {
+                return this.myPod?.Metadata?.Uid;
+            }
+        }
+
+        /// <summary>
+        /// Labels for a pod
+        /// </summary>
         public string PodLabels
         {
             get
@@ -143,16 +158,24 @@
                 IDictionary<string, string> labelDict = myPod?.Metadata?.Labels;
                 if (labelDict != null && labelDict.Count > 0)
                 {
-                    StringBuilder labelStringBuilder = new StringBuilder();
-                    foreach (KeyValuePair<string, string> label in labelDict)
-                    {
-                        labelStringBuilder.AppendFormat(CultureInfo.InvariantCulture, ",{0}:{1}", label.Key, label.Value);
-                    }
-                    result = labelStringBuilder.ToString().Substring(1);
+                    result = JoinKeyValuePairs(labelDict);
                 }
                 return result;
             }
         }
+
+        public string ReplicaSetUid
+        {
+            get
+            {
+                return this.myReplicaSet?.Metadata?.Uid;
+            }
+        }
         #endregion
+
+        private string JoinKeyValuePairs(IDictionary<string, string> dictionary)
+        {
+            return string.Join(",", dictionary.Select(kvp => kvp.Key + ':' + kvp.Value));
+        }
     }
 }

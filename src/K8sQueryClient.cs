@@ -51,6 +51,17 @@
         }
         #endregion
 
+        #region Replica Sets
+        public async Task<IEnumerable<ReplicaSet>> GetReplicasAsync()
+        {
+            string url = Invariant($"apis/extensions/v1beta1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/replicasets");
+            Uri requestUri = new Uri(url);
+            string resultString = await kubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
+            ReplicaSetList replicas = JsonConvert.DeserializeObject<ReplicaSetList>(resultString);
+            return replicas.Items;
+        }
+        #endregion
+
         #region ContainerStatus
         /// <summary>
         /// Get the container status for the pod, where the current container is running upon.

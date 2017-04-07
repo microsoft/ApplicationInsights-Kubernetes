@@ -1,17 +1,18 @@
 ﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity
 {
+    using System.Collections.Generic;
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class Pod
+    public class Pod : K8sObject
     {
-        [JsonProperty("apiVersion")]
-        public string ApiVersion { get; set; }
-
         [JsonProperty("metadata")]
         public PodMetadata Metadata { get; set; }
 
         [JsonProperty("status")]
         public PodStatus Status { get; set; }
+
+        [JsonProperty("ownerReferences")]
+        public IEnumerable<OwnerReference> OwnerReferences { get; set; }
     }
 }
