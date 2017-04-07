@@ -11,8 +11,5 @@
 
         [JsonProperty("status")]
         public PodStatus Status { get; set; }
-
-        [JsonProperty("ownerReferences")]
-        public IEnumerable<OwnerReference> OwnerReferences { get; set; }
     }
 }
