@@ -54,9 +54,15 @@
         #region Replica Sets
         public async Task<IEnumerable<ReplicaSet>> GetReplicasAsync()
         {
+            // TODO: This delay is only for debugging. Do not allow PR in when you see this line of code.
+            await Task.Delay(TimeSpan.FromSeconds(20)).ConfigureAwait(false);
+            // ~
+
             string url = Invariant($"apis/extensions/v1beta1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/replicasets");
             Uri requestUri = GetQueryUri(url);
             string resultString = await kubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
+            Console.WriteLine("Replica result: ");
+            Console.WriteLine(resultString);
             ReplicaSetList replicas = JsonConvert.DeserializeObject<ReplicaSetList>(resultString);
             return replicas.Items;
         }
