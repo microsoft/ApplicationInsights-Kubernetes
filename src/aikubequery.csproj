@@ -48,7 +48,7 @@
 
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.3.0-beta3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsCIBuild)' == 'true' AND '$(IsSignBuild)' == 'true'">
