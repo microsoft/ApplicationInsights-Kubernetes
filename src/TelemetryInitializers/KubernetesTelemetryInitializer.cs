@@ -48,6 +48,9 @@
 
             // Replica Set
             telemetry.Context.Properties.Add(Invariant($"{K8s}.{ReplicaSet}.ID"), this.k8sEnvironment.ReplicaSetUid);
+
+            // Deployment
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Deployment}.ID"), this.k8sEnvironment.DeploymentUid);
         }
     }
 }

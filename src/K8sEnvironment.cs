@@ -19,6 +19,7 @@
         private Pod myPod;
         private ContainerStatus myContainerStatus;
         private ReplicaSet myReplicaSet;
+        private K8sDeployment myDeployment;
 
         // Waiter to making sure initialization code is run before calling into properties.
         internal EventWaitHandle InitializationWaiter { get; private set; }
@@ -60,6 +61,12 @@
 
                         IEnumerable<ReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
                         instance.myReplicaSet = myPod.GetMyReplicaSet(replicaSetList);
+
+                        if (instance.myReplicaSet != null)
+                        {
+                            IEnumerable<K8sDeployment> deploymentList = await queryClient.GetDeploymentsAsync().ConfigureAwait(false);
+                            instance.myDeployment = instance.myReplicaSet.GetMyDeployment(deploymentList);
+                        }
                     }
                     else
                     {
@@ -169,6 +176,14 @@
             get
             {
                 return this.myReplicaSet?.Metadata?.Uid;
+            }
+        }
+
+        public string DeploymentUid
+        {
+            get
+            {
+                return this.myDeployment?.Metadata.Uid;
             }
         }
         #endregion

@@ -26,13 +26,10 @@
         /// Get all pods in this cluster
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Pod>> GetPodsAsync()
+        public Task<IEnumerable<Pod>> GetPodsAsync()
         {
             string url = Invariant($"api/v1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/pods");
-            Uri requestUri = GetQueryUri(url);
-            string resultString = await kubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
-            PodList pods = JsonConvert.DeserializeObject<PodList>(resultString);
-            return pods.Items;
+            return GetAllItemsAsync<Pod, PodList>(url);
         }
 
         /// <summary>
@@ -52,13 +49,18 @@
         #endregion
 
         #region Replica Sets
-        public async Task<IEnumerable<ReplicaSet>> GetReplicasAsync()
+        public Task<IEnumerable<ReplicaSet>> GetReplicasAsync()
         {
             string url = Invariant($"apis/extensions/v1beta1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/replicasets");
-            Uri requestUri = GetQueryUri(url);
-            string resultString = await kubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
-            ReplicaSetList replicas = JsonConvert.DeserializeObject<ReplicaSetList>(resultString);
-            return replicas.Items;
+            return GetAllItemsAsync<ReplicaSet, ReplicaSetList>(url);
+        }
+        #endregion
+
+        #region Deployment
+        public Task<IEnumerable<K8sDeployment>> GetDeploymentsAsync()
+        {
+            string url = Invariant($"apis/extensions/v1beta1/namespaces/{this.kubeHttpClient.Settings.QueryNamespace}/deployments");
+            return GetAllItemsAsync<K8sDeployment, K8sDeploymentList>(url);
         }
         #endregion
 
@@ -74,6 +76,15 @@
             return myPod.GetContainerStatus(myContainerId);
         }
         #endregion
+
+        private async Task<IEnumerable<TEntity>> GetAllItemsAsync<TEntity, TList>(string relativeUrl)
+            where TList : K8sObjectList<TEntity>
+        {
+            Uri requestUri = GetQueryUri(relativeUrl);
+            string resultString = await this.kubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
+            TList resultList = JsonConvert.DeserializeObject<TList>(resultString);
+            return resultList.Items;
+        }
 
         private Uri GetQueryUri(string relativeUrl)
         {

@@ -6,5 +6,6 @@
         public const string Container = "Container";
         public const string Pod = "Pod";
         public const string ReplicaSet = "ReplicaSet";
+        public const string Deployment = "Deployment";
     }
 }
