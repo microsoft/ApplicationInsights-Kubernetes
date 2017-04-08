@@ -51,6 +51,10 @@
 
             // Deployment
             telemetry.Context.Properties.Add(Invariant($"{K8s}.{Deployment}.ID"), this.k8sEnvironment.DeploymentUid);
+
+            // Ndoe
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Node}.ID"), this.k8sEnvironment.NodeUid);
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Node}.Name"), this.k8sEnvironment.NodeName);
         }
     }
 }

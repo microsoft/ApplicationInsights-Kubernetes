@@ -4,12 +4,9 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class Pod : K8sObject
+    public class K8sPodMetadata : K8sObjectMetadata<K8sPod>
     {
-        [JsonProperty("metadata")]
-        public PodMetadata Metadata { get; set; }
-
-        [JsonProperty("status")]
-        public PodStatus Status { get; set; }
+        [JsonProperty("ownerReferences")]
+        public IEnumerable<OwnerReference> OwnerReferences { get; set; }
     }
 }

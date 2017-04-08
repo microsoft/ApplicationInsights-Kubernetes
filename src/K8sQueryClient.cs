@@ -26,21 +26,21 @@
         /// Get all pods in this cluster
         /// </summary>
         /// <returns></returns>
-        public Task<IEnumerable<Pod>> GetPodsAsync()
+        public Task<IEnumerable<K8sPod>> GetPodsAsync()
         {
             string url = Invariant($"api/v1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/pods");
-            return GetAllItemsAsync<Pod, PodList>(url);
+            return GetAllItemsAsync<K8sPod, K8sPodList>(url);
         }
 
         /// <summary>
         /// Get the pod the current container is running upon.
         /// </summary>
         /// <returns></returns>
-        public async Task<Pod> GetMyPodAsync()
+        public async Task<K8sPod> GetMyPodAsync()
         {
             string myContainerId = kubeHttpClient.Settings.ContainerId;
-            IEnumerable<Pod> possiblePods = await GetPodsAsync().ConfigureAwait(false);
-            Pod targetPod = possiblePods.FirstOrDefault(pod => pod.Status != null &&
+            IEnumerable<K8sPod> possiblePods = await GetPodsAsync().ConfigureAwait(false);
+            K8sPod targetPod = possiblePods.FirstOrDefault(pod => pod.Status != null &&
                                 pod.Status.ContainerStatuses != null &&
                                 pod.Status.ContainerStatuses.Any(
                                     cs => !string.IsNullOrEmpty(cs.ContainerID) && cs.ContainerID.EndsWith(myContainerId, StringComparison.Ordinal)));
@@ -64,6 +64,14 @@
         }
         #endregion
 
+        #region Node
+        public Task<IEnumerable<K8sNode>> GetNodesAsync()
+        {
+            string url = Invariant($"api/v1/nodes");
+            return GetAllItemsAsync<K8sNode, K8sNodeList>(url);
+        }
+        #endregion
+
         #region ContainerStatus
         /// <summary>
         /// Get the container status for the pod, where the current container is running upon.
@@ -72,7 +80,7 @@
         public async Task<ContainerStatus> GetMyContainerStatusAsync()
         {
             string myContainerId = kubeHttpClient.Settings.ContainerId;
-            Pod myPod = await GetMyPodAsync().ConfigureAwait(false);
+            K8sPod myPod = await GetMyPodAsync().ConfigureAwait(false);
             return myPod.GetContainerStatus(myContainerId);
         }
         #endregion

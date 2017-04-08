@@ -16,10 +16,11 @@
     public class K8sEnvironment
     {
         // Property holder objects
-        private Pod myPod;
+        private K8sPod myPod;
         private ContainerStatus myContainerStatus;
         private ReplicaSet myReplicaSet;
         private K8sDeployment myDeployment;
+        private K8sNode myNode;
 
         // Waiter to making sure initialization code is run before calling into properties.
         internal EventWaitHandle InitializationWaiter { get; private set; }
@@ -54,7 +55,7 @@
                             ContainerID = settings.ContainerId
                         };
 
-                        Pod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
+                        K8sPod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
                         instance.myPod = myPod;
                         Console.WriteLine(Invariant($"Getting container status of container-id: {settings.ContainerId}"));
                         instance.myContainerStatus = myPod.GetContainerStatus(settings.ContainerId);
@@ -66,6 +67,16 @@
                         {
                             IEnumerable<K8sDeployment> deploymentList = await queryClient.GetDeploymentsAsync().ConfigureAwait(false);
                             instance.myDeployment = instance.myReplicaSet.GetMyDeployment(deploymentList);
+                        }
+
+                        if (instance.myPod != null)
+                        {
+                            IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync().ConfigureAwait(false);
+                            string nodeName = instance.myPod.Spec.NodeName;
+                            if (!string.IsNullOrEmpty(nodeName))
+                            {
+                                instance.myNode = nodeList.FirstOrDefault(node => !string.IsNullOrEmpty(node.Metadata?.Name) && node.Metadata.Name.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
+                            }
                         }
                     }
                     else
@@ -95,7 +106,7 @@
             DateTime tiemoutAt = DateTime.Now.Add(timeout);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            Pod myPod = null;
+            K8sPod myPod = null;
             do
             {
                 // When my pod become available and it's status become ready, we recognize the container is ready.
@@ -184,6 +195,22 @@
             get
             {
                 return this.myDeployment?.Metadata.Uid;
+            }
+        }
+
+        public string NodeName
+        {
+            get
+            {
+                return this.myNode?.Metadata?.Name;
+            }
+        }
+
+        public string NodeUid
+        {
+            get
+            {
+                return this.myNode?.Metadata?.Uid;
             }
         }
         #endregion

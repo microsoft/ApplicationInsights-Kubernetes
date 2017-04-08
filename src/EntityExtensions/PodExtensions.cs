@@ -8,7 +8,7 @@
     // Extension methods for Pod
     internal static class PodExtensions
     {
-        public static ContainerStatus GetContainerStatus(this Pod self, string containerId)
+        public static ContainerStatus GetContainerStatus(this K8sPod self, string containerId)
         {
             ContainerStatus result = self.Status.ContainerStatuses?.FirstOrDefault(
                 cs => !string.IsNullOrEmpty(cs.ContainerID) && cs.ContainerID.EndsWith(containerId, StringComparison.Ordinal));
@@ -21,7 +21,7 @@
         /// <param name="self">The target pod.</param>
         /// <param name="scope">List of replicas to search from.</param>
         /// <returns>Returns the replicaSet of the pod. Returns null when the data doens't exist.</returns>
-        public static ReplicaSet GetMyReplicaSet(this Pod self, IEnumerable<ReplicaSet> scope)
+        public static ReplicaSet GetMyReplicaSet(this K8sPod self, IEnumerable<ReplicaSet> scope)
         {
             OwnerReference replicaRef = self.Metadata?.OwnerReferences?.FirstOrDefault(owner => owner.GetKind() != null && owner.GetKind() == typeof(ReplicaSet));
             if (replicaRef != null)
