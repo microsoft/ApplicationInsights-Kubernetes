@@ -3,8 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Globalization;
-    using System.Text;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity;
@@ -17,8 +16,11 @@
     public class K8sEnvironment
     {
         // Property holder objects
-        private Pod myPod;
+        private K8sPod myPod;
         private ContainerStatus myContainerStatus;
+        private ReplicaSet myReplicaSet;
+        private K8sDeployment myDeployment;
+        private K8sNode myNode;
 
         // Waiter to making sure initialization code is run before calling into properties.
         internal EventWaitHandle InitializationWaiter { get; private set; }
@@ -50,13 +52,32 @@
                     {
                         instance = new K8sEnvironment()
                         {
-                            ContainerId = settings.ContainerId
+                            ContainerID = settings.ContainerId
                         };
 
-                        Pod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
+                        K8sPod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
                         instance.myPod = myPod;
                         Console.WriteLine(Invariant($"Getting container status of container-id: {settings.ContainerId}"));
                         instance.myContainerStatus = myPod.GetContainerStatus(settings.ContainerId);
+
+                        IEnumerable<ReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
+                        instance.myReplicaSet = myPod.GetMyReplicaSet(replicaSetList);
+
+                        if (instance.myReplicaSet != null)
+                        {
+                            IEnumerable<K8sDeployment> deploymentList = await queryClient.GetDeploymentsAsync().ConfigureAwait(false);
+                            instance.myDeployment = instance.myReplicaSet.GetMyDeployment(deploymentList);
+                        }
+
+                        if (instance.myPod != null)
+                        {
+                            IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync().ConfigureAwait(false);
+                            string nodeName = instance.myPod.Spec.NodeName;
+                            if (!string.IsNullOrEmpty(nodeName))
+                            {
+                                instance.myNode = nodeList.FirstOrDefault(node => !string.IsNullOrEmpty(node.Metadata?.Name) && node.Metadata.Name.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
+                            }
+                        }
                     }
                     else
                     {
@@ -85,7 +106,7 @@
             DateTime tiemoutAt = DateTime.Now.Add(timeout);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            Pod myPod = null;
+            K8sPod myPod = null;
             do
             {
                 // When my pod become available and it's status become ready, we recognize the container is ready.
@@ -109,8 +130,11 @@
         /// <summary>
         /// ContainerID for the current K8s entity.
         /// </summary>
-        public string ContainerId { get; private set; }
+        public string ContainerID { get; private set; }
 
+        /// <summary>
+        /// Name of the container specificed in deployment spec.
+        /// </summary>
         public string ContainerName
         {
             get
@@ -119,14 +143,9 @@
             }
         }
 
-        public string Image
-        {
-            get
-            {
-                return this.myContainerStatus?.Image;
-            }
-        }
-
+        /// <summary>
+        /// Name of the Pod
+        /// </summary>
         public string PodName
         {
             get
@@ -135,6 +154,20 @@
             }
         }
 
+        /// <summary>
+        /// GUID for a Pod
+        /// </summary>
+        public string PodID
+        {
+            get
+            {
+                return this.myPod?.Metadata?.Uid;
+            }
+        }
+
+        /// <summary>
+        /// Labels for a pod
+        /// </summary>
         public string PodLabels
         {
             get
@@ -143,16 +176,48 @@
                 IDictionary<string, string> labelDict = myPod?.Metadata?.Labels;
                 if (labelDict != null && labelDict.Count > 0)
                 {
-                    StringBuilder labelStringBuilder = new StringBuilder();
-                    foreach (KeyValuePair<string, string> label in labelDict)
-                    {
-                        labelStringBuilder.AppendFormat(CultureInfo.InvariantCulture, ",{0}:{1}", label.Key, label.Value);
-                    }
-                    result = labelStringBuilder.ToString().Substring(1);
+                    result = JoinKeyValuePairs(labelDict);
                 }
                 return result;
             }
         }
+
+        public string ReplicaSetUid
+        {
+            get
+            {
+                return this.myReplicaSet?.Metadata?.Uid;
+            }
+        }
+
+        public string DeploymentUid
+        {
+            get
+            {
+                return this.myDeployment?.Metadata.Uid;
+            }
+        }
+
+        public string NodeName
+        {
+            get
+            {
+                return this.myNode?.Metadata?.Name;
+            }
+        }
+
+        public string NodeUid
+        {
+            get
+            {
+                return this.myNode?.Metadata?.Uid;
+            }
+        }
         #endregion
+
+        private string JoinKeyValuePairs(IDictionary<string, string> dictionary)
+        {
+            return string.Join(",", dictionary.Select(kvp => kvp.Key + ':' + kvp.Value));
+        }
     }
 }

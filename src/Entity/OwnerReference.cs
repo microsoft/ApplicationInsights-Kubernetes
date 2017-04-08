@@ -1,15 +1,13 @@
 ﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity
 {
-    using System.Collections.Generic;
     using Newtonsoft.Json;
-
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class PodMetadata
+
+    public class OwnerReference : K8sObject
     {
         [JsonProperty("name")]
         public string Name { get; set; }
-
-        [JsonProperty("labels")]
-        public IDictionary<string, string> Labels { get; set; }
+        [JsonProperty("uid")]
+        public string Uid { get; set; }
     }
 }

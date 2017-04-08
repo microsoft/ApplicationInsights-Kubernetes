@@ -2,13 +2,11 @@
 {
     using System.Collections.Generic;
     using Newtonsoft.Json;
-    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class PodList
-    {
-        [JsonProperty("kind")]
-        public string Kind { get; set; }
 
-        [JsonProperty("items")]
-        public IEnumerable<Pod> Items { get; set; }
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
+    public class K8sNodeStatus
+    {
+        [JsonProperty("images")]
+        public IEnumerable<K8sNodeImage> Images { get; set; }
     }
 }

@@ -4,6 +4,7 @@
     using Microsoft.ApplicationInsights.Extensibility;
 
     using static Microsoft.ApplicationInsights.Netcore.Kubernetes.StringUtils;
+    using static Microsoft.ApplicationInsights.Netcore.Kubernetes.TelemetryInitializers.Prefixes;
 
     /// <summary>
     /// Telemetry Initializer for K8s Environment
@@ -34,10 +35,26 @@
 
         private void SetCustomDimensions(ITelemetry telemetry)
         {
-            const string Prefix = "K8s.";
             // Adding pod name into custom dimension
-            telemetry.Context.Properties.Add(Invariant($"{Prefix}PodName"), this.k8sEnvironment.PodName);
-            telemetry.Context.Properties.Add(Invariant($"{Prefix}Labels"), this.k8sEnvironment.PodLabels);
+
+            // Container
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Container}.ID"), this.k8sEnvironment.ContainerID);
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Container}.Name"), this.k8sEnvironment.ContainerName);
+
+            // Pod
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Pod}.Name"), this.k8sEnvironment.PodName);
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Pod}.ID"), this.k8sEnvironment.PodID);
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Pod}.Labels"), this.k8sEnvironment.PodLabels);
+
+            // Replica Set
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{ReplicaSet}.ID"), this.k8sEnvironment.ReplicaSetUid);
+
+            // Deployment
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Deployment}.ID"), this.k8sEnvironment.DeploymentUid);
+
+            // Ndoe
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Node}.ID"), this.k8sEnvironment.NodeUid);
+            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Node}.Name"), this.k8sEnvironment.NodeName);
         }
     }
 }

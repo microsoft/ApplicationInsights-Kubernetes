@@ -3,15 +3,12 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class Pod
+    public class K8sNode
     {
-        [JsonProperty("apiVersion")]
-        public string ApiVersion { get; set; }
-
         [JsonProperty("metadata")]
-        public PodMetadata Metadata { get; set; }
+        public K8sNodeMetadata Metadata { get; set; }
 
         [JsonProperty("status")]
-        public PodStatus Status { get; set; }
+        public K8sNodeStatus Status { get; set; }
     }
 }
