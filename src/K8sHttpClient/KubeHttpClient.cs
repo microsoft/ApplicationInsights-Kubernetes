@@ -5,9 +5,9 @@
 
     internal class KubeHttpClient : HttpClient
     {
-        public KubeHttpClientSettingsProvider Settings { get; private set; }
+        public IKubeHttpClientSettingsProvider Settings { get; private set; }
 
-        public KubeHttpClient(KubeHttpClientSettingsProvider settingsProvider) : base(settingsProvider.CreateMessageHandler())
+        public KubeHttpClient(IKubeHttpClientSettingsProvider settingsProvider) : base(settingsProvider.CreateMessageHandler())
         {
             this.Settings = settingsProvider;
             string token = settingsProvider.GetToken();

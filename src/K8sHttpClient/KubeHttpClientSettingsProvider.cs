@@ -8,7 +8,7 @@
 
     using static Microsoft.ApplicationInsights.Netcore.Kubernetes.StringUtils;
 
-    internal class KubeHttpClientSettingsProvider : IHttpClientSettingsProvider
+    internal class KubeHttpClientSettingsProvider : IKubeHttpClientSettingsProvider
     {
         private string pathToToken;
         private string pathToCert;
