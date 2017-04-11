@@ -13,7 +13,7 @@
     /// <summary>
     /// Flatten objects for application insights or other external caller to fetch K8s properties.
     /// </summary>
-    public class K8sEnvironment
+    internal class K8sEnvironment : IK8sEnvironment
     {
         // Property holder objects
         private K8sPod myPod;
