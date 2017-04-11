@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity
+namespace Microsoft.ApplicationInsights.Kubernetes.Entities
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
 

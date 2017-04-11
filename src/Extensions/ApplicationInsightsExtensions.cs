@@ -2,7 +2,7 @@
 {
     using System;
     using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.ApplicationInsights.Netcore.Kubernetes;
+    using Microsoft.ApplicationInsights.Kubernetes;
 
     /// <summary>
     /// Extnesion method to inject Kubernetes Telemtry Initializer.

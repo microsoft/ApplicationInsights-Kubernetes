@@ -3,7 +3,7 @@ using System.Net.Http;
 using Moq;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+namespace Microsoft.ApplicationInsights.Kubernetes
 {
 
     public class KubeHttpClientTests

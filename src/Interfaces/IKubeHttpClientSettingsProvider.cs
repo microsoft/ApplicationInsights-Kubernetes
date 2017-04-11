@@ -1,4 +1,4 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public interface IKubeHttpClientSettingsProvider : IHttpClientSettingsProvider
     {

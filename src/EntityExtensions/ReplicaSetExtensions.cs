@@ -1,8 +1,8 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity;
+    using Microsoft.ApplicationInsights.Kubernetes.Entities;
 
     internal static class ReplicaSetExtensions
     {

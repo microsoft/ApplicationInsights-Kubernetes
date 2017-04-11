@@ -1,4 +1,4 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System.Net.Http;
     using System.Net.Http.Headers;

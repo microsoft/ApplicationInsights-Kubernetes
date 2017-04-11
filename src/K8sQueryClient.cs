@@ -1,13 +1,13 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity;
+    using Microsoft.ApplicationInsights.Kubernetes.Entities;
     using Newtonsoft.Json;
 
-    using static Microsoft.ApplicationInsights.Netcore.Kubernetes.StringUtils;
+    using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
     /// <summary>
     /// High level query client for K8s concepts.

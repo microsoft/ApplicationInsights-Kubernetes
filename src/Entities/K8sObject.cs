@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity
+namespace Microsoft.ApplicationInsights.Kubernetes.Entities
 {
 
     public class K8sObject

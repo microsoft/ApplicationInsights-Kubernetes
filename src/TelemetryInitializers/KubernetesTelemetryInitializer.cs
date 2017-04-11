@@ -1,10 +1,10 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.Extensibility;
 
-    using static Microsoft.ApplicationInsights.Netcore.Kubernetes.StringUtils;
-    using static Microsoft.ApplicationInsights.Netcore.Kubernetes.TelemetryInitializers.Prefixes;
+    using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
+    using static Microsoft.ApplicationInsights.Kubernetes.TelemetryInitializers.Prefixes;
 
     /// <summary>
     /// Telemetry Initializer for K8s Environment

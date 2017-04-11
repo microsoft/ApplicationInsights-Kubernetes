@@ -5,7 +5,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <TargetFramework>netstandard1.4</TargetFramework>
-    <RootNamespace>Microsoft.ApplicationInsights.Netcore.Kubernetes</RootNamespace>
+    <RootNamespace>Microsoft.ApplicationInsights.Kubernetes</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageId>Microsoft.ApplicationInsights.Kubernetes</PackageId>
@@ -24,6 +24,7 @@
     <SignAssembly>True</SignAssembly>
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>PublicKey.snk</AssemblyOriginatorKeyFile>
+    <AssemblyName>Microsoft.ApplicationInsights.Kubernetes</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -1,9 +1,9 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System;
     using System.Linq;
     using System.Collections.Generic;
-    using Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity;
+    using Microsoft.ApplicationInsights.Kubernetes.Entities;
 
     // Extension methods for Pod
     internal static class PodExtensions
