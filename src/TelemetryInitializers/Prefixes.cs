@@ -1,4 +1,4 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes.TelemetryInitializers
+﻿namespace Microsoft.ApplicationInsights.Kubernetes.TelemetryInitializers
 {
     internal class Prefixes
     {

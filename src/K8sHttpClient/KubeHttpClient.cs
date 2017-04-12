@@ -1,13 +1,13 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System.Net.Http;
     using System.Net.Http.Headers;
 
-    internal class KubeHttpClient : HttpClient
+    internal class KubeHttpClient : HttpClient, IKubeHttpClient
     {
-        public KubeHttpClientSettingsProvider Settings { get; private set; }
+        public IKubeHttpClientSettingsProvider Settings { get; private set; }
 
-        public KubeHttpClient(KubeHttpClientSettingsProvider settingsProvider) : base(settingsProvider.CreateMessageHandler())
+        public KubeHttpClient(IKubeHttpClientSettingsProvider settingsProvider) : base(settingsProvider.CreateMessageHandler())
         {
             this.Settings = settingsProvider;
             string token = settingsProvider.GetToken();

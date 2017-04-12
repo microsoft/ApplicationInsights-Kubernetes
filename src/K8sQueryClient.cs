@@ -1,23 +1,24 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity;
+    using Microsoft.ApplicationInsights.Kubernetes.Entities;
     using Newtonsoft.Json;
 
-    using static Microsoft.ApplicationInsights.Netcore.Kubernetes.StringUtils;
+    using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
     /// <summary>
     /// High level query client for K8s concepts.
     /// </summary>
     internal class K8sQueryClient
     {
-        KubeHttpClient kubeHttpClient;
-        public K8sQueryClient(KubeHttpClient kubeHttpClient)
+        internal IKubeHttpClient KubeHttpClient { get; private set; }
+
+        public K8sQueryClient(IKubeHttpClient kubeHttpClient)
         {
-            this.kubeHttpClient = kubeHttpClient ?? throw new ArgumentNullException(nameof(kubeHttpClient));
+            this.KubeHttpClient = kubeHttpClient ?? throw new ArgumentNullException(nameof(kubeHttpClient));
         }
 
 
@@ -28,7 +29,7 @@
         /// <returns></returns>
         public Task<IEnumerable<K8sPod>> GetPodsAsync()
         {
-            string url = Invariant($"api/v1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/pods");
+            string url = Invariant($"api/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/pods");
             return GetAllItemsAsync<K8sPod, K8sPodList>(url);
         }
 
@@ -38,8 +39,12 @@
         /// <returns></returns>
         public async Task<K8sPod> GetMyPodAsync()
         {
-            string myContainerId = kubeHttpClient.Settings.ContainerId;
+            string myContainerId = KubeHttpClient.Settings.ContainerId;
             IEnumerable<K8sPod> possiblePods = await GetPodsAsync().ConfigureAwait(false);
+            if (possiblePods == null)
+            {
+                return null;
+            }
             K8sPod targetPod = possiblePods.FirstOrDefault(pod => pod.Status != null &&
                                 pod.Status.ContainerStatuses != null &&
                                 pod.Status.ContainerStatuses.Any(
@@ -49,17 +54,17 @@
         #endregion
 
         #region Replica Sets
-        public Task<IEnumerable<ReplicaSet>> GetReplicasAsync()
+        public Task<IEnumerable<K8sReplicaSet>> GetReplicasAsync()
         {
-            string url = Invariant($"apis/extensions/v1beta1/namespaces/{kubeHttpClient.Settings.QueryNamespace}/replicasets");
-            return GetAllItemsAsync<ReplicaSet, ReplicaSetList>(url);
+            string url = Invariant($"apis/extensions/v1beta1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/replicasets");
+            return GetAllItemsAsync<K8sReplicaSet, K8sReplicaSetList>(url);
         }
         #endregion
 
         #region Deployment
         public Task<IEnumerable<K8sDeployment>> GetDeploymentsAsync()
         {
-            string url = Invariant($"apis/extensions/v1beta1/namespaces/{this.kubeHttpClient.Settings.QueryNamespace}/deployments");
+            string url = Invariant($"apis/extensions/v1beta1/namespaces/{this.KubeHttpClient.Settings.QueryNamespace}/deployments");
             return GetAllItemsAsync<K8sDeployment, K8sDeploymentList>(url);
         }
         #endregion
@@ -79,7 +84,7 @@
         /// <returns></returns>
         public async Task<ContainerStatus> GetMyContainerStatusAsync()
         {
-            string myContainerId = kubeHttpClient.Settings.ContainerId;
+            string myContainerId = KubeHttpClient.Settings.ContainerId;
             K8sPod myPod = await GetMyPodAsync().ConfigureAwait(false);
             return myPod.GetContainerStatus(myContainerId);
         }
@@ -89,14 +94,14 @@
             where TList : K8sObjectList<TEntity>
         {
             Uri requestUri = GetQueryUri(relativeUrl);
-            string resultString = await this.kubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
+            string resultString = await this.KubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
             TList resultList = JsonConvert.DeserializeObject<TList>(resultString);
             return resultList.Items;
         }
 
         private Uri GetQueryUri(string relativeUrl)
         {
-            return new Uri(this.kubeHttpClient.Settings.ServiceBaseAddress, relativeUrl);
+            return new Uri(this.KubeHttpClient.Settings.ServiceBaseAddress, relativeUrl);
         }
     }
 }

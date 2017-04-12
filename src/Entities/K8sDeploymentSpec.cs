@@ -1,4 +1,4 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes.Entity
+﻿namespace Microsoft.ApplicationInsights.Kubernetes.Entities
 {
     using Newtonsoft.Json;
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
