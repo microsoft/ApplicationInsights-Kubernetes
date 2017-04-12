@@ -10,7 +10,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             switch (self.Kind)
             {
                 case "ReplicaSet":
-                    return typeof(ReplicaSet);
+                    return typeof(K8sReplicaSet);
                 default:
                     return null;
             }

@@ -21,12 +21,12 @@
         /// <param name="self">The target pod.</param>
         /// <param name="scope">List of replicas to search from.</param>
         /// <returns>Returns the replicaSet of the pod. Returns null when the data doens't exist.</returns>
-        public static ReplicaSet GetMyReplicaSet(this K8sPod self, IEnumerable<ReplicaSet> scope)
+        public static K8sReplicaSet GetMyReplicaSet(this K8sPod self, IEnumerable<K8sReplicaSet> scope)
         {
-            OwnerReference replicaRef = self.Metadata?.OwnerReferences?.FirstOrDefault(owner => owner.GetKind() != null && owner.GetKind() == typeof(ReplicaSet));
+            OwnerReference replicaRef = self.Metadata?.OwnerReferences?.FirstOrDefault(owner => owner.GetKind() != null && owner.GetKind() == typeof(K8sReplicaSet));
             if (replicaRef != null)
             {
-                ReplicaSet replica = scope?.FirstOrDefault(
+                K8sReplicaSet replica = scope?.FirstOrDefault(
                     r => r.Metadata != null &&
                     r.Metadata.Uid != null &&
                     r.Metadata.Uid.Equals(replicaRef.Uid, StringComparison.OrdinalIgnoreCase));

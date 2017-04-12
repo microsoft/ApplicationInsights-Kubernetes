@@ -18,17 +18,17 @@
         // Property holder objects
         private K8sPod myPod;
         private ContainerStatus myContainerStatus;
-        private ReplicaSet myReplicaSet;
+        private K8sReplicaSet myReplicaSet;
         private K8sDeployment myDeployment;
         private K8sNode myNode;
 
         // Waiter to making sure initialization code is run before calling into properties.
         internal EventWaitHandle InitializationWaiter { get; private set; }
 
-#pragma warning disable CA2222 // Do not decrease inherited member visibility
         /// <summary>
         /// Private ctor to prevent the ctor being called.
         /// </summary>
+#pragma warning disable CA2222 // Do not decrease inherited member visibility
         private K8sEnvironment()
 #pragma warning restore CA2222 // Do not decrease inherited member visibility
         {
@@ -60,7 +60,7 @@
                         Console.WriteLine(Invariant($"Getting container status of container-id: {settings.ContainerId}"));
                         instance.myContainerStatus = myPod.GetContainerStatus(settings.ContainerId);
 
-                        IEnumerable<ReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
+                        IEnumerable<K8sReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
                         instance.myReplicaSet = myPod.GetMyReplicaSet(replicaSetList);
 
                         if (instance.myReplicaSet != null)

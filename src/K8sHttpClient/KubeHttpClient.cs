@@ -3,7 +3,7 @@
     using System.Net.Http;
     using System.Net.Http.Headers;
 
-    internal class KubeHttpClient : HttpClient
+    internal class KubeHttpClient : HttpClient, IKubeHttpClient
     {
         public IKubeHttpClientSettingsProvider Settings { get; private set; }
 

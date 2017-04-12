@@ -5,7 +5,6 @@ using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-
     public class KubeHttpClientTests
     {
         [Fact(DisplayName = "KueHttpClient ctor should set Settings property")]

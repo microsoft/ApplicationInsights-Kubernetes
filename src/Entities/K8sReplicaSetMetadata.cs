@@ -3,7 +3,7 @@
 namespace Microsoft.ApplicationInsights.Kubernetes.Entities
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class ReplicaSetMetadata : K8sObjectMetadata<ReplicaSet>
+    public class K8sReplicaSetMetadata : K8sObjectMetadata<K8sReplicaSet>
     {
     }
 }

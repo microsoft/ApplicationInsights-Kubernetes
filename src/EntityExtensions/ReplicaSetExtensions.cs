@@ -6,7 +6,7 @@
 
     internal static class ReplicaSetExtensions
     {
-        public static K8sDeployment GetMyDeployment(this ReplicaSet self, IEnumerable<K8sDeployment> scope)
+        public static K8sDeployment GetMyDeployment(this K8sReplicaSet self, IEnumerable<K8sDeployment> scope)
         {
             IDictionary<string, string> replicaLabels = self.Metadata.Labels;
 
