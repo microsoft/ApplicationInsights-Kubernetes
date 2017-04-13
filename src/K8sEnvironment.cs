@@ -46,8 +46,8 @@
             {
                 KubeHttpClientSettingsProvider settings = new KubeHttpClientSettingsProvider();
                 using (KubeHttpClient httpClient = new KubeHttpClient(settings))
+                using (K8sQueryClient queryClient = new K8sQueryClient(httpClient))
                 {
-                    K8sQueryClient queryClient = new K8sQueryClient(httpClient);
                     if (await SpinWaitContainerReady(timeout, queryClient, settings.ContainerId).ConfigureAwait(false))
                     {
                         instance = new K8sEnvironment()
