@@ -1,4 +1,4 @@
-﻿namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System;
     using System.IO;
@@ -6,9 +6,9 @@
     using System.Security.Cryptography.X509Certificates;
     using System.Text.RegularExpressions;
 
-    using static Microsoft.ApplicationInsights.Netcore.Kubernetes.StringUtils;
+    using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
-    internal class KubeHttpClientSettingsProvider : IHttpClientSettingsProvider
+    internal class KubeHttpClientSettingsProvider : IKubeHttpClientSettingsProvider
     {
         private string pathToToken;
         private string pathToCert;
