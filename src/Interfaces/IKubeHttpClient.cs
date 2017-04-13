@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    internal interface IKubeHttpClient
+    internal interface IKubeHttpClient : IDisposable
     {
         IKubeHttpClientSettingsProvider Settings { get; }
 

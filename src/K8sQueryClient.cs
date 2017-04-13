@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Kubernetes.Entities;
+    using Microsoft.ApplicationInsights.Kubernetes.Utilities;
     using Newtonsoft.Json;
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
@@ -12,13 +13,22 @@
     /// <summary>
     /// High level query client for K8s concepts.
     /// </summary>
-    internal class K8sQueryClient
+    internal class K8sQueryClient : IDisposable
     {
-        internal IKubeHttpClient KubeHttpClient { get; private set; }
+        internal bool disposed = false;
+        private IKubeHttpClient kubeHttpClient;
+        internal IKubeHttpClient KubeHttpClient
+        {
+            get
+            {
+                EnsureNotDisposed();
+                return this.kubeHttpClient;
+            }
+        }
 
         public K8sQueryClient(IKubeHttpClient kubeHttpClient)
         {
-            this.KubeHttpClient = kubeHttpClient ?? throw new ArgumentNullException(nameof(kubeHttpClient));
+            this.kubeHttpClient = Arguments.IsNotNull(kubeHttpClient, nameof(kubeHttpClient));
         }
 
 
@@ -29,6 +39,7 @@
         /// <returns></returns>
         public Task<IEnumerable<K8sPod>> GetPodsAsync()
         {
+            EnsureNotDisposed();
             string url = Invariant($"api/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/pods");
             return GetAllItemsAsync<K8sPod, K8sPodList>(url);
         }
@@ -39,6 +50,8 @@
         /// <returns></returns>
         public async Task<K8sPod> GetMyPodAsync()
         {
+            EnsureNotDisposed();
+
             string myContainerId = KubeHttpClient.Settings.ContainerId;
             IEnumerable<K8sPod> possiblePods = await GetPodsAsync().ConfigureAwait(false);
             if (possiblePods == null)
@@ -56,6 +69,8 @@
         #region Replica Sets
         public Task<IEnumerable<K8sReplicaSet>> GetReplicasAsync()
         {
+            EnsureNotDisposed();
+
             string url = Invariant($"apis/extensions/v1beta1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/replicasets");
             return GetAllItemsAsync<K8sReplicaSet, K8sReplicaSetList>(url);
         }
@@ -64,6 +79,8 @@
         #region Deployment
         public Task<IEnumerable<K8sDeployment>> GetDeploymentsAsync()
         {
+            EnsureNotDisposed();
+
             string url = Invariant($"apis/extensions/v1beta1/namespaces/{this.KubeHttpClient.Settings.QueryNamespace}/deployments");
             return GetAllItemsAsync<K8sDeployment, K8sDeploymentList>(url);
         }
@@ -72,6 +89,8 @@
         #region Node
         public Task<IEnumerable<K8sNode>> GetNodesAsync()
         {
+            EnsureNotDisposed();
+
             string url = Invariant($"api/v1/nodes");
             return GetAllItemsAsync<K8sNode, K8sNodeList>(url);
         }
@@ -84,6 +103,8 @@
         /// <returns></returns>
         public async Task<ContainerStatus> GetMyContainerStatusAsync()
         {
+            EnsureNotDisposed();
+
             string myContainerId = KubeHttpClient.Settings.ContainerId;
             K8sPod myPod = await GetMyPodAsync().ConfigureAwait(false);
             return myPod.GetContainerStatus(myContainerId);
@@ -102,6 +123,37 @@
         private Uri GetQueryUri(string relativeUrl)
         {
             return new Uri(this.KubeHttpClient.Settings.ServiceBaseAddress, relativeUrl);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.disposed)
+            {
+                return;
+            }
+            this.disposed = true;
+            if (disposing)
+            {
+                if (this.kubeHttpClient != null)
+                {
+                    this.kubeHttpClient.Dispose();
+                    this.kubeHttpClient = null;
+                }
+            }
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(kubeHttpClient));
+            }
         }
     }
 }
