@@ -18,7 +18,7 @@
             k8sEnv.InitializationWaiter.WaitOne(TimeSpan.FromMinutes(1));
 
             // Inject the telemetry initializer.
-            services.AddSingleton(k8sEnv);
+            services.AddSingleton<IK8sEnvironment>(k8sEnv);
             services.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
             return services;
         }
