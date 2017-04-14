@@ -47,7 +47,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.3.0-beta3" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.4.0-beta1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
