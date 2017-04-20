@@ -1,6 +1,7 @@
 Microsoft Application Insights for Kubernetes
 ==
 This repository has code for Application Insights for Kubernetes, which works on .NET Core applications within the containers, managed by Kubernetes, on Azure Container Service.
+This page is subject to be updated once more info is available.
 
 # Continous Integration Status
 |Rolling Build                    | Nightly Build                |
