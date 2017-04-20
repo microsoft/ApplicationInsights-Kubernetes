@@ -35,16 +35,19 @@ Firstly, please check your .NET Core CLI version by running:
 
 And the expected version is: 1.0.1
 
-Then, restore the nuget packages when necessary:
+Then, restore the nuget packages when necessary under the root folder of the repository:
 
-    dotnet restore src\aikubequery.sln
+    dotnet restore
 
 Build the product:
 
-    dotnet build src\aikubequery.sln
+    dotnet build
 
 ### Test
-We uses [xUnit](https://xunit.github.io/) and [Moq](https://github.com/Moq/moq4/wiki/Quickstart) for our unit tests.
+We uses [xUnit](https://xunit.github.io/) and [Moq](https://github.com/Moq/moq4/wiki/Quickstart) for our unit tests. To run unit tests:
+
+    dotnet test tests\UnitTests\UnitTests.csproj
+
 
 ### Code-Conventions
 We uses C# and please follow the coding conventions here: [C# Coding Conventions](https://msdn.microsoft.com/en-us/library/ff926074.aspx). When there is special conventions, we will post it in Wiki.
