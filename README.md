@@ -44,13 +44,13 @@ Build the product:
     dotnet build
 
 ### Test
-We uses [xUnit](https://xunit.github.io/) and [Moq](https://github.com/Moq/moq4/wiki/Quickstart) for our unit tests. To run unit tests:
+We use [xUnit](https://xunit.github.io/) and [Moq](https://github.com/Moq/moq4/wiki/Quickstart) for our unit tests. To run unit tests:
 
     dotnet test tests\UnitTests\UnitTests.csproj
 
 
 ### Code-Conventions
-We uses C# and please follow the coding conventions here: [C# Coding Conventions](https://msdn.microsoft.com/en-us/library/ff926074.aspx). When there is special conventions, we will post it in Wiki.
+We use C# and please follow the coding conventions here: [C# Coding Conventions](https://msdn.microsoft.com/en-us/library/ff926074.aspx). When there is special conventions, we will post it in Wiki.
 
 ### Branches
 * The default branch is 'develop'. Please submit all pull requests for new features to this branch.
