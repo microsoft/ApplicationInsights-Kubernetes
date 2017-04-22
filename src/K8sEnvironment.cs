@@ -98,6 +98,7 @@
             catch (Exception ex)
             {
                 logger?.LogCritical(ex.ToString());
+                return null;
             }
             finally
             {
