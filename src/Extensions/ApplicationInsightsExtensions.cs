@@ -11,11 +11,16 @@
     /// </summary>
     public static class ApplicationInsightsExtensions
     {
+        public static ILoggerFactory GetLoggerFactoryInAdvance(this IServiceCollection services)
+        {
+            return (ILoggerFactory)services.FirstOrDefault(s => s.ServiceType == typeof(ILoggerFactory))?.ImplementationInstance;
+        }
+
         public static IServiceCollection EnableK8s(this IServiceCollection services, TimeSpan? timeout = null)
         {
             // 2 minutes maximum to spin up the container.
             timeout = timeout ?? TimeSpan.FromMinutes(2);
-            ILoggerFactory loggerFactory = (ILoggerFactory)services.FirstOrDefault(s => s.ServiceType == typeof(ILoggerFactory))?.ImplementationInstance;
+            ILoggerFactory loggerFactory = services.GetLoggerFactoryInAdvance();
             ILogger logger = loggerFactory?.CreateLogger("K8sEnvInitializer");
 
             try
