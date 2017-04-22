@@ -15,10 +15,7 @@ This page is subject to be updated once more info is available.
 * [Kubernetes](https://kubernetes.io/)
 
 ## Walkthrough
-### Build the application and enable application insights
-### Create the containers
-### Create the cluster
-### Deploy the containers onto the cluster
+Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started) for a simple walkthrough.
 
 # Contributing
 ## Report issues
