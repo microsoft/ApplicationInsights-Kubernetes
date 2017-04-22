@@ -95,6 +95,10 @@
                 }
                 return instance;
             }
+            catch (Exception ex)
+            {
+                logger?.LogCritical(ex.ToString());
+            }
             finally
             {
                 // Signal that initialization is done.
