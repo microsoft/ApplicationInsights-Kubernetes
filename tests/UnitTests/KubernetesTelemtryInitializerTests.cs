@@ -10,7 +10,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "K8sTelemetryInitializer gets null K8s environment when given null")]
         public void K8sTelemetryInitializerSetNullGetNull()
         {
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, null);
             Assert.Null(target.K8sEnvironment);
         }
 
@@ -18,7 +18,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void K8sTelemetryInitializerSetK8sEnvironment()
         {
             var envMock = new Mock<IK8sEnvironment>();
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envMock.Object);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, envMock.Object);
 
             Assert.NotNull(target.K8sEnvironment);
             Assert.Equal(envMock.Object, target.K8sEnvironment);
@@ -29,7 +29,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envMock.Object);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, envMock.Object);
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
@@ -52,7 +52,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.NodeUid).Returns("Nid");
             envMock.Setup(env => env.NodeName).Returns("NName");
             
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envMock.Object);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, envMock.Object);
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 

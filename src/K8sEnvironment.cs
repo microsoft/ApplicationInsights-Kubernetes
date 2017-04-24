@@ -7,6 +7,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Kubernetes.Entities;
+    using Microsoft.Extensions.Logging;
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
@@ -21,6 +22,7 @@
         private K8sReplicaSet myReplicaSet;
         private K8sDeployment myDeployment;
         private K8sNode myNode;
+        private ILogger<K8sEnvironment> logger;
 
         // Waiter to making sure initialization code is run before calling into properties.
         internal EventWaitHandle InitializationWaiter { get; private set; }
@@ -39,25 +41,32 @@
         /// Async factory method to build the instance of this class.
         /// </summary>
         /// <returns></returns>
-        public static async Task<K8sEnvironment> CreateAsync(TimeSpan timeout)
+        public static async Task<K8sEnvironment> CreateAsync(TimeSpan timeout, ILoggerFactory loggerFactory)
         {
             K8sEnvironment instance = null;
+            ILogger<K8sEnvironment> logger = null;
             try
             {
-                KubeHttpClientSettingsProvider settings = new KubeHttpClientSettingsProvider();
+                if (loggerFactory != null)
+                {
+                    logger = loggerFactory.CreateLogger<K8sEnvironment>();
+                }
+
+                KubeHttpClientSettingsProvider settings = new KubeHttpClientSettingsProvider(loggerFactory);
                 using (KubeHttpClient httpClient = new KubeHttpClient(settings))
                 using (K8sQueryClient queryClient = new K8sQueryClient(httpClient))
                 {
-                    if (await SpinWaitContainerReady(timeout, queryClient, settings.ContainerId).ConfigureAwait(false))
+                    if (await SpinWaitContainerReady(timeout, queryClient, settings.ContainerId, logger).ConfigureAwait(false))
                     {
                         instance = new K8sEnvironment()
                         {
                             ContainerID = settings.ContainerId
                         };
+                        instance.logger = logger;
 
                         K8sPod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
                         instance.myPod = myPod;
-                        Console.WriteLine(Invariant($"Getting container status of container-id: {settings.ContainerId}"));
+                        logger?.LogInformation(Invariant($"Getting container status of container-id: {settings.ContainerId}"));
                         instance.myContainerStatus = myPod.GetContainerStatus(settings.ContainerId);
 
                         IEnumerable<K8sReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
@@ -81,10 +90,15 @@
                     }
                     else
                     {
-                        throw new TimeoutException(Invariant($"Kubernetes info is not available within given time of {timeout.TotalMilliseconds} ms."));
+                        logger?.LogError(Invariant($"Kubernetes info is not available within given time of {timeout.TotalMilliseconds} ms."));
                     }
                 }
                 return instance;
+            }
+            catch (Exception ex)
+            {
+                logger?.LogCritical(ex.ToString());
+                return null;
             }
             finally
             {
@@ -101,7 +115,7 @@
         /// <param name="client">Query client to try getting info from the Kubernetes cluster API.</param>
         /// <param name="myContainerId">The container that we are interested in.</param>
         /// <returns></returns>
-        private static async Task<bool> SpinWaitContainerReady(TimeSpan timeout, K8sQueryClient client, string myContainerId)
+        private static async Task<bool> SpinWaitContainerReady(TimeSpan timeout, K8sQueryClient client, string myContainerId, ILogger<K8sEnvironment> logger)
         {
             DateTime tiemoutAt = DateTime.Now.Add(timeout);
             Stopwatch stopwatch = new Stopwatch();
@@ -114,7 +128,7 @@
                 if (myPod != null && myPod.GetContainerStatus(myContainerId).Ready)
                 {
                     stopwatch.Stop();
-                    Console.WriteLine(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
+                    logger?.LogDebug(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
                     return true;
                 }
 
