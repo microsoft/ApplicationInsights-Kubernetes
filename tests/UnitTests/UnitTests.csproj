@@ -18,6 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\aikubequery.csproj" />
+    <ProjectReference Include="..\..\src\ApplicationInsights.Kubernetes.csproj" />
   </ItemGroup>
 </Project>

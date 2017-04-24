@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aikubequery", "src\aikubequery.csproj", "{B3829285-8FD8-437C-832C-F9A6E30D6DDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationInsights.Kubernetes", "src\ApplicationInsights.Kubernetes.csproj", "{B3829285-8FD8-437C-832C-F9A6E30D6DDE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{A09A74D9-9F9A-4FD0-A7FB-72620B97BA9C}"
 EndProject
