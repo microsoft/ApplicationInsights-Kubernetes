@@ -5,6 +5,7 @@
     using System.Net.Http;
     using System.Security.Cryptography.X509Certificates;
     using System.Text.RegularExpressions;
+    using Microsoft.Extensions.Logging;
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
@@ -12,12 +13,14 @@
     {
         private string pathToToken;
         private string pathToCert;
+        private ILogger<KubeHttpClientSettingsProvider> logger;
 
         public Uri ServiceBaseAddress { get; private set; }
         public string QueryNamespace { get; private set; }
         public string ContainerId { get; private set; }
 
         public KubeHttpClientSettingsProvider(
+            ILoggerFactory loggerFactory,
             string pathToToken = @"/var/run/secrets/kubernetes.io/serviceaccount/token",
             string pathToCert = @"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
             string pathToNamespace = @"/var/run/secrets/kubernetes.io/serviceaccount/namespace",
@@ -25,6 +28,8 @@
             string kubernetesServiceHost = null,
             string kubernetesServicePort = null)
         {
+            this.logger = loggerFactory?.CreateLogger<KubeHttpClientSettingsProvider>();
+
             if (string.IsNullOrEmpty(pathToToken))
             {
                 throw new ArgumentNullException(nameof(pathToToken));
@@ -36,7 +41,6 @@
                 throw new ArgumentNullException(nameof(pathToCert));
             }
             this.pathToCert = pathToCert;
-            // Environment.SetEnvironmentVariable("SSL_CERT_FILE", this.pathToCert);
 
             if (string.IsNullOrEmpty(pathToNamespace))
             {
@@ -56,9 +60,7 @@
             }
             this.ContainerId = FetchContainerId(pathToCGroup);
             string baseAddress = Invariant($"https://{kubernetesServiceHost}:{kubernetesServicePort}/");
-#if DEBUG
-            Console.WriteLine(Invariant($"Kubernetes base address: {baseAddress}"));
-#endif
+            this.logger?.LogDebug(Invariant($"Kubernetes base address: {baseAddress}"));
             ServiceBaseAddress = new Uri(baseAddress, UriKind.Absolute);
         }
 
@@ -88,8 +90,13 @@
 
             HttpClientHandler handler = new HttpClientHandler()
             {
-                ServerCertificateCustomValidationCallback = (message, certResult, chain, policyErrors) => true
+                ServerCertificateCustomValidationCallback = (message, certResult, chain, policyErrors) =>
+                {
+                    logger?.LogWarning("Certification verification is bypassed.");
+                    return true;
+                }
             };
+
             // TODO: When time certificate can be used, remove the callback for the validation.
             // EnableCertificate(handler);
             return handler;
@@ -144,9 +151,7 @@
         private void EnableCertificate(HttpClientHandler handler)
         {
             X509Certificate2 cert = new X509Certificate2(this.pathToCert);
-#if DEBUG
-            Console.WriteLine(cert.ToString());
-#endif
+            logger?.LogDebug(cert.ToString());
             handler.UseDefaultCredentials = false;
             handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
             handler.ClientCertificateOptions = ClientCertificateOption.Manual;

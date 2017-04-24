@@ -52,7 +52,7 @@
                     logger = loggerFactory.CreateLogger<K8sEnvironment>();
                 }
 
-                KubeHttpClientSettingsProvider settings = new KubeHttpClientSettingsProvider();
+                KubeHttpClientSettingsProvider settings = new KubeHttpClientSettingsProvider(loggerFactory);
                 using (KubeHttpClient httpClient = new KubeHttpClient(settings))
                 using (K8sQueryClient queryClient = new K8sQueryClient(httpClient))
                 {
@@ -128,7 +128,7 @@
                 if (myPod != null && myPod.GetContainerStatus(myContainerId).Ready)
                 {
                     stopwatch.Stop();
-                    logger.LogDebug(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
+                    logger?.LogDebug(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
                     return true;
                 }
 

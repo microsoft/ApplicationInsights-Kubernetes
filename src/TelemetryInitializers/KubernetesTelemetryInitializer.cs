@@ -2,6 +2,7 @@
 {
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.Extensions.Logging;
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
     using static Microsoft.ApplicationInsights.Kubernetes.TelemetryInitializers.Prefixes;
@@ -11,10 +12,14 @@
     /// </summary>
     internal class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
+        private ILogger<KubernetesTelemetryInitializer> logger;
         internal IK8sEnvironment K8sEnvironment { get; private set; }
 
-        public KubernetesTelemetryInitializer(IK8sEnvironment env)
+        public KubernetesTelemetryInitializer(
+            ILoggerFactory loggerFactory,
+            IK8sEnvironment env)
         {
+            this.logger = loggerFactory?.CreateLogger<KubernetesTelemetryInitializer>();
             this.K8sEnvironment = env;
         }
 
@@ -29,8 +34,7 @@
             }
             else
             {
-                // TODO: Use event listner instead of console output for self-diagnostics.
-                System.Console.WriteLine("K8s Environemnt is null.");
+                logger?.LogError("K8s Environemnt is null.");
             }
         }
 
