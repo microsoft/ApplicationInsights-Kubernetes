@@ -27,8 +27,8 @@
                     k8sEnv.InitializationWaiter.WaitOne(TimeSpan.FromMinutes(1));
 
                     // Inject the telemetry initializer.
-                    services.AddSingleton<IK8sEnvironment>(k8sEnv);
-                    services.AddSingleton<ITelemetryInitializer>(serviceProvider => new KubernetesTelemetryInitializer(loggerFactory, k8sEnv));
+                    ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(loggerFactory, k8sEnv);
+                    TelemetryConfiguration.Active.TelemetryInitializers.Add(initializer);
                     logger?.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 }
                 else
