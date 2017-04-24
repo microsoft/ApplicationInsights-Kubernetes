@@ -3,6 +3,7 @@
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
     using static Microsoft.ApplicationInsights.Kubernetes.TelemetryInitializers.Prefixes;
@@ -31,6 +32,8 @@
                 telemetry.Context.Cloud.RoleName = this.K8sEnvironment.ContainerName;
 
                 SetCustomDimensions(telemetry);
+
+                logger?.LogTrace(JsonConvert.SerializeObject(telemetry));
             }
             else
             {
