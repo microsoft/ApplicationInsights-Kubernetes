@@ -50,7 +50,7 @@
                 }
                 else
                 {
-                    logger?.LogWarning("Application Insights Kubernetes failed to start.");
+                    logger?.LogError("Application Insights Kubernetes failed to start.");
                 }
             }
             catch (Exception ex)
