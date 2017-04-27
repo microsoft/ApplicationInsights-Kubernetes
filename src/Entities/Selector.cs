@@ -3,7 +3,7 @@
     using System.Collections.Generic;
     using Newtonsoft.Json;
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class Selector
+    internal class Selector
     {
         [JsonProperty("matchLabels")]
         public IDictionary<string, string> MatchLabels { get; set; }
