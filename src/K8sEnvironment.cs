@@ -66,7 +66,7 @@
 
                         K8sPod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
                         instance.myPod = myPod;
-                        logger?.LogInformation(Invariant($"Getting container status of container-id: {settings.ContainerId}"));
+                        logger?.LogDebug(Invariant($"Getting container status of container-id: {settings.ContainerId}"));
                         instance.myContainerStatus = myPod.GetContainerStatus(settings.ContainerId);
 
                         IEnumerable<K8sReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
