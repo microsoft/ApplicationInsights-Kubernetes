@@ -58,10 +58,10 @@
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this.K8sEnvironment.PodLabels);
 
             // Replica Set
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.ID"), this.K8sEnvironment.ReplicaSetUid);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.Name"), this.K8sEnvironment.ReplicaSetName);
 
             // Deployment
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.ID"), this.K8sEnvironment.DeploymentUid);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this.K8sEnvironment.DeploymentName);
 
             // Ndoe
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this.K8sEnvironment.NodeUid);
