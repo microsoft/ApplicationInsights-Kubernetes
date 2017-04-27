@@ -25,14 +25,14 @@
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>PublicKey.snk</AssemblyOriginatorKeyFile>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes</AssemblyName>
+    <OutputPath>..\bin\$(Configuration)\</OutputPath>
+    <DocumentationFile>$(OutputPath)\Microsoft.ApplicationInsights.Kubernetes.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\bin\Debug\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\bin\Release\</OutputPath>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 

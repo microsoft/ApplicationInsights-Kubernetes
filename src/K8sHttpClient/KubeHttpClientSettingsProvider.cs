@@ -9,16 +9,40 @@
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
+    /// <summary>
+    /// The default settings for KubeHttpClient.
+    /// </summary>
     internal class KubeHttpClientSettingsProvider : IKubeHttpClientSettingsProvider
     {
         private string pathToToken;
         private string pathToCert;
         private ILogger<KubeHttpClientSettingsProvider> logger;
 
+        /// <summary>
+        /// Gets the base address for http queries.
+        /// </summary>
         public Uri ServiceBaseAddress { get; private set; }
+
+        /// <summary>
+        /// Gets the query namespaces for http queries.
+        /// </summary>
         public string QueryNamespace { get; private set; }
+
+        /// <summary>
+        /// Gets the container id.
+        /// </summary>
         public string ContainerId { get; private set; }
 
+        /// <summary>
+        /// Constructor to create a settings object for <see cref="KubeHttpClient"/>.
+        /// </summary>
+        /// <param name="loggerFactory">Logger factory for self-diagnostics. When set to null, no self-diagnostics info will be logged.</param>
+        /// <param name="pathToToken">Path to token file. /var/run/secrets/kubernetes.io/serviceaccount/token.</param>
+        /// <param name="pathToCert">Path to certificate file. Default to /var/run/secrets/kubernetes.io/serviceaccount/ca.crt.</param>
+        /// <param name="pathToNamespace">Path to namespace file. Default to /var/run/secrets/kubernetes.io/serviceaccount/namespace.</param>
+        /// <param name="pathToCGroup">Path to cGroup file. Defualt to /proc/self/cgroup.</param>
+        /// <param name="kubernetesServiceHost">The service host address for kubernetes master node. Default to %KUBERNETES_SERVICE_HOST%.</param>
+        /// <param name="kubernetesServicePort">The service host port for kubernetes master node. Default to %KUBERNETES_SERVICE_PORT%.</param>
         public KubeHttpClientSettingsProvider(
             ILoggerFactory loggerFactory,
             string pathToToken = @"/var/run/secrets/kubernetes.io/serviceaccount/token",
@@ -64,6 +88,10 @@
             ServiceBaseAddress = new Uri(baseAddress, UriKind.Absolute);
         }
 
+        /// <summary>
+        /// Reads content from token file.
+        /// </summary>
+        /// <returns>The content in the token file as a string.</returns>
         public string GetToken()
         {
             if (!File.Exists(this.pathToToken))
@@ -81,6 +109,10 @@
             return token;
         }
 
+        /// <summary>
+        /// Creates a default http handler for kubernetes restful calls.
+        /// </summary>
+        /// <returns>The http message handler that works with kubernetes API calls.</returns>
         public HttpMessageHandler CreateMessageHandler()
         {
             if (!File.Exists(this.pathToCert))
