@@ -94,8 +94,15 @@
             }
             else
             {
-                logger?.LogWarning(Invariant($"The telemetry already contains the property of {key}."));
-                logger?.LogDebug(Invariant($"Existing value: Telemetry[{key}]:{value}. New value: {value}"));
+                string existingValue = telemetry.Context.Properties[key];
+                if (string.Equals(existingValue, value, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    logger?.LogDebug(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
+                }
+                else
+                {
+                    logger?.LogWarning(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
+                }
             }
         }
     }
