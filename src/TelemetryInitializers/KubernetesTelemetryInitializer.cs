@@ -29,7 +29,10 @@
             if (K8sEnvironment != null)
             {
                 // Setting the container name to role name
-                telemetry.Context.Cloud.RoleName = this.K8sEnvironment.ContainerName;
+                if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
+                {
+                    telemetry.Context.Cloud.RoleName = this.K8sEnvironment.ContainerName;
+                }
 
                 SetCustomDimensions(telemetry);
 
@@ -46,23 +49,54 @@
             // Adding pod name into custom dimension
 
             // Container
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Container}.ID"), this.K8sEnvironment.ContainerID);
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Container}.Name"), this.K8sEnvironment.ContainerName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.ID"), this.K8sEnvironment.ContainerID);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.Name"), this.K8sEnvironment.ContainerName);
 
             // Pod
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Pod}.ID"), this.K8sEnvironment.PodID);
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Pod}.Name"), this.K8sEnvironment.PodName);
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Pod}.Labels"), this.K8sEnvironment.PodLabels);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.ID"), this.K8sEnvironment.PodID);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Name"), this.K8sEnvironment.PodName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this.K8sEnvironment.PodLabels);
 
             // Replica Set
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{ReplicaSet}.ID"), this.K8sEnvironment.ReplicaSetUid);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.ID"), this.K8sEnvironment.ReplicaSetUid);
 
             // Deployment
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Deployment}.ID"), this.K8sEnvironment.DeploymentUid);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.ID"), this.K8sEnvironment.DeploymentUid);
 
             // Ndoe
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Node}.ID"), this.K8sEnvironment.NodeUid);
-            telemetry.Context.Properties.Add(Invariant($"{K8s}.{Node}.Name"), this.K8sEnvironment.NodeName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this.K8sEnvironment.NodeUid);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this.K8sEnvironment.NodeName);
+        }
+
+        private void SetCustomDimension(ITelemetry telemetry, string key, string value)
+        {
+            if (telemetry == null)
+            {
+                logger?.LogError("telemetry object is null in telememtry initializer.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(key))
+            {
+                logger?.LogError("Key is required to set custom dimension.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(value))
+            {
+                logger?.LogError(Invariant($"Value is required to set custom dimension. Key: {key}"));
+                return;
+            }
+
+            if (!telemetry.Context.Properties.ContainsKey(key))
+            {
+                telemetry.Context.Properties.Add(key, value);
+            }
+            else
+            {
+                logger?.LogWarning(Invariant($"The telemetry already contains the property of {key}."));
+                logger?.LogDebug(Invariant($"Existing value: Telemetry[{key}]:{value}. New value: {value}"));
+            }
         }
     }
 }
