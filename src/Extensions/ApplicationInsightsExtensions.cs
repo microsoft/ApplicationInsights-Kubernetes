@@ -2,9 +2,13 @@
 {
     using System;
     using System.Linq;
+    using System.Reflection;
+    using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.ApplicationInsights.Kubernetes;
     using Microsoft.Extensions.Logging;
+
+    using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
     /// <summary>
     /// Extnesion method to inject Kubernetes Telemtry Initializer.
@@ -17,6 +21,19 @@
             timeout = timeout ?? TimeSpan.FromMinutes(2);
             ILoggerFactory loggerFactory = (ILoggerFactory)services.FirstOrDefault(s => s.ServiceType == typeof(ILoggerFactory))?.ImplementationInstance;
             ILogger logger = loggerFactory?.CreateLogger("K8sEnvInitializer");
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    string versionInfo = typeof(ApplicationInsightsExtensions).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+                    logger?.LogInformation(Invariant($"ApplicationInsights.Kubernetes.Version:{versionInfo}"));
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogError("Failed to fetch ApplicaitonInsights.Kubernetes' version info. Details" + ex.ToString());
+                }
+            });
 
             try
             {
