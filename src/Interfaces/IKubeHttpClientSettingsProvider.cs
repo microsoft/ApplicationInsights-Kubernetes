@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    public interface IKubeHttpClientSettingsProvider : IHttpClientSettingsProvider
+    internal interface IKubeHttpClientSettingsProvider : IHttpClientSettingsProvider
     {
         string ContainerId { get; }
         string QueryNamespace { get; }

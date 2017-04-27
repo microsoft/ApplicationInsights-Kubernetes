@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Kubernetes.Entities;
-    using Microsoft.ApplicationInsights.Kubernetes.Utilities;
     using Newtonsoft.Json;
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;

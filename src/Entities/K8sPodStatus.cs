@@ -4,7 +4,7 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class K8sPodStatus
+    internal class K8sPodStatus
     {
         [JsonProperty("phase")]
         public string Phase { get; set; }
