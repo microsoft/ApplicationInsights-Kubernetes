@@ -149,35 +149,17 @@
         /// <summary>
         /// Name of the container specificed in deployment spec.
         /// </summary>
-        public string ContainerName
-        {
-            get
-            {
-                return this.myContainerStatus?.Name;
-            }
-        }
+        public string ContainerName => this.myContainerStatus?.Name;
 
         /// <summary>
         /// Name of the Pod
         /// </summary>
-        public string PodName
-        {
-            get
-            {
-                return this.myPod?.Metadata?.Name;
-            }
-        }
+        public string PodName => this.myPod?.Metadata?.Name;
 
         /// <summary>
         /// GUID for a Pod
         /// </summary>
-        public string PodID
-        {
-            get
-            {
-                return this.myPod?.Metadata?.Uid;
-            }
-        }
+        public string PodID => this.myPod?.Metadata?.Uid;
 
         /// <summary>
         /// Labels for a pod
@@ -196,37 +178,14 @@
             }
         }
 
-        public string ReplicaSetUid
-        {
-            get
-            {
-                return this.myReplicaSet?.Metadata?.Uid;
-            }
-        }
+        public string ReplicaSetUid => this.myReplicaSet?.Metadata?.Uid;
+        public string ReplicaSetName => this.myReplicaSet?.Metadata?.Name;
 
-        public string DeploymentUid
-        {
-            get
-            {
-                return this.myDeployment?.Metadata.Uid;
-            }
-        }
+        public string DeploymentUid => this.myDeployment?.Metadata?.Uid;
+        public string DeploymentName => this.myDeployment?.Metadata?.Name;
 
-        public string NodeName
-        {
-            get
-            {
-                return this.myNode?.Metadata?.Name;
-            }
-        }
-
-        public string NodeUid
-        {
-            get
-            {
-                return this.myNode?.Metadata?.Uid;
-            }
-        }
+        public string NodeName => this.myNode?.Metadata?.Name;
+        public string NodeUid => this.myNode?.Metadata?.Uid;
         #endregion
 
         private string JoinKeyValuePairs(IDictionary<string, string> dictionary)

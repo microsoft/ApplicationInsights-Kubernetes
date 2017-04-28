@@ -61,7 +61,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.PodName).Returns("PName");
             envMock.Setup(env => env.PodLabels).Returns("PLabels");
             envMock.Setup(env => env.ReplicaSetUid).Returns("Rid");
+            envMock.Setup(env => env.ReplicaSetName).Returns("RName");
             envMock.Setup(env => env.DeploymentUid).Returns("Did");
+            envMock.Setup(env => env.DeploymentName).Returns("DName");
             envMock.Setup(env => env.NodeUid).Returns("Nid");
             envMock.Setup(env => env.NodeName).Returns("NName");
 
@@ -76,9 +78,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Equal("PName", telemetry.Context.Properties["K8s.Pod.Name"]);
             Assert.Equal("PLabels", telemetry.Context.Properties["K8s.Pod.Labels"]);
 
-            Assert.Equal("Rid", telemetry.Context.Properties["K8s.ReplicaSet.ID"]);
+            Assert.Equal("RName", telemetry.Context.Properties["K8s.ReplicaSet.Name"]);
 
-            Assert.Equal("Did", telemetry.Context.Properties["K8s.Deployment.ID"]);
+            Assert.Equal("DName", telemetry.Context.Properties["K8s.Deployment.Name"]);
 
             Assert.Equal("Nid", telemetry.Context.Properties["K8s.Node.ID"]);
             Assert.Equal("NName", telemetry.Context.Properties["K8s.Node.Name"]);
