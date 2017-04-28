@@ -4,6 +4,7 @@
     using System.Globalization;
     using System.IO;
     using System.Net.Http;
+    using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
     using System.Text.RegularExpressions;
     using Microsoft.Extensions.Logging;
@@ -88,6 +89,68 @@
             return token;
         }
 
+        /// <summary>
+        /// Verify server certificate within returned HttpResponse to prevent MITM attack.
+        /// </summary>
+        /// <param name="httpRequestMessage">The httpRequestMessage returned.</param>
+        /// <param name="serverCert">The server certificate.</param>
+        /// <param name="chain">The X509Chain.</param>
+        /// <param name="policyErrors">SslPolicyErrors.</param>
+        /// <returns>Returns true when server certificate is valid.</returns>
+        public bool VerifyServerCertificate(HttpRequestMessage httpRequestMessage, X509Certificate2 serverCert, X509Chain chain, SslPolicyErrors policyErrors)
+        {
+            logger?.LogDebug("Server certification custom validation callback.");
+            logger?.LogTrace(httpRequestMessage.ToString());
+            logger?.LogTrace(chain.ToString());
+            logger?.LogTrace(policyErrors.ToString());
+
+            logger?.LogDebug("ServerCert:" + Environment.NewLine + serverCert);
+            X509Certificate2 clientCert = null;
+            try
+            {
+                clientCert = new X509Certificate2(this.pathToCert);
+                if (clientCert == null)
+                {
+                    logger?.LogError(Invariant($"Client certificate does not exist at: {this.pathToCert}"));
+                }
+                else
+                {
+                    logger?.LogDebug("ClientCert:" + Environment.NewLine + clientCert);
+                }
+
+
+                // Issuer field is case-insensitive.
+                if (!string.Equals(clientCert.Issuer, serverCert.Issuer, StringComparison.OrdinalIgnoreCase))
+                {
+                    logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCert.Issuer}, Client Certificate Issuer: {serverCert.Issuer}"));
+                    return false;
+                }
+                else
+                {
+                    logger.LogDebug(Invariant($"Issuer validation passed: {serverCert.Issuer}"));
+                }
+
+                // Server certificate must in effective for now.
+                DateTime now = DateTime.Now;
+                if (serverCert.NotBefore > now || serverCert.NotAfter < now)
+                {
+                    logger?.LogError(Invariant($"Server certification is not in valid period from {serverCert.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCert.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
+                    return false;
+                }
+                else
+                {
+                    logger?.LogDebug("Server certificate validate date verification passed.");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex.ToString());
+                return false;
+            }
+            logger?.LogDebug("Server certification custom validation successed.");
+            return true;
+        }
+
         public HttpMessageHandler CreateMessageHandler()
         {
             if (!File.Exists(this.pathToCert))
@@ -95,65 +158,12 @@
                 throw new FileNotFoundException("Certificate file is required to access kubernetes API.", this.pathToCert);
             }
 
+            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> verifyFunc = VerifyServerCertificate;
             HttpClientHandler handler = new HttpClientHandler()
             {
-                ServerCertificateCustomValidationCallback = (httpRequestMessage, serverCert, chain, policyErrors) =>
-                {
-                    logger?.LogDebug(Invariant($"RequestUri: {httpRequestMessage.RequestUri.ToString()}"));
-                    logger?.LogDebug(Invariant($"Policy Errors: {policyErrors}"));
-
-                    logger?.LogDebug("Server certification custom validation callback.");
-
-                    logger?.LogDebug("ServerCert:" + Environment.NewLine + serverCert);
-                    X509Certificate2 clientCert = null;
-                    try
-                    {
-                        clientCert = new X509Certificate2(this.pathToCert);
-                        if (clientCert == null)
-                        {
-                            logger?.LogError(Invariant($"Client certificate does not exist at: {this.pathToCert}"));
-                        }
-                        else
-                        {
-                            logger?.LogDebug("ClientCert:" + Environment.NewLine + clientCert);
-                        }
-
-
-                        // Issuer field is case-insensitive.
-                        if (!string.Equals(clientCert.Issuer, serverCert.Issuer, StringComparison.OrdinalIgnoreCase))
-                        {
-                            logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCert.Issuer}, Client Certificate Issuer: {serverCert.Issuer}"));
-                            return false;
-                        }
-                        else
-                        {
-                            logger.LogDebug(Invariant($"Issuer validation passed: {serverCert.Issuer}"));
-                        }
-
-                        // Server certificate must in effective for now.
-                        DateTime now = DateTime.Now;
-                        if (serverCert.NotBefore > now || serverCert.NotAfter < now)
-                        {
-                            logger?.LogError(Invariant($"Server certification is not in valid period from {serverCert.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCert.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
-                            return false;
-                        }
-                        else
-                        {
-                            logger?.LogDebug("Server certificate validate date verification passed.");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logger?.LogError(ex.ToString());
-                        return false;
-                    }
-                    logger?.LogDebug("Server certification custom validation successed.");
-                    return true;
-                }
+                ServerCertificateCustomValidationCallback = verifyFunc
             };
 
-            // TODO: When time certificate can be used, remove the callback for the validation.
-            // EnableCertificate(handler);
             return handler;
         }
 
