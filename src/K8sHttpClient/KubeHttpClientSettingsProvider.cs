@@ -158,7 +158,7 @@
                     }
                     else
                     {
-                        logger.LogDebug(Invariant($"SubjectAltName matched: {serverSubjectAltName}");
+                        logger.LogDebug(Invariant($"SubjectAltName matched: {serverSubjectAltName}"));
                     }
 
                     logger?.LogDebug("Server certification custom validation successed.");
