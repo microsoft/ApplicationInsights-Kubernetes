@@ -149,6 +149,16 @@
 
                     // SubjectAltName should match the host name
                     string serverSubjectAltName = serverCert.GetNameInfo(X509NameType.UpnName, false);
+                    logger?.LogWarning("Being to output server cert name info:");
+                    logger?.LogDebug("DnsFromAlternativeName:" + serverCert.GetNameInfo(X509NameType.DnsFromAlternativeName, false));
+                    logger?.LogDebug("DnsName:" + serverCert.GetNameInfo(X509NameType.DnsName, false));
+                    logger?.LogDebug("EmailName:" + serverCert.GetNameInfo(X509NameType.EmailName, false));
+                    logger?.LogDebug("SimpleName:" + serverCert.GetNameInfo(X509NameType.SimpleName, false));
+                    logger?.LogDebug("UpnName:" + serverCert.GetNameInfo(X509NameType.UpnName, false));
+                    logger?.LogDebug("UrlName:" + serverCert.GetNameInfo(X509NameType.UrlName, false));
+
+
+
                     string clientSubjectAltName = clientCert.GetNameInfo(X509NameType.UpnName, false);
                     logger?.LogDebug(Invariant($"Client subject alt name: {clientSubjectAltName}"));
                     if (!string.Equals(this.expectedSubjectAltName, serverSubjectAltName, StringComparison.OrdinalIgnoreCase))
