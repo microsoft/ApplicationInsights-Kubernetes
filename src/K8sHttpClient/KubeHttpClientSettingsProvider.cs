@@ -15,6 +15,7 @@
         private string pathToToken;
         private string pathToCert;
         private ILogger<KubeHttpClientSettingsProvider> logger;
+        private string expectedSubjectAltName = null;
 
         public Uri ServiceBaseAddress { get; private set; }
         public string QueryNamespace { get; private set; }
@@ -54,6 +55,11 @@
             {
                 throw new NullReferenceException("Kubernetes service host is not set.");
             }
+            else
+            {
+                this.expectedSubjectAltName = kubernetesServiceHost;
+            }
+
             kubernetesServicePort = kubernetesServicePort ?? Environment.GetEnvironmentVariable(@"KUBERNETES_SERVICE_PORT");
             if (string.IsNullOrEmpty(kubernetesServicePort))
             {
@@ -119,10 +125,14 @@
                     }
 
                     // Issuer field is case-insensitive.
-                    if (!string.Equals(clientCert.Issuer, serverCert.Issuer, StringComparison.CurrentCultureIgnoreCase))
+                    if (!string.Equals(clientCert.Issuer, serverCert.Issuer, StringComparison.OrdinalIgnoreCase))
                     {
                         logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCert.Issuer}, Client Certificate Issuer: {serverCert.Issuer}"));
                         return false;
+                    }
+                    else
+                    {
+                        logger.LogDebug(Invariant($"Issuer validation passed: {serverCert.Issuer}"));
                     }
 
                     // Server certificate must in effective for now.
@@ -131,6 +141,24 @@
                     {
                         logger?.LogError(Invariant($"Server certification is not in valid period from {serverCert.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCert.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
                         return false;
+                    }
+                    else
+                    {
+                        logger?.LogDebug("Server certificate validate date verification passed.");
+                    }
+
+                    // SubjectAltName should match the host name
+                    string serverSubjectAltName = serverCert.GetNameInfo(X509NameType.UpnName, false);
+                    string clientSubjectAltName = clientCert.GetNameInfo(X509NameType.UpnName, false);
+                    logger?.LogDebug(Invariant($"Client subject alt name: {clientSubjectAltName}"));
+                    if (!string.Equals(this.expectedSubjectAltName, serverSubjectAltName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        logger.LogError(Invariant($"SubjectAltName doesn't match. Actual:{serverSubjectAltName} Expected:{this.expectedSubjectAltName}"));
+                        return false;
+                    }
+                    else
+                    {
+                        logger.LogDebug(Invariant($"SubjectAltName matched: {serverSubjectAltName}");
                     }
 
                     logger?.LogDebug("Server certification custom validation successed.");
