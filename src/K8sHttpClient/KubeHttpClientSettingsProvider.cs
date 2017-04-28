@@ -157,7 +157,13 @@
                     logger?.LogDebug("UpnName:" + serverCert.GetNameInfo(X509NameType.UpnName, false));
                     logger?.LogDebug("UrlName:" + serverCert.GetNameInfo(X509NameType.UrlName, false));
 
-
+                    logger?.LogWarning("Being to output client cert name info:");
+                    logger?.LogDebug("DnsFromAlternativeName:" + clientCert.GetNameInfo(X509NameType.DnsFromAlternativeName, false));
+                    logger?.LogDebug("DnsName:" + clientCert.GetNameInfo(X509NameType.DnsName, false));
+                    logger?.LogDebug("EmailName:" + clientCert.GetNameInfo(X509NameType.EmailName, false));
+                    logger?.LogDebug("SimpleName:" + clientCert.GetNameInfo(X509NameType.SimpleName, false));
+                    logger?.LogDebug("UpnName:" + clientCert.GetNameInfo(X509NameType.UpnName, false));
+                    logger?.LogDebug("UrlName:" + clientCert.GetNameInfo(X509NameType.UrlName, false));
 
                     string clientSubjectAltName = clientCert.GetNameInfo(X509NameType.UpnName, false);
                     logger?.LogDebug(Invariant($"Client subject alt name: {clientSubjectAltName}"));
