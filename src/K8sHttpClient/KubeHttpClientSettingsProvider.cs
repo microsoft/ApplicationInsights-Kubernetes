@@ -117,66 +117,36 @@
                         {
                             logger?.LogDebug("ClientCert:" + Environment.NewLine + clientCert);
                         }
+
+
+                        // Issuer field is case-insensitive.
+                        if (!string.Equals(clientCert.Issuer, serverCert.Issuer, StringComparison.OrdinalIgnoreCase))
+                        {
+                            logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCert.Issuer}, Client Certificate Issuer: {serverCert.Issuer}"));
+                            return false;
+                        }
+                        else
+                        {
+                            logger.LogDebug(Invariant($"Issuer validation passed: {serverCert.Issuer}"));
+                        }
+
+                        // Server certificate must in effective for now.
+                        DateTime now = DateTime.Now;
+                        if (serverCert.NotBefore > now || serverCert.NotAfter < now)
+                        {
+                            logger?.LogError(Invariant($"Server certification is not in valid period from {serverCert.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCert.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
+                            return false;
+                        }
+                        else
+                        {
+                            logger?.LogDebug("Server certificate validate date verification passed.");
+                        }
                     }
                     catch (Exception ex)
                     {
                         logger?.LogError(ex.ToString());
                         return false;
                     }
-
-                    // Issuer field is case-insensitive.
-                    if (!string.Equals(clientCert.Issuer, serverCert.Issuer, StringComparison.OrdinalIgnoreCase))
-                    {
-                        logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCert.Issuer}, Client Certificate Issuer: {serverCert.Issuer}"));
-                        return false;
-                    }
-                    else
-                    {
-                        logger.LogDebug(Invariant($"Issuer validation passed: {serverCert.Issuer}"));
-                    }
-
-                    // Server certificate must in effective for now.
-                    DateTime now = DateTime.Now;
-                    if (serverCert.NotBefore > now || serverCert.NotAfter < now)
-                    {
-                        logger?.LogError(Invariant($"Server certification is not in valid period from {serverCert.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCert.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
-                        return false;
-                    }
-                    else
-                    {
-                        logger?.LogDebug("Server certificate validate date verification passed.");
-                    }
-
-                    // SubjectAltName should match the host name
-                    string serverSubjectAltName = serverCert.GetNameInfo(X509NameType.UpnName, false);
-                    logger?.LogWarning("Being to output server cert name info:");
-                    logger?.LogDebug("DnsFromAlternativeName:" + serverCert.GetNameInfo(X509NameType.DnsFromAlternativeName, false));
-                    logger?.LogDebug("DnsName:" + serverCert.GetNameInfo(X509NameType.DnsName, false));
-                    logger?.LogDebug("EmailName:" + serverCert.GetNameInfo(X509NameType.EmailName, false));
-                    logger?.LogDebug("SimpleName:" + serverCert.GetNameInfo(X509NameType.SimpleName, false));
-                    logger?.LogDebug("UpnName:" + serverCert.GetNameInfo(X509NameType.UpnName, false));
-                    logger?.LogDebug("UrlName:" + serverCert.GetNameInfo(X509NameType.UrlName, false));
-
-                    logger?.LogWarning("Being to output client cert name info:");
-                    logger?.LogDebug("DnsFromAlternativeName:" + clientCert.GetNameInfo(X509NameType.DnsFromAlternativeName, false));
-                    logger?.LogDebug("DnsName:" + clientCert.GetNameInfo(X509NameType.DnsName, false));
-                    logger?.LogDebug("EmailName:" + clientCert.GetNameInfo(X509NameType.EmailName, false));
-                    logger?.LogDebug("SimpleName:" + clientCert.GetNameInfo(X509NameType.SimpleName, false));
-                    logger?.LogDebug("UpnName:" + clientCert.GetNameInfo(X509NameType.UpnName, false));
-                    logger?.LogDebug("UrlName:" + clientCert.GetNameInfo(X509NameType.UrlName, false));
-
-                    string clientSubjectAltName = clientCert.GetNameInfo(X509NameType.UpnName, false);
-                    logger?.LogDebug(Invariant($"Client subject alt name: {clientSubjectAltName}"));
-                    if (!string.Equals(this.expectedSubjectAltName, serverSubjectAltName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        logger.LogError(Invariant($"SubjectAltName doesn't match. Actual:{serverSubjectAltName} Expected:{this.expectedSubjectAltName}"));
-                        return false;
-                    }
-                    else
-                    {
-                        logger.LogDebug(Invariant($"SubjectAltName matched: {serverSubjectAltName}"));
-                    }
-
                     logger?.LogDebug("Server certification custom validation successed.");
                     return true;
                 }
