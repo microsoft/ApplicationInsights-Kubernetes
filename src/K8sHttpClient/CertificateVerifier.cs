@@ -10,6 +10,8 @@
             this.certificate = Arguments.IsNotNull(certificate, nameof(certificate));
         }
 
+        public X509Certificate2 Certificate => this.certificate;
+
         public string Issuer => this.certificate.Issuer;
 
         public DateTime NotBefore => this.certificate.NotBefore;
