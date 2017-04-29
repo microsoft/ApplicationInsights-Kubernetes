@@ -109,39 +109,16 @@
         public bool VerifyServerCertificate(HttpRequestMessage httpRequestMessage, ICertificateVerifier serverCertVerifier, X509Chain chain, SslPolicyErrors policyErrors, ICertificateVerifier clientCertVerifier)
         {
             Arguments.IsNotNull(clientCertVerifier, nameof(clientCertVerifier));
-            X509Certificate2 clientCert = clientCertVerifier.Certificate;
             X509Certificate2 serverCert = serverCertVerifier.Certificate;
-
             logger?.LogDebug("Server certification custom validation callback.");
             logger?.LogTrace(httpRequestMessage?.ToString());
             logger?.LogTrace(chain?.ToString());
             logger?.LogTrace(policyErrors.ToString());
-            logger?.LogDebug("ServerCert:" + Environment.NewLine + serverCert);
-
-
-            X509Chain verify = new X509Chain();
-            if (clientCert != null)
-            {
-                verify.ChainPolicy.ExtraStore.Add(clientCert);
-                verify.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
-                if (verify.Build(serverCert))
-                {
-                    logger?.LogDebug("Begin output chian elements:");
-                    int i = 0;
-                    foreach (var ele in verify.ChainElements)
-                    {
-                        logger?.LogDebug(Invariant($"[{i}]"));
-                        logger?.LogDebug(ele.Certificate.ToString());
-                    }
-                    logger?.LogDebug("End output chian elements.");
-
-                    return verify.ChainElements[verify.ChainElements.Count - 1].Certificate.Thumbprint == clientCert.Thumbprint;
-                }
-            }
+            logger?.LogTrace("ServerCert:" + Environment.NewLine + serverCert);
 
             try
             {
-                // Issuer field is case-insensitive.
+                // Verify Issuer. Issuer field is case-insensitive.
                 if (!string.Equals(clientCertVerifier.Issuer, serverCertVerifier.Issuer, StringComparison.OrdinalIgnoreCase))
                 {
                     logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCertVerifier.Issuer}, Client Certificate Issuer: {serverCertVerifier.Issuer}"));
@@ -149,12 +126,12 @@
                 }
                 else
                 {
-                    logger.LogDebug(Invariant($"Issuer validation passed: {serverCertVerifier.Issuer}"));
+                    logger?.LogDebug(Invariant($"Issuer validation passed: {serverCertVerifier.Issuer}"));
                 }
 
-                // Server certificate must in effective for now.
+                // Server certificate is not expired.
                 DateTime now = DateTime.Now;
-                if (serverCertVerifier.NotBefore > now || serverCertVerifier.NotAfter < now)
+                if (serverCertVerifier.NotBefore > now || serverCertVerifier.NotAfter.AddDays(1) <= now)
                 {
                     logger?.LogError(Invariant($"Server certification is not in valid period from {serverCertVerifier.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCertVerifier.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
                     return false;
