@@ -1,8 +1,10 @@
 ﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System;
+    using System.Globalization;
     using System.IO;
     using System.Net.Http;
+    using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
     using System.Text.RegularExpressions;
     using Microsoft.Extensions.Logging;
@@ -18,6 +20,14 @@
         public Uri ServiceBaseAddress { get; private set; }
         public string QueryNamespace { get; private set; }
         public string ContainerId { get; private set; }
+
+        internal KubeHttpClientSettingsProvider(bool isForTesting)
+        {
+            if (!isForTesting)
+            {
+                throw new InvalidOperationException("This constructor is only supposed to be used by unit tests.");
+            }
+        }
 
         public KubeHttpClientSettingsProvider(
             ILoggerFactory loggerFactory,
@@ -53,6 +63,7 @@
             {
                 throw new NullReferenceException("Kubernetes service host is not set.");
             }
+
             kubernetesServicePort = kubernetesServicePort ?? Environment.GetEnvironmentVariable(@"KUBERNETES_SERVICE_PORT");
             if (string.IsNullOrEmpty(kubernetesServicePort))
             {
@@ -81,6 +92,59 @@
             return token;
         }
 
+        /// <summary>
+        /// Verify server certificate within returned HttpResponse to prevent MITM attack.
+        /// </summary>
+        /// <param name="httpRequestMessage">The httpRequestMessage returned.</param>
+        /// <param name="serverCertVerifier">The server certificate.</param>
+        /// <param name="chain">The X509Chain.</param>
+        /// <param name="policyErrors">SslPolicyErrors.</param>
+        /// <param name="clientCertVerifier">Client certificate.</param>
+        /// <returns>Returns true when server certificate is valid.</returns>
+        public bool VerifyServerCertificate(HttpRequestMessage httpRequestMessage, ICertificateVerifier serverCertVerifier, X509Chain chain, SslPolicyErrors policyErrors, ICertificateVerifier clientCertVerifier)
+        {
+            Arguments.IsNotNull(clientCertVerifier, nameof(clientCertVerifier));
+            X509Certificate2 serverCert = serverCertVerifier.Certificate;
+            logger?.LogDebug("Server certification custom validation callback.");
+            logger?.LogTrace(httpRequestMessage?.ToString());
+            logger?.LogTrace(chain?.ToString());
+            logger?.LogTrace(policyErrors.ToString());
+            logger?.LogTrace("ServerCert:" + Environment.NewLine + serverCert);
+
+            try
+            {
+                // Verify Issuer. Issuer field is case-insensitive.
+                if (!string.Equals(clientCertVerifier.Issuer, serverCertVerifier.Issuer, StringComparison.OrdinalIgnoreCase))
+                {
+                    logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCertVerifier.Issuer}, Client Certificate Issuer: {serverCertVerifier.Issuer}"));
+                    return false;
+                }
+                else
+                {
+                    logger?.LogDebug(Invariant($"Issuer validation passed: {serverCertVerifier.Issuer}"));
+                }
+
+                // Server certificate is not expired.
+                DateTime now = DateTime.Now;
+                if (serverCertVerifier.NotBefore > now || serverCertVerifier.NotAfter.AddDays(1) <= now)
+                {
+                    logger?.LogError(Invariant($"Server certification is not in valid period from {serverCertVerifier.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCertVerifier.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
+                    return false;
+                }
+                else
+                {
+                    logger?.LogDebug("Server certificate validate date verification passed.");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex.ToString());
+                return false;
+            }
+            logger?.LogDebug("Server certification custom validation successed.");
+            return true;
+        }
+
         public HttpMessageHandler CreateMessageHandler()
         {
             if (!File.Exists(this.pathToCert))
@@ -90,15 +154,13 @@
 
             HttpClientHandler handler = new HttpClientHandler()
             {
-                ServerCertificateCustomValidationCallback = (message, certResult, chain, policyErrors) =>
+                ServerCertificateCustomValidationCallback = (httpRequestMessage, serverCert, chain, policyErrors) =>
                 {
-                    logger?.LogWarning("Certification verification is bypassed.");
-                    return true;
+                    X509Certificate2 clientCert = new X509Certificate2(this.pathToCert);
+                    return VerifyServerCertificate(httpRequestMessage, new CertificateVerifier(serverCert), chain, policyErrors, new CertificateVerifier(clientCert));
                 }
             };
 
-            // TODO: When time certificate can be used, remove the callback for the validation.
-            // EnableCertificate(handler);
             return handler;
         }
 
@@ -142,20 +204,9 @@
             }
             else
             {
-
                 throw new InvalidCastException(Invariant($"Can't figure out docker id. Input: {content}. Pattern: {pattern}"));
             }
             return result;
-        }
-
-        private void EnableCertificate(HttpClientHandler handler)
-        {
-            X509Certificate2 cert = new X509Certificate2(this.pathToCert);
-            logger?.LogDebug(cert.ToString());
-            handler.UseDefaultCredentials = false;
-            handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ClientCertificates.Add(cert);
         }
     }
 }
