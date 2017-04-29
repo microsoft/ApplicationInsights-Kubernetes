@@ -16,7 +16,6 @@
         private string pathToToken;
         private string pathToCert;
         private ILogger<KubeHttpClientSettingsProvider> logger;
-        private string expectedSubjectAltName = null;
 
         public Uri ServiceBaseAddress { get; private set; }
         public string QueryNamespace { get; private set; }
@@ -63,10 +62,6 @@
             if (string.IsNullOrEmpty(kubernetesServiceHost))
             {
                 throw new NullReferenceException("Kubernetes service host is not set.");
-            }
-            else
-            {
-                this.expectedSubjectAltName = kubernetesServiceHost;
             }
 
             kubernetesServicePort = kubernetesServicePort ?? Environment.GetEnvironmentVariable(@"KUBERNETES_SERVICE_PORT");
