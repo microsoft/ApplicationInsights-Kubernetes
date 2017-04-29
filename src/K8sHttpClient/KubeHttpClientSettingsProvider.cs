@@ -22,6 +22,14 @@
         public string QueryNamespace { get; private set; }
         public string ContainerId { get; private set; }
 
+        internal KubeHttpClientSettingsProvider(bool isForTesting)
+        {
+            if (!isForTesting)
+            {
+                throw new InvalidOperationException("This constructor is only supposed to be used by unit tests.");
+            }
+        }
+
         public KubeHttpClientSettingsProvider(
             ILoggerFactory loggerFactory,
             string pathToToken = @"/var/run/secrets/kubernetes.io/serviceaccount/token",
@@ -96,29 +104,42 @@
         /// <param name="serverCert">The server certificate.</param>
         /// <param name="chain">The X509Chain.</param>
         /// <param name="policyErrors">SslPolicyErrors.</param>
+        /// <param name="clientCert">Client certificate.</param>
         /// <returns>Returns true when server certificate is valid.</returns>
-        public bool VerifyServerCertificate(HttpRequestMessage httpRequestMessage, X509Certificate2 serverCert, X509Chain chain, SslPolicyErrors policyErrors)
+        public bool VerifyServerCertificate(HttpRequestMessage httpRequestMessage, ICertificateVerifier serverCert, X509Chain chain, SslPolicyErrors policyErrors, ICertificateVerifier clientCert)
         {
+            Arguments.IsNotNull(clientCert, nameof(clientCert));
             logger?.LogDebug("Server certification custom validation callback.");
-            logger?.LogTrace(httpRequestMessage.ToString());
-            logger?.LogTrace(chain.ToString());
+            logger?.LogTrace(httpRequestMessage?.ToString());
+            logger?.LogTrace(chain?.ToString());
             logger?.LogTrace(policyErrors.ToString());
-
             logger?.LogDebug("ServerCert:" + Environment.NewLine + serverCert);
-            X509Certificate2 clientCert = null;
+
+            X509Chain verify = new X509Chain();
+            X509Certificate2 clientCert2 = clientCert as X509Certificate2;
+            X509Certificate2 serverCert2 = serverCert as X509Certificate2;
+            if (clientCert2 != null)
+            {
+                verify.ChainPolicy.ExtraStore.Add(clientCert2);
+                verify.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+                if (verify.Build(serverCert2))
+                {
+                    logger?.LogDebug("Begin output chian elements:");
+                    foreach (var ele in verify.ChainElements)
+                    {
+                        logger?.LogDebug(ele.Certificate.ToString());
+                    }
+                    logger?.LogDebug("End output chian elements.");
+
+                    return verify.ChainElements[verify.ChainElements.Count - 1].Certificate.Thumbprint
+                        == clientCert2.Thumbprint;
+                }
+            }
+
+
+
             try
             {
-                clientCert = new X509Certificate2(this.pathToCert);
-                if (clientCert == null)
-                {
-                    logger?.LogError(Invariant($"Client certificate does not exist at: {this.pathToCert}"));
-                }
-                else
-                {
-                    logger?.LogDebug("ClientCert:" + Environment.NewLine + clientCert);
-                }
-
-
                 // Issuer field is case-insensitive.
                 if (!string.Equals(clientCert.Issuer, serverCert.Issuer, StringComparison.OrdinalIgnoreCase))
                 {
@@ -158,10 +179,13 @@
                 throw new FileNotFoundException("Certificate file is required to access kubernetes API.", this.pathToCert);
             }
 
-            Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> verifyFunc = VerifyServerCertificate;
             HttpClientHandler handler = new HttpClientHandler()
             {
-                ServerCertificateCustomValidationCallback = verifyFunc
+                ServerCertificateCustomValidationCallback = (httpRequestMessage, serverCert, chain, policyErrors) =>
+                {
+                    X509Certificate2 clientCert = new X509Certificate2(this.pathToCert);
+                    return VerifyServerCertificate(httpRequestMessage, new CertificateVerifier(serverCert), chain, policyErrors, new CertificateVerifier(clientCert));
+                }
             };
 
             return handler;
