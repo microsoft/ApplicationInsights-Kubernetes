@@ -47,10 +47,7 @@
             ILogger<K8sEnvironment> logger = null;
             try
             {
-                if (loggerFactory != null)
-                {
-                    logger = loggerFactory.CreateLogger<K8sEnvironment>();
-                }
+                logger = loggerFactory?.CreateLogger<K8sEnvironment>();
 
                 KubeHttpClientSettingsProvider settings = new KubeHttpClientSettingsProvider(loggerFactory);
                 using (KubeHttpClient httpClient = new KubeHttpClient(settings))
