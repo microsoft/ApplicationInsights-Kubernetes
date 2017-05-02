@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <CIPackageVersion Condition=" '$(CIPackageVersion)' == ''">1.0.0-dev</CIPackageVersion>
     <Features>IOperation</Features>
   </PropertyGroup>
   <PropertyGroup>
@@ -9,7 +8,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageId>Microsoft.ApplicationInsights.Kubernetes</PackageId>
-    <Version>$(CIPackageVersion)</Version>
+    <Version Condition=" '$(Version)' == '' ">1.0.0-private-$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</Version>
     <Authors>Microsoft</Authors>
     <Company>Microsoft</Company>
     <Product>Microsoft.ApplicationInsights.Kubernetes</Product>
