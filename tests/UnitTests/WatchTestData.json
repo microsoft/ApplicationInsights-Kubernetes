@@ -1,0 +1,146 @@
+﻿{
+  "type": "ADDED",
+  "object": {
+    "kind": "Pod",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "saars-u-service-2503151269-gvzx1",
+      "generateName": "saars-u-service-2503151269-",
+      "namespace": "default",
+      "selfLink": "/api/v1/namespaces/default/pods/saars-u-service-2503151269-gvzx1",
+      "uid": "66824f2c-2ed0-11e7-8363-000d3a30b321",
+      "resourceVersion": "1343383",
+      "creationTimestamp": "2017-05-02T00:43:46Z",
+      "labels": {
+        "app": "u-svc-demo-2",
+        "pod-template-hash": "2503151269"
+      },
+      "annotations": { "kubernetes.io/created-by": "{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"ReplicaSet\",\"namespace\":\"default\",\"name\":\"saars-u-service-2503151269\",\"uid\":\"6676c96e-2ed0-11e7-8363-000d3a30b321\",\"apiVersion\":\"extensions\",\"resourceVersion\":\"1343351\"}}\n" },
+      "ownerReferences": [
+        {
+          "apiVersion": "extensions/v1beta1",
+          "kind": "ReplicaSet",
+          "name": "saars-u-service-2503151269",
+          "uid": "6676c96e-2ed0-11e7-8363-000d3a30b321",
+          "controller": true
+        }
+      ]
+    },
+    "spec": {
+      "volumes": [
+        {
+          "name": "default-token-mxbbm",
+          "secret": {
+            "secretName": "default-token-mxbbm",
+            "defaultMode": 420
+          }
+        }
+      ],
+      "containers": [
+        {
+          "name": "saars-webapi",
+          "image": "saars/netcore-rest:3.0.20",
+          "ports": [
+            {
+              "containerPort": 5001,
+              "protocol": "TCP"
+            },
+            {
+              "containerPort": 443,
+              "protocol": "TCP"
+            }
+          ],
+          "resources": {},
+          "volumeMounts": [
+            {
+              "name": "default-token-mxbbm",
+              "readOnly": true,
+              "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+            }
+          ],
+          "terminationMessagePath": "/dev/termination-log",
+          "imagePullPolicy": "IfNotPresent"
+        },
+        {
+          "name": "saars-web",
+          "image": "saars/netcore-web:3.0.4",
+          "ports": [
+            {
+              "containerPort": 80,
+              "protocol": "TCP"
+            },
+            {
+              "containerPort": 443,
+              "protocol": "TCP"
+            }
+          ],
+          "resources": {},
+          "volumeMounts": [
+            {
+              "name": "default-token-mxbbm",
+              "readOnly": true,
+              "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+            }
+          ],
+          "terminationMessagePath": "/dev/termination-log",
+          "imagePullPolicy": "IfNotPresent"
+        }
+      ],
+      "restartPolicy": "Always",
+      "terminationGracePeriodSeconds": 30,
+      "dnsPolicy": "ClusterFirst",
+      "serviceAccountName": "default",
+      "serviceAccount": "default",
+      "nodeName": "k8s-agent-79226462-0",
+      "securityContext": {}
+    },
+    "status": {
+      "phase": "Running",
+      "conditions": [
+        {
+          "type": "Initialized",
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2017-05-02T00:43:46Z"
+        },
+        {
+          "type": "Ready",
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2017-05-02T00:43:48Z"
+        },
+        {
+          "type": "PodScheduled",
+          "status": "True",
+          "lastProbeTime": null,
+          "lastTransitionTime": "2017-05-02T00:43:46Z"
+        }
+      ],
+      "hostIP": "10.240.0.6",
+      "podIP": "10.244.1.24",
+      "startTime": "2017-05-02T00:43:46Z",
+      "containerStatuses": [
+        {
+          "name": "saars-web",
+          "state": { "running": { "startedAt": "2017-05-02T00:43:48Z" } },
+          "lastState": {},
+          "ready": true,
+          "restartCount": 0,
+          "image": "saars/netcore-web:3.0.4",
+          "imageID": "docker-pullable://saars/netcore-web@sha256:f99e272f3f0d48c6a8f3432cb7e855a1cd117cd07ea7c049a319079ee3741969",
+          "containerID": "docker://9fbc75f651de532e2833d9a867d9e97d4b86e551f38d230b68c00585c7e1cc15"
+        },
+        {
+          "name": "saars-webapi",
+          "state": { "running": { "startedAt": "2017-05-02T00:43:47Z" } },
+          "lastState": {},
+          "ready": true,
+          "restartCount": 0,
+          "image": "saars/netcore-rest:3.0.20",
+          "imageID": "docker-pullable://saars/netcore-rest@sha256:b1dad815689d2d02b5e8885833156dea752095cdd422e44bce83346d8f7d9018",
+          "containerID": "docker://2472cbd46698821d81ad2e62da094506b05e097c8c0ede0a1d612736b6a47636"
+        }
+      ]
+    }
+  }
+}

@@ -121,7 +121,7 @@
 
         private Uri GetQueryUri(string relativeUrl)
         {
-            return new Uri(this.KubeHttpClient.Settings.ServiceBaseAddress, relativeUrl);
+            return this.kubeHttpClient.GetQueryUrl(relativeUrl);
         }
 
         public void Dispose()

@@ -5,7 +5,7 @@
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
 
-    internal class K8sObjectMetadata<TParent>
+    internal abstract class K8sObjectMetadata
     {
         [JsonProperty("name")]
         public string Name { get; set; }
@@ -15,5 +15,8 @@
 
         [JsonProperty("labels")]
         public IDictionary<string, string> Labels { get; set; }
+
+        [JsonProperty("resourceVersion")]
+        public string ResourceVersion { get; set; }
     }
 }

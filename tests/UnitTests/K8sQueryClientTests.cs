@@ -57,15 +57,21 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         {
             var httpClientSettingsMock = GetKubeHttpClientSettingsProviderForTest();
 
+            string relativePath = "api/v1/namespaces/queryNamespace/pods";
+            string absoluteUrl = "https://baseaddress/api/v1/namespaces/queryNamespace/pods";
+
             var httpClientMock = new Mock<IKubeHttpClient>();
             httpClientMock.Setup(httpClient => httpClient.Settings).Returns(httpClientSettingsMock.Object);
             httpClientMock.Setup(httpClient => httpClient.GetStringAsync(It.IsAny<Uri>())).Returns(Task.FromResult(JsonConvert.SerializeObject(new K8sPodList())));
+            httpClientMock.Setup(httpClient => httpClient.GetQueryUrl(It.Is<string>(parameter => string.Equals(relativePath, parameter)))).Returns(new Uri(absoluteUrl));
+
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetPodsAsync();
             }
 
-            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri("https://baseaddress/api/v1/namespaces/queryNamespace/pods")), Times.Once);
+            httpClientMock.Verify(mock => mock.GetQueryUrl(relativePath), Times.Once);
+            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri(absoluteUrl)), Times.Once);
         }
 
         [Fact(DisplayName = "GetPodsAsync should deserialize multiple pods")]
@@ -100,15 +106,21 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         {
             var httpClientSettingsMock = GetKubeHttpClientSettingsProviderForTest();
 
+            string relativePath = "api/v1/namespaces/queryNamespace/pods";
+            string absoluteUrl = "https://baseaddress/api/v1/namespaces/queryNamespace/pods";
+
             var httpClientMock = new Mock<IKubeHttpClient>();
             httpClientMock.Setup(httpClient => httpClient.Settings).Returns(httpClientSettingsMock.Object);
             httpClientMock.Setup(httpClient => httpClient.GetStringAsync(It.IsAny<Uri>())).Returns(Task.FromResult(JsonConvert.SerializeObject(new K8sPodList())));
+            httpClientMock.Setup(httpClient => httpClient.GetQueryUrl(It.Is<string>(parameter => string.Equals(relativePath, parameter)))).Returns(new Uri(absoluteUrl));
+
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetMyPodAsync();
             }
 
-            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri("https://baseaddress/api/v1/namespaces/queryNamespace/pods")), Times.Once);
+            httpClientMock.Verify(mock => mock.GetQueryUrl(relativePath), Times.Once);
+            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri(absoluteUrl)), Times.Once);
         }
 
         [Fact(DisplayName = "GetPodAsync should get my pod correctly")]
@@ -144,15 +156,21 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         {
             var httpClientSettingsMock = GetKubeHttpClientSettingsProviderForTest();
 
+            string relativePath = "apis/extensions/v1beta1/namespaces/queryNamespace/replicasets";
+            string absoluteUrl = "https://baseaddress/apis/extensions/v1beta1/namespaces/queryNamespace/replicasets";
+
             var httpClientMock = new Mock<IKubeHttpClient>();
             httpClientMock.Setup(httpClient => httpClient.Settings).Returns(httpClientSettingsMock.Object);
             httpClientMock.Setup(httpClient => httpClient.GetStringAsync(It.IsAny<Uri>())).Returns(Task.FromResult(JsonConvert.SerializeObject(new K8sPodList())));
+            httpClientMock.Setup(httpClient => httpClient.GetQueryUrl(It.Is<string>(parameter => string.Equals(relativePath, parameter)))).Returns(new Uri(absoluteUrl));
+
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetReplicasAsync();
             }
 
-            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri("https://baseaddress/apis/extensions/v1beta1/namespaces/queryNamespace/replicasets")), Times.Once);
+            httpClientMock.Verify(mock => mock.GetQueryUrl(relativePath), Times.Once);
+            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri(absoluteUrl)), Times.Once);
         }
 
         [Fact(DisplayName = "GetReplicasAsync should deserialize multiple replicas")]
@@ -186,15 +204,17 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         public async Task GetDeploymentsAsyncShouldHitsTheUri()
         {
             var httpClientSettingsMock = GetKubeHttpClientSettingsProviderForTest();
-
+            string relativePath = "apis/extensions/v1beta1/namespaces/queryNamespace/deployments";
+            string absoluteUrl = "https://baseaddress/apis/extensions/v1beta1/namespaces/queryNamespace/deployments";
             var httpClientMock = new Mock<IKubeHttpClient>();
             httpClientMock.Setup(httpClient => httpClient.Settings).Returns(httpClientSettingsMock.Object);
             httpClientMock.Setup(httpClient => httpClient.GetStringAsync(It.IsAny<Uri>())).Returns(Task.FromResult(JsonConvert.SerializeObject(new K8sPodList())));
+            httpClientMock.Setup(httpClient => httpClient.GetQueryUrl(It.Is<string>(parameter => string.Equals(relativePath, parameter)))).Returns(new Uri(absoluteUrl));
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetDeploymentsAsync();
             }
-            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri("https://baseaddress/apis/extensions/v1beta1/namespaces/queryNamespace/deployments")), Times.Once);
+            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri(absoluteUrl)), Times.Once);
         }
 
         [Fact(DisplayName = "GetDeploymentsAsync should deserialize multiple deployments")]
@@ -229,15 +249,21 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         {
             var httpClientSettingsMock = GetKubeHttpClientSettingsProviderForTest();
 
+            string relativePath = "api/v1/nodes";
+            string absoluteUrl = "https://baseaddress/api/v1/nodes";
+
             var httpClientMock = new Mock<IKubeHttpClient>();
             httpClientMock.Setup(httpClient => httpClient.Settings).Returns(httpClientSettingsMock.Object);
             httpClientMock.Setup(httpClient => httpClient.GetStringAsync(It.IsAny<Uri>())).Returns(Task.FromResult(JsonConvert.SerializeObject(new K8sPodList())));
+            httpClientMock.Setup(httpClient => httpClient.GetQueryUrl(It.Is<string>(parameter => string.Equals(relativePath, parameter)))).Returns(new Uri(absoluteUrl));
+
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetNodesAsync();
             }
 
-            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri("https://baseaddress/api/v1/nodes")), Times.Once);
+            httpClientMock.Verify(mock => mock.GetQueryUrl(relativePath), Times.Once);
+            httpClientMock.Verify(mock => mock.GetStringAsync(new Uri(absoluteUrl)), Times.Once);
         }
 
         [Fact(DisplayName = "GetNodesAsync should deserialize multiple nodes")]

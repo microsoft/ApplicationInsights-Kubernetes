@@ -3,9 +3,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Entities
 {
     using Newtonsoft.Json;
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    internal class K8sReplicaSet : K8sObject
+    internal class K8sReplicaSet : K8sEntity<K8sReplicaSetMetadata>
     {
-        [JsonProperty("metadata")]
-        public K8sReplicaSetMetadata Metadata { get; set; }
     }
 }

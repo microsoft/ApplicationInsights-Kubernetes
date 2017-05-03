@@ -3,11 +3,8 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    internal class K8sNode
+    internal class K8sNode : K8sEntity<K8sNodeMetadata>
     {
-        [JsonProperty("metadata")]
-        public K8sNodeMetadata Metadata { get; set; }
-
         [JsonProperty("status")]
         public K8sNodeStatus Status { get; set; }
     }

@@ -3,11 +3,8 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    internal class K8sDeployment 
+    internal class K8sDeployment : K8sEntity<K8sDeploymentMetadata>
     {
-        [JsonProperty("metadata")]
-        public K8sDeploymentMetadata Metadata { get; set; }
-
         [JsonProperty("spec")]
         public K8sDeploymentSpec Spec { get; set; }
     }
