@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.ApplicationInsights.Kubernetes;
     using Microsoft.Extensions.Logging;
 
@@ -13,7 +14,7 @@
         public static IServiceCollection EnableK8s(this IServiceCollection services, TimeSpan? timeout = null)
         {
             ILoggerFactory loggerFactory = (ILoggerFactory)services.FirstOrDefault(s => s.ServiceType == typeof(ILoggerFactory))?.ImplementationInstance;
-            KubernetesModule.EnableK8s(loggerFactory, timeout);
+            KubernetesModule.EnableK8s(TelemetryConfiguration.Active, loggerFactory, timeout);
             return services;
         }
     }

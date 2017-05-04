@@ -11,7 +11,7 @@
     /// <summary>
     /// Telemetry Initializer for K8s Environment
     /// </summary>
-    internal class KubernetesTelemetryInitializer : ITelemetryInitializer
+    public class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
         private ILogger<KubernetesTelemetryInitializer> logger;
         internal IK8sEnvironment K8sEnvironment { get; private set; }

@@ -1,6 +1,6 @@
 ﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    internal interface IK8sEnvironment
+    public interface IK8sEnvironment
     {
         string ContainerID { get; }
         string ContainerName { get; }
