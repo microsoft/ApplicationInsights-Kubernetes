@@ -1,9 +1,13 @@
 ﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
     using System;
+    using System.Reflection;
+    using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+
+    using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
     public class KubernetesModule : ITelemetryModule
     {
@@ -35,9 +39,58 @@
                 {
                     if (!isInitialized)
                     {
-                        ApplicationInsightsExtensions.EnableK8s(loggerFactory, timeout);
+                        EnableK8s(loggerFactory, timeout);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Enable applicaiton insights for kubernetes.
+        /// </summary>
+        /// <param name="loggerFactory"></param>
+        /// <param name="timeout"></param>
+        public static void EnableK8s(ILoggerFactory loggerFactory = null, TimeSpan? timeout = null)
+        {
+            // 2 minutes maximum to spin up the container.
+            timeout = timeout ?? TimeSpan.FromMinutes(2);
+
+            ILogger logger = loggerFactory?.CreateLogger("K8sEnvInitializer");
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    string versionInfo = typeof(ApplicationInsightsExtensions).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+                    logger?.LogInformation(Invariant($"ApplicationInsights.Kubernetes.Version:{versionInfo}"));
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogError("Failed to fetch ApplicaitonInsights.Kubernetes' version info. Details" + ex.ToString());
+                }
+            });
+
+            try
+            {
+                K8sEnvironment k8sEnv = K8sEnvironment.CreateAsync(timeout.Value, loggerFactory).ConfigureAwait(false).GetAwaiter().GetResult();
+                if (k8sEnv != null)
+                {
+                    // Wait until the initialization is done.
+                    k8sEnv.InitializationWaiter.WaitOne(TimeSpan.FromMinutes(1));
+
+                    // Inject the telemetry initializer.
+                    ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(loggerFactory, k8sEnv);
+                    TelemetryConfiguration.Active.TelemetryInitializers.Add(initializer);
+                    logger?.LogDebug("Application Insights Kubernetes injected the service successfully.");
+                }
+                else
+                {
+                    logger?.LogError("Application Insights Kubernetes failed to start.");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex.ToString());
             }
         }
     }
