@@ -17,9 +17,21 @@
     {
         public static IServiceCollection EnableK8s(this IServiceCollection services, TimeSpan? timeout = null)
         {
+            ILoggerFactory loggerFactory = (ILoggerFactory)services.FirstOrDefault(s => s.ServiceType == typeof(ILoggerFactory))?.ImplementationInstance;
+            EnableK8s(loggerFactory, timeout);
+            return services;
+        }
+
+        /// <summary>
+        /// Enable applicaiton insights for kubernetes.
+        /// </summary>
+        /// <param name="loggerFactory"></param>
+        /// <param name="timeout"></param>
+        public static void EnableK8s(ILoggerFactory loggerFactory = null, TimeSpan? timeout = null)
+        {
             // 2 minutes maximum to spin up the container.
             timeout = timeout ?? TimeSpan.FromMinutes(2);
-            ILoggerFactory loggerFactory = (ILoggerFactory)services.FirstOrDefault(s => s.ServiceType == typeof(ILoggerFactory))?.ImplementationInstance;
+
             ILogger logger = loggerFactory?.CreateLogger("K8sEnvInitializer");
 
             Task.Run(() =>
@@ -57,7 +69,6 @@
             {
                 logger?.LogError(ex.ToString());
             }
-            return services;
         }
     }
 }
