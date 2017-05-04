@@ -11,17 +11,19 @@
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
-    internal class K8sWatcher<TEntity, TMetadata> : IDisposable
+    public abstract class K8sWatcher<TEntity, TMetadata> : IDisposable
         where TEntity : K8sEntity<TMetadata>
         where TMetadata : K8sObjectMetadata
     {
         private ILogger<K8sWatcher<TEntity, TMetadata>> logger;
+        private TimeSpan interval;
         CancellationTokenSource cancellationTokenSource;
         bool isDisposed = false;
 
         public K8sWatcher(ILoggerFactory loggerFactory)
         {
             this.logger = loggerFactory?.CreateLogger<K8sWatcher<TEntity, TMetadata>>();
+            this.VersionTracker = new Dictionary<string, string>();
         }
 
         private Dictionary<string, string> VersionTracker { get; set; }
@@ -33,7 +35,7 @@
             Changed?.Invoke(this, e);
         }
 
-        protected virtual string RelativePath { get; }
+        protected abstract string GetRelativePath(string queryNamespace);
 
         public virtual async Task StartWatchAsync(IKubeHttpClient kubeHttpClient)
         {
@@ -41,7 +43,7 @@
             this.cancellationTokenSource = new CancellationTokenSource();
 
             string line = null;
-            using (Stream inStream = await kubeHttpClient.GetStreamAsync(kubeHttpClient.GetQueryUrl(this.RelativePath)).ConfigureAwait(false))
+            using (Stream inStream = await kubeHttpClient.GetStreamAsync(kubeHttpClient.GetQueryUrl(this.GetRelativePath(kubeHttpClient.Settings.QueryNamespace))).ConfigureAwait(false))
             using (StreamReader reader = new StreamReader(inStream))
             {
                 try
@@ -53,12 +55,16 @@
                         {
                             throw new TaskCanceledException();
                         }
-
-                        // TODO: process the line, raise the event when necessary
                         Process(line);
+                        line = await reader.ReadLineAsync().ConfigureAwait(false);
                     }
+                    logger?.LogWarning("Should never run into this spot unless exception happened.");
                 }
                 catch (TaskCanceledException)
+                {
+                    // Stop is called.
+                }
+                catch (OperationCanceledException)
                 {
                     // Stop is called.
                 }
@@ -103,6 +109,13 @@
                     logger?.LogDebug(Invariant($"Watch object key or value is null: {key} = {value}"));
                 }
             }
+            catch (JsonSerializationException ex)
+            {
+                logger?.LogTrace(ex.Message);
+                logger?.LogTrace(jsonLine);
+                K8sWatcherObject<K8sError, K8sErrorMetadata> watcherObject = JsonConvert.DeserializeObject<K8sWatcherObject<K8sError, K8sErrorMetadata>>(jsonLine);
+                logger?.LogError(jsonLine);
+            }
             catch (Exception ex)
             {
                 logger?.LogError(ex.ToString());
@@ -114,7 +127,9 @@
             K8sWatcherEventArgs newArgs = new K8sWatcherEventArgs()
             {
                 ObjectUid = watcherObject.EventObject?.Metadata?.Uid,
-                EventType = watcherObject.EventType
+                EventType = watcherObject.EventType,
+                ObjectKind = watcherObject?.EventObject.Kind,
+                ObjectName = watcherObject?.EventObject?.Metadata.Name
             };
 
             return newArgs;

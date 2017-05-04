@@ -3,7 +3,7 @@
     using System;
     using System.Net.Http;
 
-    internal interface IHttpClientSettingsProvider
+    public interface IHttpClientSettingsProvider
     {
         Uri ServiceBaseAddress { get; }
 

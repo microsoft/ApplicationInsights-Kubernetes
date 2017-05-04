@@ -4,7 +4,7 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    internal class K8sPod : K8sEntity<K8sPodMetadata>
+    public class K8sPod : K8sEntity<K8sPodMetadata>
     {
         [JsonProperty("status")]
         public K8sPodStatus Status { get; set; }

@@ -3,7 +3,7 @@
     using Newtonsoft.Json;
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
 
-    internal class OwnerReference : K8sObject
+    public class OwnerReference : K8sObject
     {
         [JsonProperty("name")]
         public string Name { get; set; }

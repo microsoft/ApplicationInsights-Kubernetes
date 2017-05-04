@@ -3,7 +3,7 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    internal class K8sNodeList : K8sObjectList<K8sNode>
+    public class K8sNodeList : K8sObjectList<K8sNode>
     {
     }
 }

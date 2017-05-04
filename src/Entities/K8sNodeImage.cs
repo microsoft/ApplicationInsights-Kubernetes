@@ -4,7 +4,7 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    internal class K8sNodeImage
+    public class K8sNodeImage
     {
         [JsonProperty("names")]
         public IList<string> Names { get; set; }

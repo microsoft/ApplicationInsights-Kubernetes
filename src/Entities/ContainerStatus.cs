@@ -3,7 +3,7 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    internal class ContainerStatus
+    public class ContainerStatus
     {
         [JsonProperty("name")]
         public string Name { get; set; }

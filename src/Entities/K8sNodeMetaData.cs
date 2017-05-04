@@ -3,7 +3,7 @@
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    internal class K8sNodeMetadata : K8sObjectMetadata
+    public class K8sNodeMetadata : K8sObjectMetadata
     {
 
     }
