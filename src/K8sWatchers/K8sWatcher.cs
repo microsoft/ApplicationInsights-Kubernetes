@@ -126,8 +126,9 @@
         {
             K8sWatcherEventArgs newArgs = new K8sWatcherEventArgs()
             {
-                ObjectUid = watcherObject.EventObject?.Metadata?.Uid,
                 EventType = watcherObject.EventType,
+                Entity = watcherObject.EventObject,
+                ObjectUid = watcherObject.EventObject?.Metadata?.Uid,
                 ObjectKind = watcherObject?.EventObject.Kind,
                 ObjectName = watcherObject?.EventObject?.Metadata.Name
             };
