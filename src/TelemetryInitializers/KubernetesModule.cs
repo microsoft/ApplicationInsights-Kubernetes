@@ -39,7 +39,7 @@
                 {
                     if (!isInitialized)
                     {
-                        EnableK8s(configuration, loggerFactory, timeout);
+                        EnableKubernetes(configuration, loggerFactory, timeout);
                     }
                 }
             }
@@ -50,7 +50,7 @@
         /// </summary>
         /// <param name="loggerFactory"></param>
         /// <param name="timeout"></param>
-        public static void EnableK8s(TelemetryConfiguration configuration, ILoggerFactory loggerFactory = null, TimeSpan? timeout = null)
+        public static void EnableKubernetes(TelemetryConfiguration configuration, ILoggerFactory loggerFactory = null, TimeSpan? timeout = null)
         {
             // 2 minutes maximum to spin up the container.
             timeout = timeout ?? TimeSpan.FromMinutes(2);
