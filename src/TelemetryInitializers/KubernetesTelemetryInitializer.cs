@@ -1,5 +1,6 @@
 ﻿namespace Microsoft.ApplicationInsights.Kubernetes
 {
+    using System;
     using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Extensions.Logging;
@@ -11,17 +12,27 @@
     /// <summary>
     /// Telemetry Initializer for K8s Environment
     /// </summary>
-    internal class KubernetesTelemetryInitializer : ITelemetryInitializer
+    public class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
         private ILogger<KubernetesTelemetryInitializer> logger;
         internal IK8sEnvironment K8sEnvironment { get; private set; }
 
-        public KubernetesTelemetryInitializer(
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        public KubernetesTelemetryInitializer()
+            : this(null, null)
+        { }
+
+#pragma warning disable CA2222 // Do not decrease inherited member visibility
+        internal KubernetesTelemetryInitializer(
+#pragma warning restore CA2222 // Do not decrease inherited member visibility
             ILoggerFactory loggerFactory,
             IK8sEnvironment env)
         {
             this.logger = loggerFactory?.CreateLogger<KubernetesTelemetryInitializer>();
-            this.K8sEnvironment = env;
+            this.K8sEnvironment = env ?? Kubernetes.K8sEnvironment.CreateAsync(
+                TimeSpan.FromMinutes(2), loggerFactory).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public void Initialize(ITelemetry telemetry)

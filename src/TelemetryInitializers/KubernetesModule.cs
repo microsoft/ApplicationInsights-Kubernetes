@@ -39,7 +39,7 @@
                 {
                     if (!isInitialized)
                     {
-                        EnableK8s(loggerFactory, timeout);
+                        EnableK8s(configuration, loggerFactory, timeout);
                     }
                 }
             }
@@ -50,7 +50,7 @@
         /// </summary>
         /// <param name="loggerFactory"></param>
         /// <param name="timeout"></param>
-        public static void EnableK8s(ILoggerFactory loggerFactory = null, TimeSpan? timeout = null)
+        public static void EnableK8s(TelemetryConfiguration configuration, ILoggerFactory loggerFactory = null, TimeSpan? timeout = null)
         {
             // 2 minutes maximum to spin up the container.
             timeout = timeout ?? TimeSpan.FromMinutes(2);
@@ -80,7 +80,7 @@
 
                     // Inject the telemetry initializer.
                     ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(loggerFactory, k8sEnv);
-                    TelemetryConfiguration.Active.TelemetryInitializers.Add(initializer);
+                    configuration.TelemetryInitializers.Add(initializer);
                     logger?.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 }
                 else
