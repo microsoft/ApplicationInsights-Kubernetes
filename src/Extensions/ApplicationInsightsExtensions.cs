@@ -11,10 +11,10 @@
     /// </summary>
     public static class ApplicationInsightsExtensions
     {
-        public static IServiceCollection EnableK8s(this IServiceCollection services, TimeSpan? timeout = null)
+        public static IServiceCollection EnableKubernetes(this IServiceCollection services, TimeSpan? timeout = null)
         {
             ILoggerFactory loggerFactory = (ILoggerFactory)services.FirstOrDefault(s => s.ServiceType == typeof(ILoggerFactory))?.ImplementationInstance;
-            KubernetesModule.EnableK8s(TelemetryConfiguration.Active, loggerFactory, timeout);
+            KubernetesModule.EnableKubernetes(TelemetryConfiguration.Active, loggerFactory, timeout);
             return services;
         }
     }

@@ -71,19 +71,19 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
-            Assert.Equal("Cid", telemetry.Context.Properties["K8s.Container.ID"]);
-            Assert.Equal("CName", telemetry.Context.Properties["K8s.Container.Name"]);
+            Assert.Equal("Cid", telemetry.Context.Properties["Kubernetes.Container.ID"]);
+            Assert.Equal("CName", telemetry.Context.Properties["Kubernetes.Container.Name"]);
 
-            Assert.Equal("Pid", telemetry.Context.Properties["K8s.Pod.ID"]);
-            Assert.Equal("PName", telemetry.Context.Properties["K8s.Pod.Name"]);
-            Assert.Equal("PLabels", telemetry.Context.Properties["K8s.Pod.Labels"]);
+            Assert.Equal("Pid", telemetry.Context.Properties["Kubernetes.Pod.ID"]);
+            Assert.Equal("PName", telemetry.Context.Properties["Kubernetes.Pod.Name"]);
+            Assert.Equal("PLabels", telemetry.Context.Properties["Kubernetes.Pod.Labels"]);
 
-            Assert.Equal("RName", telemetry.Context.Properties["K8s.ReplicaSet.Name"]);
+            Assert.Equal("RName", telemetry.Context.Properties["Kubernetes.ReplicaSet.Name"]);
 
-            Assert.Equal("DName", telemetry.Context.Properties["K8s.Deployment.Name"]);
+            Assert.Equal("DName", telemetry.Context.Properties["Kubernetes.Deployment.Name"]);
 
-            Assert.Equal("Nid", telemetry.Context.Properties["K8s.Node.ID"]);
-            Assert.Equal("NName", telemetry.Context.Properties["K8s.Node.Name"]);
+            Assert.Equal("Nid", telemetry.Context.Properties["Kubernetes.Node.ID"]);
+            Assert.Equal("NName", telemetry.Context.Properties["Kubernetes.Node.Name"]);
         }
 
         [Fact(DisplayName = "K8sTelemetryInitializer will not overwrite custom dimension when it exists already.")]
