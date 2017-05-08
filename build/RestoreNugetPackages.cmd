@@ -1,2 +1,2 @@
 @ECHO OFF
-dotnet restore %~dp0\..\src\aikubequery.sln
+dotnet restore %~dp0\..\ApplicationInsights.Kubernetes.sln

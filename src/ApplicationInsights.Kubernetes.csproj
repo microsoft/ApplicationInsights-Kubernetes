@@ -1,15 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <CIPackageVersion Condition=" '$(CIPackageVersion)' == ''">1.0.0-dev</CIPackageVersion>
     <Features>IOperation</Features>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>netstandard1.4</TargetFramework>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <RootNamespace>Microsoft.ApplicationInsights.Kubernetes</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageId>Microsoft.ApplicationInsights.Kubernetes</PackageId>
-    <Version>$(CIPackageVersion)</Version>
+    <Version Condition=" '$(Version)' == '' ">1.0.0-private-$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</Version>
     <Authors>Microsoft</Authors>
     <Company>Microsoft</Company>
     <Product>Microsoft.ApplicationInsights.Kubernetes</Product>
@@ -40,15 +39,16 @@
     <PackageReference Include="MicroBuild.Core" Version="0.2.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.0.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="2.1.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="1.2.0-beta2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.3.0-beta3" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.3.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
