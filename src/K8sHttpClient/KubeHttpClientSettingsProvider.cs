@@ -13,6 +13,9 @@
 
     internal class KubeHttpClientSettingsProvider : IKubeHttpClientSettingsProvider
     {
+        public const string CGroupPathPatternString = "cpu.+/([^/]*)$";
+        public static readonly Regex CGroupPathPattern = new Regex(CGroupPathPatternString, RegexOptions.CultureInvariant | RegexOptions.Multiline);
+
         private string pathToToken;
         private string pathToCert;
         private ILogger<KubeHttpClientSettingsProvider> logger;
@@ -20,6 +23,20 @@
         public Uri ServiceBaseAddress { get; private set; }
         public string QueryNamespace { get; private set; }
         public string ContainerId { get; private set; }
+
+        internal static string ParseContainerId(string content)
+        {
+            if (!string.IsNullOrEmpty(content))
+            {
+                MatchCollection matches = CGroupPathPattern.Matches(content);
+                if (matches.Count >= 1 && matches[0].Groups.Count >= 2)
+                {
+                    return matches[0].Groups[1].Value;
+                }
+            }
+
+            throw new InvalidCastException(Invariant($"Can't figure out container id. Input: {content}. Pattern: {CGroupPathPatternString}"));
+        }
 
         internal KubeHttpClientSettingsProvider(bool isForTesting)
         {
@@ -188,25 +205,14 @@
             {
                 throw new FileNotFoundException("File contains container id does not exist.", pathToCGroup);
             }
+
             using (FileStream fileStream = File.OpenRead(pathToCGroup))
             using (StreamReader reader = new StreamReader(fileStream))
             {
                 content = reader.ReadToEnd();
             }
 
-            string result = null;
-            string pattern = "cpu.+docker/(.*)$";
-            Regex regex = new Regex(pattern, RegexOptions.CultureInvariant | RegexOptions.Multiline);
-            MatchCollection matches = regex.Matches(content);
-            if (matches.Count >= 1 && matches[0].Groups.Count >= 2)
-            {
-                result = matches[0].Groups[1].Value;
-            }
-            else
-            {
-                throw new InvalidCastException(Invariant($"Can't figure out docker id. Input: {content}. Pattern: {pattern}"));
-            }
-            return result;
+            return ParseContainerId(content);
         }
     }
 }
