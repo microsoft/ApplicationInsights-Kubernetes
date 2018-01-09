@@ -1,7 +1,6 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection
 {
     using System;
-    using System.Linq;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.ApplicationInsights.Kubernetes;
     using Microsoft.Extensions.Logging;
@@ -13,7 +12,8 @@
     {
         public static IServiceCollection EnableKubernetes(this IServiceCollection services, TimeSpan? timeout = null)
         {
-            ILoggerFactory loggerFactory = (ILoggerFactory)services.FirstOrDefault(s => s.ServiceType == typeof(ILoggerFactory))?.ImplementationInstance;
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             KubernetesModule.EnableKubernetes(TelemetryConfiguration.Active, loggerFactory, timeout);
             return services;
         }
