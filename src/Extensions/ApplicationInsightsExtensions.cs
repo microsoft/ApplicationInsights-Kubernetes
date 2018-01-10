@@ -1,6 +1,7 @@
 ﻿namespace Microsoft.Extensions.DependencyInjection
 {
     using System;
+    using System.Threading.Tasks;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.ApplicationInsights.Kubernetes;
     using Microsoft.Extensions.Logging;
@@ -12,9 +13,16 @@
     {
         public static IServiceCollection EnableKubernetes(this IServiceCollection services, TimeSpan? timeout = null)
         {
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-            ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            KubernetesModule.EnableKubernetes(TelemetryConfiguration.Active, loggerFactory, timeout);
+            // Dispatch this on a differnet thread to avoid blocking the main thread.
+            // Mainly used with K8s Readness Probe enabled, where communicating with Server will temperory be blocked.
+            // TODO: Instead of query the server on the start, we should depend on watch services to provide dynamic realtime data.
+            Task.Run(() =>
+            {
+                IServiceProvider serviceProvider = services.BuildServiceProvider();
+                ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+                KubernetesModule.EnableKubernetes(TelemetryConfiguration.Active, loggerFactory, timeout);
+            });
+
             return services;
         }
     }
