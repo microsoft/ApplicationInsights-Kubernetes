@@ -40,7 +40,7 @@
         {
             EnsureNotDisposed();
             string url = Invariant($"api/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/pods");
-            return GetAllItemsAsync<K8sPod, K8sPodList>(url);
+            return GetAllItemsAsync<K8sPod>(url);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@
             EnsureNotDisposed();
 
             string url = Invariant($"apis/extensions/v1beta1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/replicasets");
-            return GetAllItemsAsync<K8sReplicaSet, K8sReplicaSetList>(url);
+            return GetAllItemsAsync<K8sReplicaSet>(url);
         }
         #endregion
 
@@ -81,7 +81,7 @@
             EnsureNotDisposed();
 
             string url = Invariant($"apis/extensions/v1beta1/namespaces/{this.KubeHttpClient.Settings.QueryNamespace}/deployments");
-            return GetAllItemsAsync<K8sDeployment, K8sDeploymentList>(url);
+            return GetAllItemsAsync<K8sDeployment>(url);
         }
         #endregion
 
@@ -91,7 +91,7 @@
             EnsureNotDisposed();
 
             string url = Invariant($"api/v1/nodes");
-            return GetAllItemsAsync<K8sNode, K8sNodeList>(url);
+            return GetAllItemsAsync<K8sNode>(url);
         }
         #endregion
 
@@ -110,12 +110,11 @@
         }
         #endregion
 
-        private async Task<IEnumerable<TEntity>> GetAllItemsAsync<TEntity, TList>(string relativeUrl)
-            where TList : K8sObjectList<TEntity>
+        private async Task<IEnumerable<TEntity>> GetAllItemsAsync<TEntity>(string relativeUrl)
         {
             Uri requestUri = GetQueryUri(relativeUrl);
             string resultString = await this.KubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
-            TList resultList = JsonConvert.DeserializeObject<TList>(resultString);
+            K8sEntityList<TEntity> resultList = JsonConvert.DeserializeObject<K8sEntityList<TEntity>>(resultString);
             return resultList.Items;
         }
 
