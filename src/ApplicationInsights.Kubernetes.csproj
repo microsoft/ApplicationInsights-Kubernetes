@@ -3,7 +3,7 @@
     <Features>IOperation</Features>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard1.3;netstandard1.6;netstandard2.0</TargetFrameworks>
     <RootNamespace>Microsoft.ApplicationInsights.Kubernetes</RootNamespace>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
@@ -53,16 +53,21 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard1.6'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
+    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.4.1" />
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.4.1" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(IsCIBuild)' == 'true' AND '$(IsSignBuild)' == 'true'">
     <FilesToSign Include="$(OutputPath)\$(AssemblyName).dll">
       <Authenticode>Microsoft</Authenticode>
       <StrongName>StrongName</StrongName>
     </FilesToSign>
   </ItemGroup>
-
 </Project>
