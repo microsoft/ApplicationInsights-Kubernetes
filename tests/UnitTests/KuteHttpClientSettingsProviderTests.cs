@@ -55,7 +55,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 chainMock.Object,
                 System.Net.Security.SslPolicyErrors.None,
                 clientCertMock.Object);
-            Assert.Equal(true, actual);
+            Assert.True(actual);
         }
 
         [Fact(DisplayName = "VerifyServerCertificate should verify the cert valid period - edga case - 1 day certificate")]
@@ -78,7 +78,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 chainMock.Object,
                 System.Net.Security.SslPolicyErrors.None,
                 clientCertMock.Object);
-            Assert.Equal(true, actual);
+            Assert.True(actual);
         }
 
         [Fact(DisplayName = "VerifyServerCertificate should verify the cert valid period - too early")]
@@ -101,7 +101,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 chainMock.Object,
                 System.Net.Security.SslPolicyErrors.None,
                 clientCertMock.Object);
-            Assert.Equal(false, actual);
+            Assert.False(actual);
         }
 
         [Fact(DisplayName = "VerifyServerCertificate should verify the cert valid period - too late")]
@@ -124,7 +124,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 chainMock.Object,
                 System.Net.Security.SslPolicyErrors.None,
                 clientCertMock.Object);
-            Assert.Equal(false, actual);
+            Assert.False(actual);
         }
 
         [Fact(DisplayName = "ParseContainerId should return correct result")]
@@ -159,7 +159,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             Assert.Equal("4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a", KubeHttpClientSettingsProvider.ParseContainerId(testCase_2));
 
             const string testCase_3 = "2:cpu,cpuacct:\n1:name=systemd:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a";
-            Assert.Throws(typeof(InvalidCastException), () => KubeHttpClientSettingsProvider.ParseContainerId(testCase_3));
+            Assert.Throws<InvalidCastException>(() => KubeHttpClientSettingsProvider.ParseContainerId(testCase_3));
         }
     }
 }
