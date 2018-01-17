@@ -7,13 +7,27 @@
     using Newtonsoft.Json;
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
-    using static Microsoft.ApplicationInsights.Kubernetes.TelemetryInitializers.Prefixes;
+
+#if !NETSTANDARD1_3 && !NETSTANDARD1_6
+    using System.Diagnostics;
+    using System.Globalization;
+#endif
 
     /// <summary>
     /// Telemetry Initializer for K8s Environment
     /// </summary>
     public class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
+        public const string Container = "Container";
+        public const string Deployment = "Deployment";
+        public const string K8s = "Kubernetes";
+        public const string Node = "Node";
+        public const string Pod = "Pod";
+        public const string ReplicaSet = "ReplicaSet";
+        public const string ProcessString = "Process";
+        public const string CPU = "CPU";
+        public const string Memory = "Memory";
+
         private ILogger<KubernetesTelemetryInitializer> logger;
         internal IK8sEnvironment K8sEnvironment { get; private set; }
 
@@ -77,6 +91,17 @@
             // Ndoe
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this.K8sEnvironment.NodeUid);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this.K8sEnvironment.NodeName);
+
+#if !NETSTANDARD1_3 && !NETSTANDARD1_6
+            // Add CPU/Memory metrics to telemetry.
+            Process process = Process.GetCurrentProcess();
+            TimeSpan cpuTimeSpan = process.TotalProcessorTime;
+            long memoryInBytes = process.WorkingSet64;
+
+            SetCustomDimension(telemetry, Invariant($"{ProcessString}.{CPU}(ms)"), cpuTimeSpan.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            SetCustomDimension(telemetry, Invariant($"{ProcessString}.{Memory}"), memoryInBytes.GetReadableSize());
+#endif
+
         }
 
         private void SetCustomDimension(ITelemetry telemetry, string key, string value)
