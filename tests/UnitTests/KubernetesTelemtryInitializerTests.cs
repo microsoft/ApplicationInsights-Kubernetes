@@ -86,7 +86,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Equal("NName", telemetry.Context.Properties["Kubernetes.Node.Name"]);
 
 #if !NETSTANDARD1_3 && !NETSTANDARD1_6
-            Assert.NotNull(telemetry.Context.Properties["Process.CPU(ms)"]);
+            Assert.NotNull(telemetry.Context.Properties["Process.CPU(%)"]);
             Assert.NotNull(telemetry.Context.Properties["Process.Memory"]);
 #endif
         }

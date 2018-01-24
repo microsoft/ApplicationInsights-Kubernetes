@@ -53,13 +53,21 @@
         {
             if (K8sEnvironment != null)
             {
+#if NETSTANDARD2_0
+                Stopwatch cpuWatch = Stopwatch.StartNew();
+                TimeSpan startCPUTime = Process.GetCurrentProcess().TotalProcessorTime;
+#endif
                 // Setting the container name to role name
                 if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
                 {
                     telemetry.Context.Cloud.RoleName = this.K8sEnvironment.ContainerName;
                 }
 
+#if NETSTANDARD2_0
+                SetCustomDimensions(telemetry, cpuWatch, startCPUTime);
+#else
                 SetCustomDimensions(telemetry);
+#endif
 
                 logger?.LogTrace(JsonConvert.SerializeObject(telemetry));
             }
@@ -91,17 +99,31 @@
             // Ndoe
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this.K8sEnvironment.NodeUid);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this.K8sEnvironment.NodeName);
+        }
 
-#if !NETSTANDARD1_3 && !NETSTANDARD1_6
+#if NETSTANDARD2_0
+        private void SetCustomDimensions(ITelemetry telemetry, Stopwatch cpuWatch, TimeSpan startCPUTime)
+        {
+            SetCustomDimensions(telemetry);
+
             // Add CPU/Memory metrics to telemetry.
             Process process = Process.GetCurrentProcess();
-            TimeSpan cpuTimeSpan = process.TotalProcessorTime;
+            TimeSpan endCPUTime = process.TotalProcessorTime;
+            cpuWatch.Stop();
+
+            string cpuString = "NaN";
+            if (cpuWatch.ElapsedMilliseconds > 0)
+            {
+                double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds);
+                cpuString = CPUPercentage.ToString("P2", CultureInfo.InvariantCulture);
+            }
+
             long memoryInBytes = process.VirtualMemorySize64;
 
-            SetCustomDimension(telemetry, Invariant($"{ProcessString}.{CPU}(ms)"), cpuTimeSpan.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
+            SetCustomDimension(telemetry, Invariant($"{ProcessString}.{CPU}(%)"), cpuString);
             SetCustomDimension(telemetry, Invariant($"{ProcessString}.{Memory}"), memoryInBytes.GetReadableSize());
-#endif
         }
+#endif
 
         private void SetCustomDimension(ITelemetry telemetry, string key, string value)
         {
