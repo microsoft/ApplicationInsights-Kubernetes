@@ -96,12 +96,11 @@
             // Add CPU/Memory metrics to telemetry.
             Process process = Process.GetCurrentProcess();
             TimeSpan cpuTimeSpan = process.TotalProcessorTime;
-            long memoryInBytes = process.WorkingSet64;
+            long memoryInBytes = process.VirtualMemorySize64;
 
             SetCustomDimension(telemetry, Invariant($"{ProcessString}.{CPU}(ms)"), cpuTimeSpan.TotalMilliseconds.ToString(CultureInfo.InvariantCulture));
             SetCustomDimension(telemetry, Invariant($"{ProcessString}.{Memory}"), memoryInBytes.GetReadableSize());
 #endif
-
         }
 
         private void SetCustomDimension(ITelemetry telemetry, string key, string value)
