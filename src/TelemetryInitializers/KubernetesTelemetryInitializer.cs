@@ -114,7 +114,9 @@
             string cpuString = "NaN";
             if (cpuWatch.ElapsedMilliseconds > 0)
             {
-                double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds);
+                int processorCount = Environment.ProcessorCount;
+                Debug.Assert(processorCount > 0, $"How could process count be {processorCount}?");
+                double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds) / processorCount;
                 cpuString = CPUPercentage.ToString("P2", CultureInfo.InvariantCulture);
             }
 
