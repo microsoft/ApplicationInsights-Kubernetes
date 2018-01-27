@@ -116,7 +116,8 @@
             {
                 int processorCount = Environment.ProcessorCount;
                 Debug.Assert(processorCount > 0, $"How could process count be {processorCount}?");
-                double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds) / processorCount;
+                // A very simple but not that accruate evaluation of how much CPU the process is take out of a core.
+                double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds);
                 cpuString = CPUPercentage.ToString("P2", CultureInfo.InvariantCulture);
             }
 
