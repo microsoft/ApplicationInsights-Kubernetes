@@ -7,13 +7,27 @@
     using Newtonsoft.Json;
 
     using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
-    using static Microsoft.ApplicationInsights.Kubernetes.TelemetryInitializers.Prefixes;
+
+#if !NETSTANDARD1_3 && !NETSTANDARD1_6
+    using System.Diagnostics;
+    using System.Globalization;
+#endif
 
     /// <summary>
     /// Telemetry Initializer for K8s Environment
     /// </summary>
     public class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
+        public const string Container = "Container";
+        public const string Deployment = "Deployment";
+        public const string K8s = "Kubernetes";
+        public const string Node = "Node";
+        public const string Pod = "Pod";
+        public const string ReplicaSet = "ReplicaSet";
+        public const string ProcessString = "Process";
+        public const string CPU = "CPU";
+        public const string Memory = "Memory";
+
         private ILogger<KubernetesTelemetryInitializer> logger;
         internal IK8sEnvironment K8sEnvironment { get; private set; }
 
@@ -39,13 +53,21 @@
         {
             if (K8sEnvironment != null)
             {
+#if NETSTANDARD2_0
+                Stopwatch cpuWatch = Stopwatch.StartNew();
+                TimeSpan startCPUTime = Process.GetCurrentProcess().TotalProcessorTime;
+#endif
                 // Setting the container name to role name
                 if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
                 {
                     telemetry.Context.Cloud.RoleName = this.K8sEnvironment.ContainerName;
                 }
 
+#if NETSTANDARD2_0
+                SetCustomDimensions(telemetry, cpuWatch, startCPUTime);
+#else
                 SetCustomDimensions(telemetry);
+#endif
 
                 logger?.LogTrace(JsonConvert.SerializeObject(telemetry));
             }
@@ -78,6 +100,33 @@
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this.K8sEnvironment.NodeUid);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this.K8sEnvironment.NodeName);
         }
+
+#if NETSTANDARD2_0
+        private void SetCustomDimensions(ITelemetry telemetry, Stopwatch cpuWatch, TimeSpan startCPUTime)
+        {
+            SetCustomDimensions(telemetry);
+
+            // Add CPU/Memory metrics to telemetry.
+            Process process = Process.GetCurrentProcess();
+            TimeSpan endCPUTime = process.TotalProcessorTime;
+            cpuWatch.Stop();
+
+            string cpuString = "NaN";
+            if (cpuWatch.ElapsedMilliseconds > 0)
+            {
+                int processorCount = Environment.ProcessorCount;
+                Debug.Assert(processorCount > 0, $"How could process count be {processorCount}?");
+                // A very simple but not that accruate evaluation of how much CPU the process is take out of a core.
+                double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds);
+                cpuString = CPUPercentage.ToString("P2", CultureInfo.InvariantCulture);
+            }
+
+            long memoryInBytes = process.VirtualMemorySize64;
+
+            SetCustomDimension(telemetry, Invariant($"{ProcessString}.{CPU}(%)"), cpuString);
+            SetCustomDimension(telemetry, Invariant($"{ProcessString}.{Memory}"), memoryInBytes.GetReadableSize());
+        }
+#endif
 
         private void SetCustomDimension(ITelemetry telemetry, string key, string value)
         {
