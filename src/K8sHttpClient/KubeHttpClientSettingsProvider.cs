@@ -16,9 +16,9 @@
         public const string CGroupPathPatternString = "cpu.+/([^/]*)$";
         public static readonly Regex CGroupPathPattern = new Regex(CGroupPathPatternString, RegexOptions.CultureInvariant | RegexOptions.Multiline);
 
-        private string pathToToken;
-        private string pathToCert;
-        private ILogger<KubeHttpClientSettingsProvider> logger;
+        private string _pathToToken;
+        private string _pathToCert;
+        private readonly ILogger _logger;
 
         public Uri ServiceBaseAddress { get; private set; }
         public string QueryNamespace { get; private set; }
@@ -46,8 +46,13 @@
             }
         }
 
+        public KubeHttpClientSettingsProvider(ILogger<KubeHttpClientSettingsProvider> logger)
+            : this(logger, kubernetesServiceHost: null)
+        {
+        }
+
         public KubeHttpClientSettingsProvider(
-            ILoggerFactory loggerFactory,
+            ILogger<KubeHttpClientSettingsProvider> logger,
             string pathToToken = @"/var/run/secrets/kubernetes.io/serviceaccount/token",
             string pathToCert = @"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
             string pathToNamespace = @"/var/run/secrets/kubernetes.io/serviceaccount/namespace",
@@ -55,19 +60,19 @@
             string kubernetesServiceHost = null,
             string kubernetesServicePort = null)
         {
-            this.logger = loggerFactory?.CreateLogger<KubeHttpClientSettingsProvider>();
+            this._logger = Arguments.IsNotNull(logger, nameof(logger));
 
             if (string.IsNullOrEmpty(pathToToken))
             {
                 throw new ArgumentNullException(nameof(pathToToken));
             }
-            this.pathToToken = pathToToken;
+            this._pathToToken = pathToToken;
 
             if (string.IsNullOrEmpty(pathToCert))
             {
                 throw new ArgumentNullException(nameof(pathToCert));
             }
-            this.pathToCert = pathToCert;
+            this._pathToCert = pathToCert;
 
             if (string.IsNullOrEmpty(pathToNamespace))
             {
@@ -88,19 +93,19 @@
             }
             this.ContainerId = FetchContainerId(pathToCGroup);
             string baseAddress = Invariant($"https://{kubernetesServiceHost}:{kubernetesServicePort}/");
-            this.logger?.LogDebug(Invariant($"Kubernetes base address: {baseAddress}"));
+            this._logger?.LogDebug(Invariant($"Kubernetes base address: {baseAddress}"));
             ServiceBaseAddress = new Uri(baseAddress, UriKind.Absolute);
         }
 
         public string GetToken()
         {
-            if (!File.Exists(this.pathToToken))
+            if (!File.Exists(this._pathToToken))
             {
-                throw new FileNotFoundException("Token file doesn't exist for kubernetes query.", this.pathToToken);
+                throw new FileNotFoundException("Token file doesn't exist for kubernetes query.", this._pathToToken);
             }
 
             string token = null;
-            using (FileStream fileStream = File.OpenRead(pathToToken))
+            using (FileStream fileStream = File.OpenRead(_pathToToken))
             using (StreamReader reader = new StreamReader(fileStream))
             {
                 token = reader.ReadToEnd();
@@ -122,58 +127,58 @@
         {
             Arguments.IsNotNull(clientCertVerifier, nameof(clientCertVerifier));
             X509Certificate2 serverCert = serverCertVerifier.Certificate;
-            logger?.LogDebug("Server certification custom validation callback.");
-            logger?.LogTrace(httpRequestMessage?.ToString());
-            logger?.LogTrace(chain?.ToString());
-            logger?.LogTrace(policyErrors.ToString());
-            logger?.LogTrace("ServerCert:" + Environment.NewLine + serverCert);
+            _logger?.LogDebug("Server certification custom validation callback.");
+            _logger?.LogTrace(httpRequestMessage?.ToString());
+            _logger?.LogTrace(chain?.ToString());
+            _logger?.LogTrace(policyErrors.ToString());
+            _logger?.LogTrace("ServerCert:" + Environment.NewLine + serverCert);
 
             try
             {
                 // Verify Issuer. Issuer field is case-insensitive.
                 if (!string.Equals(clientCertVerifier.Issuer, serverCertVerifier.Issuer, StringComparison.OrdinalIgnoreCase))
                 {
-                    logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCertVerifier.Issuer}, Client Certificate Issuer: {serverCertVerifier.Issuer}"));
+                    _logger?.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCertVerifier.Issuer}, Client Certificate Issuer: {serverCertVerifier.Issuer}"));
                     return false;
                 }
                 else
                 {
-                    logger?.LogDebug(Invariant($"Issuer validation passed: {serverCertVerifier.Issuer}"));
+                    _logger?.LogDebug(Invariant($"Issuer validation passed: {serverCertVerifier.Issuer}"));
                 }
 
                 // Server certificate is not expired.
                 DateTime now = DateTime.Now;
                 if (serverCertVerifier.NotBefore > now || serverCertVerifier.NotAfter.AddDays(1) <= now)
                 {
-                    logger?.LogError(Invariant($"Server certification is not in valid period from {serverCertVerifier.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCertVerifier.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
+                    _logger?.LogError(Invariant($"Server certification is not in valid period from {serverCertVerifier.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCertVerifier.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
                     return false;
                 }
                 else
                 {
-                    logger?.LogDebug("Server certificate validate date verification passed.");
+                    _logger?.LogDebug("Server certificate validate date verification passed.");
                 }
             }
             catch (Exception ex)
             {
-                logger?.LogError(ex.ToString());
+                _logger?.LogError(ex.ToString());
                 return false;
             }
-            logger?.LogDebug("Server certification custom validation successed.");
+            _logger?.LogDebug("Server certification custom validation successed.");
             return true;
         }
 
         public HttpMessageHandler CreateMessageHandler()
         {
-            if (!File.Exists(this.pathToCert))
+            if (!File.Exists(this._pathToCert))
             {
-                throw new FileNotFoundException("Certificate file is required to access kubernetes API.", this.pathToCert);
+                throw new FileNotFoundException("Certificate file is required to access kubernetes API.", this._pathToCert);
             }
 
             HttpClientHandler handler = new HttpClientHandler()
             {
                 ServerCertificateCustomValidationCallback = (httpRequestMessage, serverCert, chain, policyErrors) =>
                 {
-                    X509Certificate2 clientCert = new X509Certificate2(this.pathToCert);
+                    X509Certificate2 clientCert = new X509Certificate2(this._pathToCert);
                     return VerifyServerCertificate(httpRequestMessage, new CertificateVerifier(serverCert), chain, policyErrors, new CertificateVerifier(clientCert));
                 }
             };
@@ -181,7 +186,7 @@
             return handler;
         }
 
-        private string FetchQueryNamespace(string pathToNamespace)
+        private static string FetchQueryNamespace(string pathToNamespace)
         {
             if (!File.Exists(pathToNamespace))
             {
@@ -198,7 +203,7 @@
             return result;
         }
 
-        private string FetchContainerId(string pathToCGroup)
+        private static string FetchContainerId(string pathToCGroup)
         {
             string content = null;
             if (!File.Exists(pathToCGroup))
