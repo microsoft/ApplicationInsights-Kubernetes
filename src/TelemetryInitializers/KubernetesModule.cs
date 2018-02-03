@@ -76,7 +76,8 @@
                 if (k8sEnv != null)
                 {
                     // Wait until the initialization is done.
-                    k8sEnv.InitializationWaiter.WaitOne(TimeSpan.FromMinutes(1));
+                    TimeSpan maxWait = timeout.Value + TimeSpan.FromSeconds(30);
+                    k8sEnv.InitializationWaiter.WaitOne(maxWait);
 
                     // Inject the telemetry initializer.
                     ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(loggerFactory, k8sEnv);
