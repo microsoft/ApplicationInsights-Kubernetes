@@ -13,11 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{EF66CE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BCA8D8BF-71A7-4037-9C72-D65967766201}"
 	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationInsights.Kubernetes.HostingStartup", "src\ApplicationInsights.Kubernetes.HostingStartup\ApplicationInsights.Kubernetes.HostingStartup.csproj", "{B17BD867-8CB1-44BB-B253-CB9110ED6A86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationInsights.Kubernetes.HostingStartup", "src\ApplicationInsights.Kubernetes.HostingStartup\ApplicationInsights.Kubernetes.HostingStartup.csproj", "{B17BD867-8CB1-44BB-B253-CB9110ED6A86}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -8,17 +8,8 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageId>Microsoft.ApplicationInsights.Kubernetes</PackageId>
-    <!--<Version Condition=" '$(Version)' == '' ">1.0.0-private-$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</Version>-->
-    <Authors>Microsoft</Authors>
-    <Company>Microsoft</Company>
     <Product>Microsoft.ApplicationInsights.Kubernetes</Product>
     <Description>Kubernetes support for .NET Core</Description>
-    <PackageLicenseUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</PackageProjectUrl>
-    <PackageIconUrl>http://appanacdn.blob.core.windows.net/cdn/icons/aic.png</PackageIconUrl>
-    <Copyright>Copyright © Microsoft. All Rights Reserved.</Copyright>
-    <RepositoryUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</RepositoryUrl>
-    <RepositoryType />
     <PackageTags>Analytics ApplicationInsights Telemetry AppInsights Kubernetes</PackageTags>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes</AssemblyName>
   </PropertyGroup>

@@ -1,10 +1,21 @@
 <Project>
   <!-- <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /> -->
   <PropertyGroup>
+    <!--Sign-->
     <SignAssembly>True</SignAssembly>
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)PublicKey.snk</AssemblyOriginatorKeyFile>
+
+    <!--Package-->
     <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
     <Version Condition=" '$(Version)' == '' ">1.0.0-private-$(VersionSuffix)</Version>
+    <Authors>Microsoft</Authors>
+    <Company>Microsoft</Company>
+    <PackageLicenseUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</PackageProjectUrl>
+    <PackageIconUrl>http://appanacdn.blob.core.windows.net/cdn/icons/aic.png</PackageIconUrl>
+    <Copyright>Copyright © Microsoft. All Rights Reserved.</Copyright>
+    <RepositoryUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</RepositoryUrl>
+    <RepositoryType />
   </PropertyGroup>
 </Project>
