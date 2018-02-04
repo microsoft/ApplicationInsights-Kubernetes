@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ApplicationInsights.Kubernetes.csproj" />
+    <ProjectReference Include="..\..\src\ApplicationInsights.Kubernetes\ApplicationInsights.Kubernetes.csproj" />
   </ItemGroup>
 
   <ItemGroup>

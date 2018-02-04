@@ -8,7 +8,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageId>Microsoft.ApplicationInsights.Kubernetes</PackageId>
-    <Version Condition=" '$(Version)' == '' ">1.0.0-private-$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</Version>
+    <!--<Version Condition=" '$(Version)' == '' ">1.0.0-private-$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</Version>-->
     <Authors>Microsoft</Authors>
     <Company>Microsoft</Company>
     <Product>Microsoft.ApplicationInsights.Kubernetes</Product>
@@ -20,9 +20,6 @@
     <RepositoryUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</RepositoryUrl>
     <RepositoryType />
     <PackageTags>Analytics ApplicationInsights Telemetry AppInsights Kubernetes</PackageTags>
-    <SignAssembly>True</SignAssembly>
-    <DelaySign>True</DelaySign>
-    <AssemblyOriginatorKeyFile>PublicKey.snk</AssemblyOriginatorKeyFile>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes</AssemblyName>
   </PropertyGroup>
 
