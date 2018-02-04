@@ -18,7 +18,7 @@
             // TODO: Instead of query the server on the start, we should depend on watch services to provide dynamic realtime data.
             Task.Run(() =>
             {
-                KubernetesModule.EnableKubernetes(TelemetryConfiguration.Active, timeout);
+                KubernetesModule.EnableKubernetes(services, TelemetryConfiguration.Active, timeout);
             });
 
             return services;
