@@ -11,10 +11,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public class KubernetesModule : ITelemetryModule
     {
-        private static readonly object lockObject = new object();
-        private static bool isInitialized = false;
-        private static IServiceCollection _serviceCollection = null;
-
         /// <summary>
         /// Initialize KubernetesModule
         /// </summary>
@@ -95,24 +91,28 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
         }
 
-        private static IServiceCollection BuildK8sServiceCollection(IServiceCollection original)
+        internal static IServiceCollection BuildK8sServiceCollection(IServiceCollection original)
         {
-            if (_serviceCollection == null || _serviceCollection != original)
+            if (Services == null || Services != original)
             {
-                _serviceCollection = original ?? new ServiceCollection();
+                Services = original ?? new ServiceCollection();
                 // According github code, adding logging will not overwrite existing logging classes
                 // https://github.com/aspnet/Logging/blob/c821494678a30c323174bea8056f43b93a3ca6f4/src/Microsoft.Extensions.Logging/LoggingServiceCollectionExtensions.cs
                 // Becuase it uses 'TryAdd()' extenion method on service collection.
-                _serviceCollection.AddLogging();
+                Services.AddLogging();
 
-                _serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider>(p => new KubeHttpClientSettingsProvider(logger: p.GetService<ILogger<KubeHttpClientSettingsProvider>>()));
-                _serviceCollection.AddSingleton<KubeHttpClientFactory>();
-                _serviceCollection.AddSingleton<K8sQueryClientFactory>();
+                Services.AddSingleton<IKubeHttpClientSettingsProvider>(p => new KubeHttpClientSettingsProvider(logger: p.GetService<ILogger<KubeHttpClientSettingsProvider>>()));
+                Services.AddSingleton<KubeHttpClientFactory>();
+                Services.AddSingleton<K8sQueryClientFactory>();
 
-                _serviceCollection.AddSingleton<K8sEnvironmentFactory>();
+                Services.AddSingleton<K8sEnvironmentFactory>();
             }
 
-            return _serviceCollection;
+            return Services;
         }
+
+        private static readonly object lockObject = new object();
+        private static bool isInitialized = false;
+        internal static IServiceCollection Services { get; private set; }
     }
 }
