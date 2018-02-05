@@ -1,0 +1,38 @@
+<Project>
+  <!-- <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /> -->
+  <!--Build-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>$(MSBuildThisFileDirectory)..\bin\Debug\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>$(MSBuildThisFileDirectory)..\bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--Sign-->
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>True</DelaySign>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)PublicKey.snk</AssemblyOriginatorKeyFile>
+
+    <!--Package-->
+    <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
+    <Version Condition=" '$(Version)' == '' ">1.0.0-private-$(VersionSuffix)</Version>
+    <Authors>Microsoft</Authors>
+    <Company>Microsoft</Company>
+    <PackageLicenseUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</PackageProjectUrl>
+    <PackageIconUrl>http://appanacdn.blob.core.windows.net/cdn/icons/aic.png</PackageIconUrl>
+    <Copyright>Copyright © Microsoft. All Rights Reserved.</Copyright>
+    <RepositoryUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</RepositoryUrl>
+    <RepositoryType />
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsCIBuild)' == 'true' AND '$(IsSignBuild)' == 'true'">
+    <FilesToSign Include="$(OutputPath)\$(AssemblyName).dll">
+      <Authenticode>Microsoft</Authenticode>
+      <StrongName>StrongName</StrongName>
+    </FilesToSign>
+  </ItemGroup>
+</Project>
