@@ -12,7 +12,7 @@
     /// <summary>
     /// High level query client for K8s concepts.
     /// </summary>
-    internal class K8sQueryClient : IDisposable
+    internal class K8sQueryClient : IDisposable, IK8sQueryClient
     {
         internal bool disposed = false;
         private IKubeHttpClient kubeHttpClient;

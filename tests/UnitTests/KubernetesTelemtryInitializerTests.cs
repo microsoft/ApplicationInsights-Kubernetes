@@ -1,5 +1,8 @@
-﻿using Microsoft.ApplicationInsights.Channel;
+﻿using System;
+using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -7,18 +10,22 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public class KubernetesTelemtryInitializerTests
     {
-        [Fact(DisplayName = "K8sTelemetryInitializer gets null K8s environment when given null")]
+        [Fact(DisplayName = "K8sEnv can't be null in K8sTelemetryInitializer")]
         public void ConstructorSetsNullGetsNull()
         {
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, null);
-            Assert.Null(target.K8sEnvironment);
+            Exception ex = Assert.Throws<ArgumentNullException>(() =>
+            {
+                KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, GetLogger());
+            });
+
+            Assert.Equal("Value cannot be null.\r\nParameter name: k8sEnv", ex.Message);
         }
 
         [Fact(DisplayName = "K8sTelemetryInitializer sets the K8s env correct")]
         public void ConstructorSetK8sEnvironment()
         {
             var envMock = new Mock<IK8sEnvironment>();
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, envMock.Object);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envMock.Object, GetLogger());
 
             Assert.NotNull(target.K8sEnvironment);
             Assert.Equal(envMock.Object, target.K8sEnvironment);
@@ -29,7 +36,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, envMock.Object);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envMock.Object, GetLogger());
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
@@ -41,7 +48,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("New RoleName");
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, envMock.Object);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envMock.Object, GetLogger());
             ITelemetry telemetry = new TraceTelemetry();
             telemetry.Context.Cloud.RoleName = "Existing RoleName";
             target.Initialize(telemetry);
@@ -67,7 +74,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.NodeUid).Returns("Nid");
             envMock.Setup(env => env.NodeName).Returns("NName");
 
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, envMock.Object);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envMock.Object, GetLogger());
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
@@ -99,12 +106,31 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             envMock.Setup(env => env.ContainerID).Returns("Cid");
 
-            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(null, envMock.Object);
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envMock.Object, GetLogger());
             ITelemetry telemetry = new TraceTelemetry();
             telemetry.Context.Properties["K8s.Container.ID"] = "Existing Cid";
             target.Initialize(telemetry);
 
             Assert.Equal("Existing Cid", telemetry.Context.Properties["K8s.Container.ID"]);
+        }
+
+        private ILogger<KubernetesTelemetryInitializer> GetLogger()
+        {
+            return GetLogger<KubernetesTelemetryInitializer>(GetTestServiceProvider());
+        }
+
+        private ILogger<T> GetLogger<T>(IServiceProvider serviceProvider)
+            where T : class
+        {
+            return serviceProvider.GetService<ILogger<T>>();
+        }
+
+        private IServiceProvider GetTestServiceProvider()
+        {
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging();
+
+            return serviceCollection.BuildServiceProvider();
         }
     }
 }

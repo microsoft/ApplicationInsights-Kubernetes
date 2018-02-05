@@ -1,22 +1,23 @@
-﻿namespace Microsoft.ApplicationInsights.Kubernetes
-{
-    using System;
-    using Microsoft.ApplicationInsights.Channel;
-    using Microsoft.ApplicationInsights.Extensibility;
-    using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
+﻿using System;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
-    using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
+using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 #if !NETSTANDARD1_3 && !NETSTANDARD1_6
-    using System.Diagnostics;
-    using System.Globalization;
+using System.Diagnostics;
+using System.Globalization;
 #endif
+
+namespace Microsoft.ApplicationInsights.Kubernetes
+{
 
     /// <summary>
     /// Telemetry Initializer for K8s Environment
     /// </summary>
-    public class KubernetesTelemetryInitializer : ITelemetryInitializer
+    internal class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
         public const string Container = "Container";
         public const string Deployment = "Deployment";
@@ -28,25 +29,15 @@
         public const string CPU = "CPU";
         public const string Memory = "Memory";
 
-        private ILogger<KubernetesTelemetryInitializer> logger;
+        private ILogger _logger;
         internal IK8sEnvironment K8sEnvironment { get; private set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        public KubernetesTelemetryInitializer()
-            : this(null, null)
-        { }
-
-#pragma warning disable CA2222 // Do not decrease inherited member visibility
-        internal KubernetesTelemetryInitializer(
-#pragma warning restore CA2222 // Do not decrease inherited member visibility
-            ILoggerFactory loggerFactory,
-            IK8sEnvironment env)
+        public KubernetesTelemetryInitializer(
+            IK8sEnvironment k8sEnv,
+            ILogger<KubernetesTelemetryInitializer> logger)
         {
-            this.logger = loggerFactory?.CreateLogger<KubernetesTelemetryInitializer>();
-            this.K8sEnvironment = env ?? Kubernetes.K8sEnvironment.CreateAsync(
-                TimeSpan.FromMinutes(2), loggerFactory).ConfigureAwait(false).GetAwaiter().GetResult();
+            _logger = logger;
+            this.K8sEnvironment = Arguments.IsNotNull(k8sEnv, nameof(k8sEnv));
         }
 
         public void Initialize(ITelemetry telemetry)
@@ -69,11 +60,11 @@
                 SetCustomDimensions(telemetry);
 #endif
 
-                logger?.LogTrace(JsonConvert.SerializeObject(telemetry));
+                _logger.LogTrace(JsonConvert.SerializeObject(telemetry));
             }
             else
             {
-                logger?.LogError("K8s Environemnt is null.");
+                _logger.LogError("K8s Environemnt is null.");
             }
         }
 
@@ -132,19 +123,19 @@
         {
             if (telemetry == null)
             {
-                logger?.LogError("telemetry object is null in telememtry initializer.");
+                _logger.LogError("telemetry object is null in telememtry initializer.");
                 return;
             }
 
             if (string.IsNullOrEmpty(key))
             {
-                logger?.LogError("Key is required to set custom dimension.");
+                _logger.LogError("Key is required to set custom dimension.");
                 return;
             }
 
             if (string.IsNullOrEmpty(value))
             {
-                logger?.LogError(Invariant($"Value is required to set custom dimension. Key: {key}"));
+                _logger.LogError(Invariant($"Value is required to set custom dimension. Key: {key}"));
                 return;
             }
 
@@ -157,11 +148,11 @@
                 string existingValue = telemetry.Context.Properties[key];
                 if (string.Equals(existingValue, value, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    logger?.LogDebug(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
+                    _logger.LogDebug(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
                 }
                 else
                 {
-                    logger?.LogWarning(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
+                    _logger.LogWarning(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
                 }
             }
         }
