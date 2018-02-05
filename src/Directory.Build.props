@@ -29,6 +29,12 @@
     <RepositoryType />
   </PropertyGroup>
 
+  <ItemGroup Condition=" '$(IsCIBuild)' == 'true' ">
+    <PackageReference Include="MicroBuild.Core" Version="0.2.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <ItemGroup Condition="'$(IsCIBuild)' == 'true' AND '$(IsSignBuild)' == 'true'">
     <FilesToSign Include="$(OutputPath)\$(AssemblyName).dll">
       <Authenticode>Microsoft</Authenticode>
