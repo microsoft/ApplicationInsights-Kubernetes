@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationInsights.Kubernetes", "src\ApplicationInsights.Kubernetes.csproj", "{B3829285-8FD8-437C-832C-F9A6E30D6DDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationInsights.Kubernetes", "src\ApplicationInsights.Kubernetes\ApplicationInsights.Kubernetes.csproj", "{B3829285-8FD8-437C-832C-F9A6E30D6DDE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{A09A74D9-9F9A-4FD0-A7FB-72620B97BA9C}"
 EndProject
@@ -13,9 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{EF66CE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BCA8D8BF-71A7-4037-9C72-D65967766201}"
 	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApplicationInsights.Kubernetes.HostingStartup", "src\ApplicationInsights.Kubernetes.HostingStartup\ApplicationInsights.Kubernetes.HostingStartup.csproj", "{B17BD867-8CB1-44BB-B253-CB9110ED6A86}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +34,10 @@ Global
 		{0D1FEF92-DCA3-49EE-8889-26F6574B541F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D1FEF92-DCA3-49EE-8889-26F6574B541F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D1FEF92-DCA3-49EE-8889-26F6574B541F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B17BD867-8CB1-44BB-B253-CB9110ED6A86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B17BD867-8CB1-44BB-B253-CB9110ED6A86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B17BD867-8CB1-44BB-B253-CB9110ED6A86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B17BD867-8CB1-44BB-B253-CB9110ED6A86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -38,5 +45,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B3829285-8FD8-437C-832C-F9A6E30D6DDE} = {EF66CE49-1BA2-4E06-A85F-D9D22DEB7363}
 		{0D1FEF92-DCA3-49EE-8889-26F6574B541F} = {A09A74D9-9F9A-4FD0-A7FB-72620B97BA9C}
+		{B17BD867-8CB1-44BB-B253-CB9110ED6A86} = {EF66CE49-1BA2-4E06-A85F-D9D22DEB7363}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8125C723-33DB-4213-9BC8-BA9AC3433977}
 	EndGlobalSection
 EndGlobal
