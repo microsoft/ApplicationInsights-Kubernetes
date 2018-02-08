@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageId>Microsoft.ApplicationInsights.Kubernetes.HostingStartup</PackageId>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes.HostingStartup</AssemblyName>
+
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>Microsoft.ApplicationInsights.Kubernetes.HostingStartup</PackageId>
+    <Product>Microsoft.ApplicationInsights.Kubernetes.HostingStartup</Product>
+    <Description>Hosting Startup of Microsoft Application Insights for Kubernetes</Description>
+    <PackageTags>Analytics ApplicationInsights Telemetry AppInsights Kubernetes Hosting Startup</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,5 +17,4 @@
   <ItemGroup>
     <ProjectReference Include="..\ApplicationInsights.Kubernetes\ApplicationInsights.Kubernetes.csproj" />
   </ItemGroup>
-
 </Project>
