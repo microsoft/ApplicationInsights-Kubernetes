@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes.Stubs;
+using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -80,7 +81,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 if (k8sEnv != null)
                 {
                     // Inject the telemetry initializer.
-                    ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(k8sEnv, serviceProvider.GetService<ILogger<KubernetesTelemetryInitializer>>());
+                    ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(k8sEnv,
+                        SDKVersionUtils.Instance,
+                        serviceProvider.GetService<ILogger<KubernetesTelemetryInitializer>>());
                     configuration.TelemetryInitializers.Add(initializer);
                     logger?.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 }
