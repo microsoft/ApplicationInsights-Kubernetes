@@ -11,14 +11,15 @@
     /// </summary>
     public static class ApplicationInsightsExtensions
     {
-        public static IServiceCollection EnableKubernetes(this IServiceCollection services, TimeSpan? timeout = null)
+        public static IServiceCollection EnableKubernetes(this IServiceCollection services, TimeSpan? timeout = null,
+            bool useStub = false)
         {
             // Dispatch this on a differnet thread to avoid blocking the main thread.
             // Mainly used with K8s Readness Probe enabled, where communicating with Server will temperory be blocked.
             // TODO: Instead of query the server on the start, we should depend on watch services to provide dynamic realtime data.
             Task.Run(() =>
             {
-                KubernetesModule.EnableKubernetes(services, TelemetryConfiguration.Active, timeout);
+                KubernetesModule.EnableKubernetes(services, TelemetryConfiguration.Active, timeout, useStub);
             });
 
             return services;
