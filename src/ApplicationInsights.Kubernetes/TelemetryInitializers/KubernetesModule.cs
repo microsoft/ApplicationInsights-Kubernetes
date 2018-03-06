@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.Kubernetes.Stubs;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -53,12 +51,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public static void EnableKubernetes(IServiceCollection serviceCollection,
             TelemetryConfiguration configuration,
             TimeSpan? timeout = null,
-            bool useStub = false)
+            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
             // 2 minutes maximum to spin up the container.
             timeout = timeout ?? TimeSpan.FromMinutes(2);
 
-            serviceCollection = BuildK8sServiceCollection(serviceCollection, useStub);
+            serviceCollection = BuildK8sServiceCollection(serviceCollection, kubernetesServiceCollectionBuilder);
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             ILogger logger = serviceProvider.GetService<ILogger<KubernetesModule>>();
 
@@ -99,33 +97,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
         }
 
-        internal static IServiceCollection BuildK8sServiceCollection(IServiceCollection original, bool useStub = false)
+        internal static IServiceCollection BuildK8sServiceCollection(IServiceCollection services, IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
-            if (Services == null || Services != original)
-            {
-                Services = original ?? new ServiceCollection();
-                // According to the code, adding logging will not overwrite existing logging classes
-                // https://github.com/aspnet/Logging/blob/c821494678a30c323174bea8056f43b93a3ca6f4/src/Microsoft.Extensions.Logging/LoggingServiceCollectionExtensions.cs
-                // Becuase it uses 'TryAdd()' extenion method on service collection.
-                Services.AddLogging();
-
-                Services.AddSingleton<KubeHttpClientFactory>();
-                Services.AddSingleton<K8sQueryClientFactory>();
-
-                if (!useStub)
-                {
-                    Services.AddSingleton<IKubeHttpClientSettingsProvider>(p => new KubeHttpClientSettingsProvider(logger: p.GetService<ILogger<KubeHttpClientSettingsProvider>>()));
-                    Services.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
-
-                }
-                else
-                {
-                    Services.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsStub>();
-                    Services.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentStubFactory>();
-
-                }
-            }
-
+            kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ?? new KubernetesServiceCollectionBuilder();
+            Services = kubernetesServiceCollectionBuilder.InjectServices(services);
             return Services;
         }
 
