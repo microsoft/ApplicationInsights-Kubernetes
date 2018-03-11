@@ -17,7 +17,7 @@ This page is subject to be updated once more info is available.
 ### Walkthrough
 We support **ASP.NET Core** application as well as **.NET Core** application.
 
-* **For ASP.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walkthrough.
+* For **ASP.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walkthrough.
 
 * For **.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-.NET-Core-Applications) for a simple walkthrough.
 
