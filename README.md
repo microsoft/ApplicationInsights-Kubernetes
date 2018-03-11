@@ -15,11 +15,15 @@ This page is subject to be updated once more info is available.
 * [Kubernetes](https://kubernetes.io/)
 
 ### Walkthrough
-For ASP.NET Core Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walkthrough.
+We support **ASP.NET Core** application as well as **.NET Core** application.
 
-For .NET Core Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-.NET-Core-Applications) for a simple walkthrough.
+* For ASP.NET Core Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walkthrough.
 
-To enable Application Insights for Kubernetes by environement variable instead of code, please refer [Hosting startup for ApplicationInsights.Kubernetes](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Hosting-startup-for-ApplicationInsights.Kubernetes).
+* For .NET Core Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-.NET-Core-Applications) for a simple walkthrough.
+
+### Learn more
+* Read the [Wikis](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki).
+* To enable Application Insights for Kubernetes by environement variable instead of code, please refer [Hosting startup for ApplicationInsights.Kubernetes](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Hosting-startup-for-ApplicationInsights.Kubernetes).
 
 ## Contributing
 ### Report issues
