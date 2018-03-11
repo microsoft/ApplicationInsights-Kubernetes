@@ -7,10 +7,11 @@ namespace ApplicationInsights.Kubernetes.HostingStartup
     {
         public void Configure(IWebHostBuilder builder)
         {
-            builder.ConfigureServices(services =>
-            {
-                services.EnableKubernetes();
-            });
+            builder.UseApplicationInsights()
+                .ConfigureServices(services =>
+                {
+                    services.EnableKubernetes();
+                });
         }
     }
 }
