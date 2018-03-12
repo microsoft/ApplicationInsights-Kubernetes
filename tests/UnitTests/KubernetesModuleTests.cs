@@ -33,7 +33,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             serviceProvider.GetRequiredService<IKubeHttpClientSettingsProvider>();
             serviceProvider.GetRequiredService<KubeHttpClientFactory>();
             serviceProvider.GetRequiredService<K8sQueryClientFactory>();
-            serviceProvider.GetRequiredService<K8sEnvironmentFactory>();
+            serviceProvider.GetRequiredService<IK8sEnvironmentFactory>();
         }
     }
 }

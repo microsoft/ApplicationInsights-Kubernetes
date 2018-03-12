@@ -1,7 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Kubernetes.Stubs;
+using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -47,12 +50,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// </summary>
         /// <param name="loggerFactory"></param>
         /// <param name="timeout"></param>
-        public static void EnableKubernetes(IServiceCollection serviceCollection, TelemetryConfiguration configuration, TimeSpan? timeout = null)
+        public static void EnableKubernetes(IServiceCollection serviceCollection,
+            TelemetryConfiguration configuration,
+            TimeSpan? timeout = null,
+            bool useStub = false)
         {
             // 2 minutes maximum to spin up the container.
             timeout = timeout ?? TimeSpan.FromMinutes(2);
 
-            serviceCollection = BuildK8sServiceCollection(serviceCollection);
+            serviceCollection = BuildK8sServiceCollection(serviceCollection, useStub);
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             ILogger logger = serviceProvider.GetService<ILogger<KubernetesModule>>();
 
@@ -71,11 +77,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             try
             {
-                K8sEnvironment k8sEnv = serviceProvider.GetRequiredService<K8sEnvironmentFactory>().CreateAsync(timeout.Value).ConfigureAwait(false).GetAwaiter().GetResult();
+                K8sEnvironment k8sEnv = serviceProvider.GetRequiredService<IK8sEnvironmentFactory>().CreateAsync(timeout.Value).ConfigureAwait(false).GetAwaiter().GetResult();
                 if (k8sEnv != null)
                 {
                     // Inject the telemetry initializer.
-                    ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(k8sEnv, serviceProvider.GetService<ILogger<KubernetesTelemetryInitializer>>());
+                    ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(k8sEnv,
+                        SDKVersionUtils.Instance,
+                        serviceProvider.GetService<ILogger<KubernetesTelemetryInitializer>>());
                     configuration.TelemetryInitializers.Add(initializer);
                     logger?.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 }
@@ -91,21 +99,31 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
         }
 
-        internal static IServiceCollection BuildK8sServiceCollection(IServiceCollection original)
+        internal static IServiceCollection BuildK8sServiceCollection(IServiceCollection original, bool useStub = false)
         {
             if (Services == null || Services != original)
             {
                 Services = original ?? new ServiceCollection();
-                // According github code, adding logging will not overwrite existing logging classes
+                // According to the code, adding logging will not overwrite existing logging classes
                 // https://github.com/aspnet/Logging/blob/c821494678a30c323174bea8056f43b93a3ca6f4/src/Microsoft.Extensions.Logging/LoggingServiceCollectionExtensions.cs
                 // Becuase it uses 'TryAdd()' extenion method on service collection.
                 Services.AddLogging();
 
-                Services.AddSingleton<IKubeHttpClientSettingsProvider>(p => new KubeHttpClientSettingsProvider(logger: p.GetService<ILogger<KubeHttpClientSettingsProvider>>()));
                 Services.AddSingleton<KubeHttpClientFactory>();
                 Services.AddSingleton<K8sQueryClientFactory>();
 
-                Services.AddSingleton<K8sEnvironmentFactory>();
+                if (!useStub)
+                {
+                    Services.AddSingleton<IKubeHttpClientSettingsProvider>(p => new KubeHttpClientSettingsProvider(logger: p.GetService<ILogger<KubeHttpClientSettingsProvider>>()));
+                    Services.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
+
+                }
+                else
+                {
+                    Services.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsStub>();
+                    Services.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentStubFactory>();
+
+                }
             }
 
             return Services;
