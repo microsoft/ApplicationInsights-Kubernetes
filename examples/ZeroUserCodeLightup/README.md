@@ -6,7 +6,7 @@ All you need to do is to add 3 lines in the [Dockerfile](./Dockerfile), and they
 ```dockerfile
 ...
 # Adding a reference to hosting startup package
-RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup
+RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup -v 1.0.0-*
 
 # Light up Application Insights for Kubernetes
 ENV APPINSIGHTS_INSTRUMENTATIONKEY Your_ApplicaitonInsights_Instrumentation_Key
@@ -22,9 +22,8 @@ WORKDIR /app
 # Copy csproj and restore as distinct layers
 COPY *.csproj ./
 
-# Adding reference to hosting startup package
-RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup
-RUN dotnet restore
+# Adding a reference to hosting startup package
+RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup -v 1.0.0-*
 
 # Copy everything else and build
 COPY . ./
@@ -33,8 +32,14 @@ RUN dotnet publish -c Release -o out
 # Build runtime image
 FROM microsoft/aspnetcore:2.0.5
 
-# Lightup Application Insights for Kubernetes
-ENV APPINSIGHTS_INSTRUMENTATIONKEY Your_ApplicaitonInsights_Instrumentation_Key
+# Create an argument to allow docker builder to passing in application insights key.
+# For example: docker build . --build-arg APPINSIGHTS_KEY=YOUR_APPLICATIONINSIGHTS_INSTRUMENTATION_KEY
+ARG APPINSIGHTS_KEY
+# Making sure the argument is set. Fail the build of the container otherwise.
+RUN test -n "$APPINSIGHTS_KEY"
+
+# Light up Application Insights for Kubernetes
+ENV APPINSIGHTS_INSTRUMENTATIONKEY $APPINSIGHTS_KEY
 ENV ASPNETCORE_HOSTINGSTARTUPASSEMBLIES Microsoft.ApplicationInsights.Kubernetes.HostingStartup
 
 WORKDIR /app
