@@ -5,8 +5,7 @@ WORKDIR /app
 COPY *.csproj ./
 
 # Adding a reference to hosting startup package
-RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup
-RUN dotnet restore
+RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup -v 1.0.0-*
 
 # Copy everything else and build
 COPY . ./
