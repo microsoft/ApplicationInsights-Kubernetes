@@ -10,7 +10,7 @@ using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    internal class K8sEnvironmentFactory
+    internal class K8sEnvironmentFactory : IK8sEnvironmentFactory
     {
         private readonly ILogger _logger;
         private readonly IKubeHttpClientSettingsProvider _httpClientSettings;
@@ -37,6 +37,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             K8sEnvironment instance = null;
             ILogger<K8sEnvironment> logger = null;
+
             try
             {
                 using (IKubeHttpClient httpClient = _httpClientFactory.Create(_httpClientSettings))

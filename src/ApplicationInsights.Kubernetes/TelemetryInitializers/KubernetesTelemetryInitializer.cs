@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Extensibility.Implementation;
+using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -29,14 +31,17 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public const string CPU = "CPU";
         public const string Memory = "Memory";
 
-        private ILogger _logger;
+        private readonly ILogger _logger;
+        private readonly SDKVersionUtils _sdkVersionUtils;
         internal IK8sEnvironment K8sEnvironment { get; private set; }
 
         public KubernetesTelemetryInitializer(
             IK8sEnvironment k8sEnv,
+            SDKVersionUtils sdkVersionUtils,
             ILogger<KubernetesTelemetryInitializer> logger)
         {
             _logger = logger;
+            _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
             this.K8sEnvironment = Arguments.IsNotNull(k8sEnv, nameof(k8sEnv));
         }
 
@@ -59,13 +64,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 #else
                 SetCustomDimensions(telemetry);
 #endif
-
                 _logger.LogTrace(JsonConvert.SerializeObject(telemetry));
             }
             else
             {
                 _logger.LogError("K8s Environemnt is null.");
             }
+            telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
         }
 
         private void SetCustomDimensions(ITelemetry telemetry)
