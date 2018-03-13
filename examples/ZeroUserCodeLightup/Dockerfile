@@ -4,7 +4,7 @@ WORKDIR /app
 # Copy csproj and restore as distinct layers
 COPY *.csproj ./
 
-# Adding reference to hosting startup package
+# Adding a reference to hosting startup package
 RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup
 RUN dotnet restore
 
@@ -15,7 +15,7 @@ RUN dotnet publish -c Release -o out
 # Build runtime image
 FROM microsoft/aspnetcore:2.0.5
 
-# Lightup Application Insights for Kubernetes
+# Light up Application Insights for Kubernetes
 ENV APPINSIGHTS_INSTRUMENTATIONKEY Your_ApplicaitonInsights_Instrumentation_Key
 ENV ASPNETCORE_HOSTINGSTARTUPASSEMBLIES Microsoft.ApplicationInsights.Kubernetes.HostingStartup
 
