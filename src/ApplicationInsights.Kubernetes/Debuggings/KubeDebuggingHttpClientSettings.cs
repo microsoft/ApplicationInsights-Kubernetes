@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net.Http;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.Stubs
+namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
-    internal class KubeHttpClientSettingsStub : IKubeHttpClientSettingsProvider
+    internal class KubeHttpDebuggingClientSettings : IKubeHttpClientSettingsProvider
     {
         public const string FakeContainerId = "F8E1C6FF-2217-4962-90FF-0D9195AF0785";
 

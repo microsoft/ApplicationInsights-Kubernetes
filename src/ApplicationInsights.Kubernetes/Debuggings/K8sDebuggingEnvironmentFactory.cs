@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Kubernetes.Entities;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.Stubs
+namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
-    internal class K8sEnvironmentStubFactory : IK8sEnvironmentFactory
+    internal class K8sDebuggingEnvironmentFactory : IK8sEnvironmentFactory
     {
         public Task<K8sEnvironment> CreateAsync(TimeSpan timeout)
         {
             return Task.FromResult(new K8sEnvironment()
             {
-                ContainerID = KubeHttpClientSettingsStub.FakeContainerId,
+                ContainerID = KubeHttpDebuggingClientSettings.FakeContainerId,
                 myContainerStatus = new ContainerStatus()
                 {
-                    ContainerID = KubeHttpClientSettingsStub.FakeContainerId,
+                    ContainerID = KubeHttpDebuggingClientSettings.FakeContainerId,
                     Image = nameof(ContainerStatus.Image),
                     ImageID = nameof(ContainerStatus.ImageID),
                     Name = nameof(ContainerStatus.Name),
