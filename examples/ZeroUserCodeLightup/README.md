@@ -8,8 +8,8 @@ All you need to do is to add a few lines in the [Dockerfile](./Dockerfile), and 
 ```dockerfile
 ...
 # Adding a reference to hosting startup package
-# RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup  -v 1.0.0-*
-RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup  -v 1.0.0-private-201803122218 -s http://saarsnuget.azurewebsites.net/nuget
+RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup  -v 1.0.0-*
+
 # Light up Application Insights for Kubernetes
 ENV APPINSIGHTS_INSTRUMENTATIONKEY $APPINSIGHTS_KEY
 ENV ASPNETCORE_HOSTINGSTARTUPASSEMBLIES Microsoft.ApplicationInsights.Kubernetes.HostingStartup
