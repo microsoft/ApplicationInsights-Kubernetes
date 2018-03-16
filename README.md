@@ -23,8 +23,9 @@ We support **ASP.NET Core** application as well as **.NET Core** application.
 * For **.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-.NET-Core-Applications) for a simple walkthrough.
 
 ### Learn more
-* Read the [Wikis](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki).
+* To build a container for Kubernetes that have Application Insights baked in for the existing applications, please refer the example of [Zero Code light up](https://github.com/Microsoft/ApplicationInsights-Kubernetes/tree/develop/examples/ZeroUserCodeLightup).
 * To enable Application Insights for Kubernetes by environement variable instead of code, please refer [Hosting startup for ApplicationInsights.Kubernetes](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Hosting-startup-for-ApplicationInsights.Kubernetes).
+* Still want more? Read the [Wikis](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki).
 
 ## Contributing
 ### Report issues
