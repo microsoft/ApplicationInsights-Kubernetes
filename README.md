@@ -1,7 +1,8 @@
 Microsoft Application Insights for Kubernetes
 ==
 This repository has code for Application Insights for Kubernetes, which works on .NET Core applications within the containers, managed by Kubernetes, on Azure Container Service.
-This page is subject to be updated once more info is available.
+
+**Note:** This library enhanced the [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore) but is **not required** to run applicaiton insights in Kubernetes. When you choose to use Microsoft Application Insights for Kubernetes, you will see Kubernetes related properties like *Pod-Name, Deployment ...* on all your telemetry entries. Rich features like Appliation Map to show the multiple micro service on your application map will also be provided.
 
 ### Continous Integration Status
 |Rolling Build                    | Nightly Build                |
@@ -15,9 +16,15 @@ This page is subject to be updated once more info is available.
 * [Kubernetes](https://kubernetes.io/)
 
 ### Walkthrough
-For ASP.NET Core Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walkthrough.
+We support **ASP.NET Core** application as well as **.NET Core** application.
 
-For .NET Core Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-.NET-Core-Applications) for a simple walkthrough.
+* For **ASP.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walkthrough.
+
+* For **.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-.NET-Core-Applications) for a simple walkthrough.
+
+### Learn more
+* Read the [Wikis](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki).
+* To enable Application Insights for Kubernetes by environement variable instead of code, please refer [Hosting startup for ApplicationInsights.Kubernetes](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Hosting-startup-for-ApplicationInsights.Kubernetes).
 
 ## Contributing
 ### Report issues
