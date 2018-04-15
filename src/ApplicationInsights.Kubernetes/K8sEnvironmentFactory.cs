@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Kubernetes.Entities;
 using Microsoft.Extensions.Logging;
@@ -42,7 +43,19 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 using (IKubeHttpClient httpClient = _httpClientFactory.Create(_httpClientSettings))
                 using (K8sQueryClient queryClient = _k8sQueryClientFactory.Create(httpClient))
                 {
-                    string containerId = _httpClientSettings.ContainerId;
+                    // TODO: See if there's better way to fetch the container id
+                    K8sPod myPod = await SpinWaitUntilGetPod(timeoutAt, queryClient).ConfigureAwait(false);
+                    string containerId = null;
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        containerId = myPod.Status.ContainerStatuses.First().ContainerID;
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        containerId = _httpClientSettings.ContainerId;
+                    }
+                    // ~
+
                     if (await SpinWaitContainerReady(timeoutAt, queryClient, containerId).ConfigureAwait(false))
                     {
                         instance = new K8sEnvironment()
@@ -50,7 +63,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                             ContainerID = containerId
                         };
 
-                        K8sPod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
                         instance.myPod = myPod;
                         _logger.LogDebug(Invariant($"Getting container status of container-id: {containerId}"));
                         instance.myContainerStatus = myPod.GetContainerStatus(containerId);
@@ -88,6 +100,42 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
         }
 
+        private async Task<K8sPod> SpinWaitUntilGetPod(DateTime timeoutAt, K8sQueryClient client)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            K8sPod myPod = null;
+            do
+            {
+                // When my pod become available and it's status become ready, we recognize the container is ready.
+                try
+                {
+                    myPod = await client.GetMyPodAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Query exception while trying to get pod info: {ex.Message}");
+                    _logger.LogDebug(ex.StackTrace);
+                    myPod = null;
+                }
+
+                if (myPod != null)
+                {
+                    stopwatch.Stop();
+                    _logger.LogDebug(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
+                    return myPod;
+                }
+
+                // The time to get the container ready dependes on how much time will a container to be initialized.
+                // When there is readiness probe, the pod info will not be available until the initial delay of it is elapsed.
+                // When there is no readiness probe, the minimum seems about 1000ms. 
+                // Try invoke a probe on readiness every 500ms until the container is ready
+                // Or it will timeout per the timeout settings.
+                await Task.Delay(500).ConfigureAwait(false);
+            } while (DateTime.Now < timeoutAt);
+            return null;
+        }
+
         /// <summary>
         /// Wait until the container is ready.
         /// Refer document @ https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase for the Pod's lifecycle.
@@ -104,7 +152,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             do
             {
                 // When my pod become available and it's status become ready, we recognize the container is ready.
-                myPod = await client.GetMyPodAsync().ConfigureAwait(false);
+                try
+                {
+                    myPod = await client.GetMyPodAsync().ConfigureAwait(false);
+                }
+                catch
+                {
+                    myPod = null;
+                }
+
                 if (myPod != null && myPod.GetContainerStatus(myContainerId).Ready)
                 {
                     stopwatch.Stop();

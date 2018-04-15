@@ -4,5 +4,6 @@
     {
         string ContainerId { get; }
         string QueryNamespace { get; }
+
     }
 }

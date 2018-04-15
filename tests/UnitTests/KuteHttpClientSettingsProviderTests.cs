@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using Castle.Core.Logging;
 using Microsoft.ApplicationInsights.Kubernetes;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+
+using static Microsoft.ApplicationInsights.Netcore.Kubernetes.TestUtils;
 
 namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
 {
@@ -15,6 +17,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         [InlineData("DifferentIssuer", false)]
         public void VerifyServerCertificateShouldVerifyIssuer(string serverIssuer, bool expected)
         {
+
             Mock<ICertificateVerifier> serverCertMock = new Mock<ICertificateVerifier>();
             serverCertMock.Setup(cert => cert.Issuer).Returns(serverIssuer);
             serverCertMock.Setup(cert => cert.NotBefore).Returns(DateTime.Now.Date.AddDays(-1));
@@ -25,7 +28,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
 
             Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true);
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
 
             bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
                 serverCertMock.Object,
@@ -48,7 +51,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
 
             Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true);
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
 
             bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
                 serverCertMock.Object,
@@ -71,7 +74,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
 
             Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true);
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
 
             bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
                 serverCertMock.Object,
@@ -94,7 +97,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
 
             Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true);
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
 
             bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
                 serverCertMock.Object,
@@ -117,7 +120,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
 
             Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true);
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
 
             bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
                 serverCertMock.Object,
@@ -160,6 +163,70 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
 
             const string testCase_3 = "2:cpu,cpuacct:\n1:name=systemd:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a";
             Assert.Throws<InvalidCastException>(() => KubeHttpClientSettingsProvider.ParseContainerId(testCase_3));
+        }
+
+        [Fact(DisplayName = "Base address is formed by constructor")]
+        public void BaseAddressShouldBeFormed()
+        {
+            IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+                pathToCGroup: "TestCGroup",
+                pathToNamespace: "namespace",
+                kubernetesServiceHost: "127.0.0.1",
+                kubernetesServicePort: "8001");
+            Assert.NotNull(target);
+            Uri expected = new Uri("https://127.0.0.1:8001", UriKind.Absolute);
+            Assert.Equal(expected.AbsoluteUri, target.ServiceBaseAddress.AbsoluteUri);
+            Assert.Equal(expected.Port, target.ServiceBaseAddress.Port);
+        }
+
+        [Fact(DisplayName = "Base address is formed by constructor of windows kube settings provider")]
+        public void BaseAddressShouldBeFormedWin()
+        {
+            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(GetLogger<KubeHttpSettingsWinContainerProvider>(),
+                serviceAccountFolder: ".",
+                namespaceFileName: "namespace",
+                kubernetesServiceHost: "127.0.0.1",
+                kubernetesServicePort: "8001");
+            Uri expected = new Uri("https://127.0.0.1:8001", UriKind.Absolute);
+            Assert.Equal(expected.AbsoluteUri, target.ServiceBaseAddress.AbsoluteUri);
+            Assert.Equal(expected.Port, target.ServiceBaseAddress.Port);
+        }
+
+        [Fact(DisplayName = "Container id is set to null for windows container settings")]
+        public void ContainerIdIsAlwaysNullForWinSettings()
+        {
+            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(GetLogger<KubeHttpSettingsWinContainerProvider>(),
+                serviceAccountFolder: ".",
+                namespaceFileName: "namespace",
+                kubernetesServiceHost: "127.0.0.1",
+                kubernetesServicePort: "8001");
+            Assert.Null(target.ContainerId);
+        }
+
+        [Fact(DisplayName = "Token can be fetched")]
+
+        public void TokenShoudBeFetched()
+        {
+            IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+                pathToCGroup: "TestCGroup",
+                pathToNamespace: "namespace",
+                pathToToken: "token",
+                kubernetesServiceHost: "127.0.0.1",
+                kubernetesServicePort: "8001");
+            Assert.Equal("Test-token", target.GetToken());
+        }
+
+        [Fact(DisplayName = "Token can be fetched by windows settings provider")]
+        public void TokenShouldBeFetchedForWin()
+        {
+            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(GetLogger<KubeHttpSettingsWinContainerProvider>(),
+                serviceAccountFolder: ".",
+                namespaceFileName: "namespace",
+                tokenFileName:"token",
+                kubernetesServiceHost: "127.0.0.1",
+                kubernetesServicePort: "8001");
+
+            Assert.Equal("Test-token", target.GetToken());
         }
     }
 }

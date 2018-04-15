@@ -11,5 +11,13 @@
             }
             return subject;
         }
+
+        public static string IsNotNullOrEmpty(string subject, string argumentName)
+        {
+            if (string.IsNullOrEmpty(subject)) {
+                throw new ArgumentNullException(argumentName);
+            }
+            return subject;
+        }
     }
 }

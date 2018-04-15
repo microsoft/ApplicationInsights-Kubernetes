@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+using System;
+using System.Runtime.InteropServices;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
@@ -49,7 +51,18 @@ namespace Microsoft.Extensions.DependencyInjection
 
         protected virtual void InjectChangableServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider>(p => new KubeHttpClientSettingsProvider(logger: p.GetService<ILogger<KubeHttpClientSettingsProvider>>()));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider>(p => new KubeHttpClientSettingsProvider(logger: p.GetService<ILogger<KubeHttpClientSettingsProvider>>()));
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider>(p => new KubeHttpSettingsWinContainerProvider(logger: p.GetService<ILogger<KubeHttpSettingsWinContainerProvider>>()));
+            }
+            else
+            {
+                serviceCollection.BuildServiceProvider().GetService<ILogger<KubernetesServiceCollectionBuilder>>().LogError("Unsupported OS.");
+            }
             serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
         }
     }
