@@ -4,7 +4,6 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
@@ -64,7 +63,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 #else
                 SetCustomDimensions(telemetry);
 #endif
-                _logger.LogTrace(JsonConvert.SerializeObject(telemetry));
             }
             else
             {

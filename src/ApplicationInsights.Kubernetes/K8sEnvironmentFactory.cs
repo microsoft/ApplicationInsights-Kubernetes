@@ -36,7 +36,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public async Task<K8sEnvironment> CreateAsync(TimeSpan timeout)
         {
             K8sEnvironment instance = null;
-            ILogger<K8sEnvironment> logger = null;
 
             try
             {
@@ -53,7 +52,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
                         K8sPod myPod = await queryClient.GetMyPodAsync().ConfigureAwait(false);
                         instance.myPod = myPod;
-                        logger?.LogDebug(Invariant($"Getting container status of container-id: {containerId}"));
+                        _logger.LogDebug(Invariant($"Getting container status of container-id: {containerId}"));
                         instance.myContainerStatus = myPod.GetContainerStatus(containerId);
 
                         IEnumerable<K8sReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
@@ -77,14 +76,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                     else
                     {
-                        logger?.LogError(Invariant($"Kubernetes info is not available within given time of {timeout.TotalMilliseconds} ms."));
+                        _logger.LogError(Invariant($"Kubernetes info is not available within given time of {timeout.TotalMilliseconds} ms."));
                     }
                 }
                 return instance;
             }
             catch (Exception ex)
             {
-                logger?.LogCritical(ex.ToString());
+                _logger.LogCritical(ex.ToString());
                 return null;
             }
         }
