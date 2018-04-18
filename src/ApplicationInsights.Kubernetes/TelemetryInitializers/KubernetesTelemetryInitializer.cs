@@ -33,10 +33,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private readonly ILogger _logger;
         private readonly SDKVersionUtils _sdkVersionUtils;
-        private readonly IK8sEnvironmentFactory _k8sEnvFactory;
         private readonly TimeSpan _timeout;
         private readonly DateTime _timeoutTime;
-        internal IK8sEnvironment K8sEnvironment { get; private set; }
+        internal IK8sEnvironment _k8sEnvironment { get; private set; }
+        internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
 
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
@@ -55,7 +55,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         public void Initialize(ITelemetry telemetry)
         {
-            if (K8sEnvironment != null)
+            if (_k8sEnvironment != null)
             {
 #if NETSTANDARD2_0
                 Stopwatch cpuWatch = Stopwatch.StartNew();
@@ -64,7 +64,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 // Setting the container name to role name
                 if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
                 {
-                    telemetry.Context.Cloud.RoleName = this.K8sEnvironment.ContainerName;
+                    telemetry.Context.Cloud.RoleName = this._k8sEnvironment.ContainerName;
                 }
 
 #if NETSTANDARD2_0
@@ -82,13 +82,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
             }
 
-            // TODO: Consider move this to ITelemetryModule?
             telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
         }
 
         private async Task SetK8sEnvironment()
         {
-            K8sEnvironment = await _k8sEnvFactory.CreateAsync(_timeout).ConfigureAwait(false);
+            _k8sEnvironment = await _k8sEnvFactory.CreateAsync(_timeout).ConfigureAwait(false);
         }
 
         private void SetCustomDimensions(ITelemetry telemetry)
@@ -96,23 +95,23 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             // Adding pod name into custom dimension
 
             // Container
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.ID"), this.K8sEnvironment.ContainerID);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.Name"), this.K8sEnvironment.ContainerName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.ID"), this._k8sEnvironment.ContainerID);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.Name"), this._k8sEnvironment.ContainerName);
 
             // Pod
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.ID"), this.K8sEnvironment.PodID);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Name"), this.K8sEnvironment.PodName);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this.K8sEnvironment.PodLabels);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.ID"), this._k8sEnvironment.PodID);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Name"), this._k8sEnvironment.PodName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this._k8sEnvironment.PodLabels);
 
             // Replica Set
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.Name"), this.K8sEnvironment.ReplicaSetName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.Name"), this._k8sEnvironment.ReplicaSetName);
 
             // Deployment
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this.K8sEnvironment.DeploymentName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this._k8sEnvironment.DeploymentName);
 
             // Ndoe
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this.K8sEnvironment.NodeUid);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this.K8sEnvironment.NodeName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this._k8sEnvironment.NodeUid);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this._k8sEnvironment.NodeName);
         }
 
 #if NETSTANDARD2_0

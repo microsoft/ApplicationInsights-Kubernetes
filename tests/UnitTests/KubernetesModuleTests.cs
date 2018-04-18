@@ -14,7 +14,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         public void ServiceInjected()
         {
             IServiceCollection services = new ServiceCollection();
-            services = KubernetesModule.BuildK8sServiceCollection(services);
+            services = KubernetesModule.BuildK8sServiceCollection(services, TimeSpan.Zero);
 
             // Replace the IKubeHttpClientSetingsProvider in case the test is not running inside a container.
             Assert.NotNull(services.FirstOrDefault(s => s.ServiceType == typeof(IKubeHttpClientSettingsProvider)));

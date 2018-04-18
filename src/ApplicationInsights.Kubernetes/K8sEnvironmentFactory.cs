@@ -33,7 +33,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// Async factory method to build the instance of a K8sEnvironment.
         /// </summary>
         /// <returns></returns>
-        public async Task<K8sEnvironment> CreateAsync(TimeSpan timeout)
+        public async Task<IK8sEnvironment> CreateAsync(TimeSpan timeout)
         {
             K8sEnvironment instance = null;
 

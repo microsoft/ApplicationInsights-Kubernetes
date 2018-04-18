@@ -5,6 +5,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal interface IK8sEnvironmentFactory
     {
-        Task<K8sEnvironment> CreateAsync(TimeSpan timeout);
+        Task<IK8sEnvironment> CreateAsync(TimeSpan timeout);
     }
 }

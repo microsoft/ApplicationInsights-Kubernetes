@@ -7,9 +7,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
     internal class K8sDebuggingEnvironmentFactory : IK8sEnvironmentFactory
     {
-        public Task<K8sEnvironment> CreateAsync(TimeSpan timeout)
+        public Task<IK8sEnvironment> CreateAsync(TimeSpan timeout)
         {
-            return Task.FromResult(new K8sEnvironment()
+            return Task.FromResult((IK8sEnvironment)new K8sEnvironment()
             {
                 ContainerID = KubeHttpDebuggingClientSettings.FakeContainerId,
                 myContainerStatus = new ContainerStatus()
