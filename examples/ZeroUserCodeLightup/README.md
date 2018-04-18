@@ -41,8 +41,8 @@ Congratulations, your image is ready to run inside the Kubernetes! The failure, 
 ## Upload the image to the DockerHub
 Once verified, the image is ready to be uploaded. For example:
 ```
-docker tag ai-k8s-app:latest saars/ai-k8s-app:0.0.1
-docker push saars/ai-k8s-app:0.0.1
+docker tag ai-k8s-app:latest dockeraccount/ai-k8s-app:0.0.1
+docker push dockeraccount/ai-k8s-app:0.0.1
 ```
 
 **Note:** Change the tag properly. For more details, please reference the docker document: [Push images to Docker Cloud](https://docs.docker.com/docker-cloud/builds/push-images/).
@@ -64,7 +64,7 @@ spec:
       containers:
         - name: k8s-web
           # Please update to use your own image in the container registry.
-          image: saars/ai-k8s-app:0.0.1
+          image: dockeraccount/ai-k8s-app:0.0.1
           ports:
             - containerPort: 80
           env:

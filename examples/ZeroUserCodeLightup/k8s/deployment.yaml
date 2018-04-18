@@ -12,7 +12,7 @@ spec:
       containers:
         - name: k8s-web
           # Please update to use your own image in the container registry.
-          image: saars/ai-k8s-app:0.0.1
+          image: dockeraccount/ai-k8s-app:0.0.1
           ports:
             - containerPort: 80
           env:
