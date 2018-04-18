@@ -11,7 +11,9 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ApplicationInsightsExtensions
     {
-        public static IServiceCollection EnableKubernetes(this IServiceCollection services, TimeSpan? timeout = null,
+        public static IServiceCollection EnableKubernetes(
+            this IServiceCollection services, 
+            TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
             // Dispatch this on a differnet thread to avoid blocking the main thread.
@@ -19,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
             // TODO: Instead of query the server on the start, we should depend on watch services to provide dynamic realtime data.
             Task.Run(() =>
             {
-                KubernetesModule.EnableKubernetes(services, TelemetryConfiguration.Active, timeout, kubernetesServiceCollectionBuilder);
+                KubernetesModule.EnableKubernetes(services, timeout, kubernetesServiceCollectionBuilder);
             });
 
             return services;

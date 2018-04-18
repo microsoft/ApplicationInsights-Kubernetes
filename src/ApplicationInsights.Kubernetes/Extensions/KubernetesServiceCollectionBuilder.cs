@@ -1,4 +1,7 @@
-﻿using Microsoft.ApplicationInsights.Kubernetes;
+﻿using System;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Kubernetes;
+using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -10,13 +13,26 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection"></param>
         /// <returns></returns>
-        public IServiceCollection InjectServices(IServiceCollection serviceCollection)
+        public IServiceCollection InjectServices(IServiceCollection serviceCollection, TimeSpan timeout)
         {
             IServiceCollection services = serviceCollection ?? new ServiceCollection();
             InjectCommonServices(services);
 
             InjectChangableServices(services);
 
+            // Inject the telemetry initializer.
+            services.AddSingleton<ITelemetryInitializer>(provider =>
+            {
+                KubernetesTelemetryInitializer initializer = new KubernetesTelemetryInitializer(
+                    provider.GetRequiredService<IK8sEnvironmentFactory>(),
+                    timeout,
+                    SDKVersionUtils.Instance,
+                    provider.GetRequiredService<ILogger<KubernetesTelemetryInitializer>>()
+                );
+                provider.GetRequiredService<ILogger<KubernetesServiceCollectionBuilder>>()
+                    .LogDebug("Application Insights Kubernetes injected the service successfully.");
+                return initializer;
+            });
             return services;
         }
 

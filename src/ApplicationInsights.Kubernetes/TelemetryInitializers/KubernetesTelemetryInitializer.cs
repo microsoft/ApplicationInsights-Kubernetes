@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
@@ -32,16 +33,24 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private readonly ILogger _logger;
         private readonly SDKVersionUtils _sdkVersionUtils;
+        private readonly IK8sEnvironmentFactory _k8sEnvFactory;
+        private readonly TimeSpan _timeout;
+        private readonly DateTime _timeoutTime;
         internal IK8sEnvironment K8sEnvironment { get; private set; }
 
         public KubernetesTelemetryInitializer(
-            IK8sEnvironment k8sEnv,
+            IK8sEnvironmentFactory k8sEnvFactory,
+            TimeSpan timeout,
             SDKVersionUtils sdkVersionUtils,
             ILogger<KubernetesTelemetryInitializer> logger)
         {
             _logger = logger;
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
-            this.K8sEnvironment = Arguments.IsNotNull(k8sEnv, nameof(k8sEnv));
+            _timeout = Arguments.IsNotNull(timeout, nameof(timeout));
+            _timeoutTime = DateTime.Now.Add(_timeout);
+            _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
+
+            var _forget = SetK8sEnvironment();
         }
 
         public void Initialize(ITelemetry telemetry)
@@ -66,9 +75,20 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
             else
             {
-                _logger.LogError("K8s Environemnt is null.");
+                // Lose 5 seconds before reporting the error just in case there is a delay before calling k8sEnvFactory.CreateAsync().
+                if (DateTime.Now > _timeoutTime.AddSeconds(5))
+                {
+                    _logger.LogError("K8s Environemnt is null.");
+                }
             }
+
+            // TODO: Consider move this to ITelemetryModule?
             telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
+        }
+
+        private async Task SetK8sEnvironment()
+        {
+            K8sEnvironment = await _k8sEnvFactory.CreateAsync(_timeout).ConfigureAwait(false);
         }
 
         private void SetCustomDimensions(ITelemetry telemetry)
@@ -151,11 +171,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 string existingValue = telemetry.Context.Properties[key];
                 if (string.Equals(existingValue, value, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogDebug(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
+                    _logger.LogTrace(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
                 }
                 else
                 {
-                    _logger.LogWarning(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
+                    telemetry.Context.Properties[key] = value;
+                    _logger.LogDebug(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
                 }
             }
         }
