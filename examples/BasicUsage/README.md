@@ -1,7 +1,7 @@
 # Walkthrough
-This example walks through the necessary steps to create an ASP.NET Core 2.0 MVC application to Kubernets cluster with `Application Insights for Kubernetes` on.
+This example walks through the necessary steps to deploy an ASP.NET Core 2.0 MVC application to Kubernets cluster with `Application Insights for Kubernetes` on.
 
-_Note: This is an example, not a best practice. You will need to consider more around the security aspects like how to protect the application insights instrumentation key and so on._
+_Note: This is a simple example that does not follow all best practices, including security-related best practices. E.g. Application Insights instrumentation key is not adequately protected (it should be deployed as a secret)_
 
 * Let's start by creating an ASP.NET Core MVC applicaiton:
 ```
@@ -40,10 +40,10 @@ public void ConfigureServices(IServiceCollection services)
 docker pull microsoft/aspnetcore-build:2.0
 docker pull microsoft/aspnetcore:2.0
 ```
-* Build the docker container (saars/aik8sbasic, for example) using [Dockerfile](Dockerfile) and upload it to an image registry.
+* Build the docker container (dockeraccount/aik8sbasic, for example) using [Dockerfile](Dockerfile) and upload it to an image registry.
 ```
-docker build . -t saars/aik8sbasic:latest
-docker push saars/aik8sbasic:latest
+docker build . -t dockeraccount/aik8sbasic:latest
+docker push dockeraccount/aik8sbasic:latest
 ```
 *  Create the Kubernetes spec for the deployment and the service. Referencing [k8s.yaml](k8s.yaml). Please update the variable of `APPINSIGHTS_INSTRUMENTATIONKEY` to your own application insights instrumentation key.
 Deploy it:
