@@ -55,16 +55,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public override HttpMessageHandler CreateMessageHandler()
         {
             HttpMessageHandler handler = base.CreateMessageHandler();
-
-#if NETSTANDARD2_0
-            if (handler is HttpClientHandler httpClientHandler)
-            {
-                X509Certificate cert = X509Certificate.CreateFromCertFile(GetCertFilePath());
-                httpClientHandler.UseDefaultCredentials = false;
-                httpClientHandler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                httpClientHandler.ClientCertificates.Add(cert);
-            }
-#endif
             return handler;
         }
 
