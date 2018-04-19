@@ -7,7 +7,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
     internal class K8sDebuggingEnvironmentFactory : IK8sEnvironmentFactory
     {
-        public Task<IK8sEnvironment> CreateAsync(TimeSpan timeout)
+        public Task<IK8sEnvironment> CreateAsync(DateTime timeoutAt)
         {
             return Task.FromResult((IK8sEnvironment)new K8sEnvironment()
             {

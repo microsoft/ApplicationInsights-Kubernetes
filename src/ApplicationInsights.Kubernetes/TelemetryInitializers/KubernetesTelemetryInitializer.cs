@@ -33,8 +33,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private readonly ILogger _logger;
         private readonly SDKVersionUtils _sdkVersionUtils;
-        private readonly TimeSpan _timeout;
-        private readonly DateTime _timeoutTime;
+        private readonly DateTime _timeoutAt;
         internal IK8sEnvironment _k8sEnvironment { get; private set; }
         internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
 
@@ -44,10 +43,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             SDKVersionUtils sdkVersionUtils,
             ILogger<KubernetesTelemetryInitializer> logger)
         {
+            _k8sEnvironment = null;
             _logger = logger;
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
-            _timeout = Arguments.IsNotNull(timeout, nameof(timeout));
-            _timeoutTime = DateTime.Now.Add(_timeout);
+            _timeoutAt = DateTime.Now.Add(Arguments.IsNotNull(timeout, nameof(timeout)));
             _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
 
             var _forget = SetK8sEnvironment();
@@ -76,7 +75,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             else
             {
                 // Lose 5 seconds before reporting the error just in case there is a delay before calling k8sEnvFactory.CreateAsync().
-                if (DateTime.Now > _timeoutTime.AddSeconds(5))
+                if (DateTime.Now > _timeoutAt.AddSeconds(5))
                 {
                     _logger.LogError("K8s Environemnt is null.");
                 }
@@ -87,7 +86,19 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private async Task SetK8sEnvironment()
         {
-            _k8sEnvironment = await _k8sEnvFactory.CreateAsync(_timeout).ConfigureAwait(false);
+            Task<IK8sEnvironment> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt);
+            Task firstFinished = await Task.WhenAny(
+                createK8sEnvTask,
+                Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
+
+            if (firstFinished == createK8sEnvTask)
+            {
+                _k8sEnvironment = createK8sEnvTask.Result;
+            }
+            else
+            {
+                _k8sEnvironment = null;
+            }
         }
 
         private void SetCustomDimensions(ITelemetry telemetry)
