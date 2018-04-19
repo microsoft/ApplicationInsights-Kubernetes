@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
@@ -128,6 +129,36 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             target.Initialize(telemetry);
 
             Assert.Equal("Existing Cid", telemetry.Context.Properties["K8s.Container.ID"]);
+        }
+
+        [Fact(DisplayName = "When timeout happens on fetching the Kubernetes properties, initializer fails gracefully")]
+        public void TimeoutGettingK8sEnvNoException()
+        {
+            var envMock = new Mock<IK8sEnvironment>();
+            envMock.Setup(env => env.ContainerID).Returns("Cid");
+            var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envFactoryMock.Object, TimeSpan.FromSeconds(1), SDKVersionUtils.Instance, GetLogger());
+
+            ITelemetry telemetry = new TraceTelemetry();
+            telemetry.Context.Properties["K8s.Container.ID"] = "No Crash";
+            target.Initialize(telemetry);
+
+            Assert.Equal("No Crash", telemetry.Context.Properties["K8s.Container.ID"]);
+        }
+
+        [Fact(DisplayName = "Query Kubernetes Environment will timeout.")]
+        public async Task QueryK8sEnvironmentWillTimeout()
+        {
+            var envMock = new Mock<IK8sEnvironment>();
+            envMock.Setup(env => env.ContainerID).Returns("Cid");
+            var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envFactoryMock.Object, TimeSpan.FromSeconds(1), SDKVersionUtils.Instance, GetLogger());
+
+            Assert.False(target._isK8sQueryTimeout);
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            Assert.True(target._isK8sQueryTimeout);
         }
 
         private ILogger<KubernetesTelemetryInitializer> GetLogger()

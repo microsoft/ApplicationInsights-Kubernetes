@@ -34,8 +34,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private readonly ILogger _logger;
         private readonly SDKVersionUtils _sdkVersionUtils;
         private readonly DateTime _timeoutAt;
-        internal IK8sEnvironment _k8sEnvironment { get; private set; }
+
         internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
+        internal IK8sEnvironment _k8sEnvironment { get; private set; }
+
+        internal bool _isK8sQueryTimeout = false;
+        private bool _isK8sQueryTimeoutReported = false;
 
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
@@ -74,10 +78,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
             else
             {
-                // Lose 5 seconds before reporting the error just in case there is a delay before calling k8sEnvFactory.CreateAsync().
-                if (DateTime.Now > _timeoutAt.AddSeconds(5))
+                if (_isK8sQueryTimeout)
                 {
-                    _logger.LogError("K8s Environemnt is null.");
+                    if (!_isK8sQueryTimeoutReported)
+                    {
+                        _isK8sQueryTimeoutReported = true;
+                        _logger.LogError("Query Kubernetes Environment timeout.");
+                    }
                 }
             }
 
@@ -97,6 +104,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
             else
             {
+                _isK8sQueryTimeout = true;
                 _k8sEnvironment = null;
             }
         }
