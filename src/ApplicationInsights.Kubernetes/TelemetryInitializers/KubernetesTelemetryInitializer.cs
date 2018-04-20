@@ -94,11 +94,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private async Task SetK8sEnvironment()
         {
             Task<IK8sEnvironment> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt);
-            Task firstFinished = await Task.WhenAny(
+            await Task.WhenAny(
                 createK8sEnvTask,
                 Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
 
-            if (firstFinished == createK8sEnvTask)
+            if(createK8sEnvTask.IsCompleted)
             {
                 _k8sEnvironment = createK8sEnvTask.Result;
             }
