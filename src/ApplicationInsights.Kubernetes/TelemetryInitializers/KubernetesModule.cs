@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,13 +29,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             // Temporary fix to make sure that we initialize module once.
             // It should be removed when configuration reading logic is moved to Web SDK.
-            if (!isInitialized)
+            if (!_isInitialized)
             {
                 lock (lockObject)
                 {
-                    if (!isInitialized)
+                    if (!_isInitialized)
                     {
-                        EnableKubernetes(null, configuration, timeout);
+                        // Configuration is required to work with Application Insights.
+                        Arguments.IsNotNull(configuration, nameof(configuration));
+                        EnableKubernetes(null, timeout: timeout);
                     }
                 }
             }
@@ -49,63 +49,38 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// <param name="loggerFactory"></param>
         /// <param name="timeout"></param>
         public static void EnableKubernetes(IServiceCollection serviceCollection,
-            TelemetryConfiguration configuration,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
             // 2 minutes maximum to spin up the container.
             timeout = timeout ?? TimeSpan.FromMinutes(2);
 
-            serviceCollection = BuildK8sServiceCollection(serviceCollection, kubernetesServiceCollectionBuilder);
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             ILogger logger = serviceProvider.GetService<ILogger<KubernetesModule>>();
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    string versionInfo = typeof(ApplicationInsightsExtensions).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-                    logger.LogInformation(Invariant($"ApplicationInsights.Kubernetes.Version:{versionInfo}"));
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError("Failed to fetch ApplicaitonInsights.Kubernetes' version info. Details" + ex.ToString());
-                }
-            });
-
+            logger.LogInformation(Invariant($"ApplicationInsights.Kubernetes.Version:{SDKVersionUtils.Instance.CurrentSDKVersion}"));
             try
             {
-                K8sEnvironment k8sEnv = serviceProvider.GetRequiredService<IK8sEnvironmentFactory>().CreateAsync(timeout.Value).ConfigureAwait(false).GetAwaiter().GetResult();
-                if (k8sEnv != null)
-                {
-                    // Inject the telemetry initializer.
-                    ITelemetryInitializer initializer = new KubernetesTelemetryInitializer(k8sEnv,
-                        SDKVersionUtils.Instance,
-                        serviceProvider.GetService<ILogger<KubernetesTelemetryInitializer>>());
-                    configuration.TelemetryInitializers.Add(initializer);
-                    logger?.LogDebug("Application Insights Kubernetes injected the service successfully.");
-                }
-                else
-                {
-                    logger?.LogError("Application Insights Kubernetes failed to start.");
-                }
-                isInitialized = true;
+                serviceCollection = BuildK8sServiceCollection(serviceCollection, timeout.Value, kubernetesServiceCollectionBuilder);
             }
             catch (Exception ex)
             {
-                logger?.LogError(ex.ToString());
+                logger.LogError("Failed to fetch ApplicaitonInsights.Kubernetes' version info. Details" + ex.ToString());
             }
+            _isInitialized = true;
         }
 
-        internal static IServiceCollection BuildK8sServiceCollection(IServiceCollection services, IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
+        internal static IServiceCollection BuildK8sServiceCollection(
+            IServiceCollection services,
+            TimeSpan timeout,
+            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
             kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ?? new KubernetesServiceCollectionBuilder();
-            Services = kubernetesServiceCollectionBuilder.InjectServices(services);
+            Services = kubernetesServiceCollectionBuilder.InjectServices(services, timeout);
             return Services;
         }
 
         private static readonly object lockObject = new object();
-        private static bool isInitialized = false;
+        private static bool _isInitialized = false;
         internal static IServiceCollection Services { get; private set; }
     }
 }

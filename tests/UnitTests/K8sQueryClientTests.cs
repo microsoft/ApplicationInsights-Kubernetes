@@ -31,9 +31,9 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         public void CtorNullHttpClientThrows()
         {
             Exception ex = Assert.Throws<ArgumentNullException>(() =>
-             {
+            {
                  using (new K8sQueryClient(null)) { }
-             });
+            });
 
             Assert.Equal("Value cannot be null." + Environment.NewLine +
                 "Parameter name: kubeHttpClient",

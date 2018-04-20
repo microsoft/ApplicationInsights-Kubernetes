@@ -33,7 +33,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// Async factory method to build the instance of a K8sEnvironment.
         /// </summary>
         /// <returns></returns>
-        public async Task<K8sEnvironment> CreateAsync(TimeSpan timeout)
+        public async Task<IK8sEnvironment> CreateAsync(DateTime timeoutAt)
         {
             K8sEnvironment instance = null;
 
@@ -43,7 +43,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 using (K8sQueryClient queryClient = _k8sQueryClientFactory.Create(httpClient))
                 {
                     string containerId = _httpClientSettings.ContainerId;
-                    if (await SpinWaitContainerReady(timeout, queryClient, containerId).ConfigureAwait(false))
+                    if (await SpinWaitContainerReady(timeoutAt, queryClient, containerId).ConfigureAwait(false))
                     {
                         instance = new K8sEnvironment()
                         {
@@ -76,7 +76,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                     else
                     {
-                        _logger.LogError(Invariant($"Kubernetes info is not available within given time of {timeout.TotalMilliseconds} ms."));
+                        _logger.LogError(Invariant($"Kubernetes info is not available before the timeout at {timeoutAt}."));
                     }
                 }
                 return instance;
@@ -96,9 +96,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// <param name="client">Query client to try getting info from the Kubernetes cluster API.</param>
         /// <param name="myContainerId">The container that we are interested in.</param>
         /// <returns></returns>
-        private async Task<bool> SpinWaitContainerReady(TimeSpan timeout, K8sQueryClient client, string myContainerId)
+        private async Task<bool> SpinWaitContainerReady(DateTime timeoutAt, K8sQueryClient client, string myContainerId)
         {
-            DateTime tiemoutAt = DateTime.Now.Add(timeout);
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             K8sPod myPod = null;
@@ -119,7 +118,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 // Try invoke a probe on readiness every 500ms until the container is ready
                 // Or it will timeout per the timeout settings.
                 await Task.Delay(500).ConfigureAwait(false);
-            } while (DateTime.Now < tiemoutAt);
+            } while (DateTime.Now < timeoutAt);
             return false;
         }
     }
