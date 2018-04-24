@@ -17,22 +17,22 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     internal class K8sQueryClient : IDisposable, IK8sQueryClient
     {
         internal bool disposed = false;
-        private IKubeHttpClient kubeHttpClient;
-        private ILogger _logger;
+        private IKubeHttpClient _kubeHttpClient;
+        private readonly ILogger _logger;
 
         internal IKubeHttpClient KubeHttpClient
         {
             get
             {
                 EnsureNotDisposed();
-                return this.kubeHttpClient;
+                return this._kubeHttpClient;
             }
         }
 
         public K8sQueryClient(IKubeHttpClient kubeHttpClient, ILogger<K8sQueryClient> logger)
         {
             this._logger = Arguments.IsNotNull(logger, nameof(logger));
-            this.kubeHttpClient = Arguments.IsNotNull(kubeHttpClient, nameof(kubeHttpClient));
+            this._kubeHttpClient = Arguments.IsNotNull(kubeHttpClient, nameof(kubeHttpClient));
         }
 
 
@@ -133,7 +133,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             Uri requestUri = GetQueryUri(relativeUrl);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            _logger.LogDebug($"Full url: {request.RequestUri.AbsoluteUri}." + Environment.NewLine + $"Request Message: {request}");
             _logger.LogDebug($"Default Header: {KubeHttpClient.DefaultRequestHeaders}");
 
             HttpResponseMessage response = await KubeHttpClient.SendAsync(request).ConfigureAwait(false);
@@ -171,10 +170,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             this.disposed = true;
             if (disposing)
             {
-                if (this.kubeHttpClient != null)
+                if (this._kubeHttpClient != null)
                 {
-                    this.kubeHttpClient.Dispose();
-                    this.kubeHttpClient = null;
+                    this._kubeHttpClient.Dispose();
+                    this._kubeHttpClient = null;
                 }
             }
         }
@@ -183,7 +182,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             if (disposed)
             {
-                throw new ObjectDisposedException(nameof(kubeHttpClient));
+                throw new ObjectDisposedException(nameof(_kubeHttpClient));
             }
         }
     }

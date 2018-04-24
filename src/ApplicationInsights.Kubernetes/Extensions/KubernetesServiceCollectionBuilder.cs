@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
@@ -61,6 +60,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else
             {
+                // TODO: See if there is a way to get rid of intermediate service provider when getting logger.
                 serviceCollection.BuildServiceProvider().GetService<ILogger<KubernetesServiceCollectionBuilder>>().LogError("Unsupported OS.");
             }
             serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();

@@ -48,10 +48,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     string containerId = null;
                     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
+                        // For Windows, is there a way to fetch the current container id from within the container?
                         containerId = myPod.Status.ContainerStatuses.First().ContainerID;
                     }
                     else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                     {
+                        // For Linux, container id could be fetched directly from cGroup.
                         containerId = _httpClientSettings.ContainerId;
                     }
                     // ~
