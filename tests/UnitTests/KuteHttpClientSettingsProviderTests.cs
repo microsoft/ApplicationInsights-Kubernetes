@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.ApplicationInsights.Kubernetes;
-using Microsoft.Extensions.Logging;
-using Moq;
 using Xunit;
 
 using static Microsoft.ApplicationInsights.Netcore.Kubernetes.TestUtils;
@@ -12,124 +9,6 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
 {
     public class KuteHttpClientSettingsProviderTests
     {
-        [Theory(DisplayName = "VerifyServerCertificate should verify the issuer")]
-        [InlineData("SameIssuer", true)]
-        [InlineData("DifferentIssuer", false)]
-        public void VerifyServerCertificateShouldVerifyIssuer(string serverIssuer, bool expected)
-        {
-
-            Mock<ICertificateVerifier> serverCertMock = new Mock<ICertificateVerifier>();
-            serverCertMock.Setup(cert => cert.Issuer).Returns(serverIssuer);
-            serverCertMock.Setup(cert => cert.NotBefore).Returns(DateTime.Now.Date.AddDays(-1));
-            serverCertMock.Setup(cert => cert.NotAfter).Returns(DateTime.Now.Date.AddDays(1));
-            Mock<HttpRequestMessage> httpRequestMessageMock = new Mock<HttpRequestMessage>();
-            Mock<X509Chain> chainMock = new Mock<X509Chain>();
-            Mock<ICertificateVerifier> clientCertMock = new Mock<ICertificateVerifier>();
-            clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-
-            Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
-
-            bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
-                serverCertMock.Object,
-                chainMock.Object,
-                System.Net.Security.SslPolicyErrors.None,
-                clientCertMock.Object);
-            Assert.Equal(expected, actual);
-        }
-
-        [Fact(DisplayName = "VerifyServerCertificate should verify the cert valid period - valid date range")]
-        public void VerifyServerCertificateShouldVerifyExpirationForValid()
-        {
-            Mock<ICertificateVerifier> serverCertMock = new Mock<ICertificateVerifier>();
-            serverCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-            serverCertMock.Setup(cert => cert.NotBefore).Returns(DateTime.Now.Date.AddDays(-1));
-            serverCertMock.Setup(cert => cert.NotAfter).Returns(DateTime.Now.Date.AddDays(1));
-            Mock<HttpRequestMessage> httpRequestMessageMock = new Mock<HttpRequestMessage>();
-            Mock<X509Chain> chainMock = new Mock<X509Chain>();
-            Mock<ICertificateVerifier> clientCertMock = new Mock<ICertificateVerifier>();
-            clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-
-            Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
-
-            bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
-                serverCertMock.Object,
-                chainMock.Object,
-                System.Net.Security.SslPolicyErrors.None,
-                clientCertMock.Object);
-            Assert.True(actual);
-        }
-
-        [Fact(DisplayName = "VerifyServerCertificate should verify the cert valid period - edga case - 1 day certificate")]
-        public void VerifyServerCertificateShouldVerifyExpirationSameDay()
-        {
-            Mock<ICertificateVerifier> serverCertMock = new Mock<ICertificateVerifier>();
-            serverCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-            serverCertMock.Setup(cert => cert.NotBefore).Returns(DateTime.Now.Date);
-            serverCertMock.Setup(cert => cert.NotAfter).Returns(DateTime.Now.Date);
-            Mock<HttpRequestMessage> httpRequestMessageMock = new Mock<HttpRequestMessage>();
-            Mock<X509Chain> chainMock = new Mock<X509Chain>();
-            Mock<ICertificateVerifier> clientCertMock = new Mock<ICertificateVerifier>();
-            clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-
-            Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
-
-            bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
-                serverCertMock.Object,
-                chainMock.Object,
-                System.Net.Security.SslPolicyErrors.None,
-                clientCertMock.Object);
-            Assert.True(actual);
-        }
-
-        [Fact(DisplayName = "VerifyServerCertificate should verify the cert valid period - too early")]
-        public void VerifyServerCertificateShouldVerifyExpirationEarly()
-        {
-            Mock<ICertificateVerifier> serverCertMock = new Mock<ICertificateVerifier>();
-            serverCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-            serverCertMock.Setup(cert => cert.NotBefore).Returns(DateTime.Now.Date.AddDays(1));
-            serverCertMock.Setup(cert => cert.NotAfter).Returns(DateTime.Now.Date.AddDays(2));
-            Mock<HttpRequestMessage> httpRequestMessageMock = new Mock<HttpRequestMessage>();
-            Mock<X509Chain> chainMock = new Mock<X509Chain>();
-            Mock<ICertificateVerifier> clientCertMock = new Mock<ICertificateVerifier>();
-            clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-
-            Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
-
-            bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
-                serverCertMock.Object,
-                chainMock.Object,
-                System.Net.Security.SslPolicyErrors.None,
-                clientCertMock.Object);
-            Assert.False(actual);
-        }
-
-        [Fact(DisplayName = "VerifyServerCertificate should verify the cert valid period - too late")]
-        public void VerifyServerCertificateShouldVerifyExpirationLate()
-        {
-            Mock<ICertificateVerifier> serverCertMock = new Mock<ICertificateVerifier>();
-            serverCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-            serverCertMock.Setup(cert => cert.NotBefore).Returns(DateTime.Now.Date.AddDays(-2));
-            serverCertMock.Setup(cert => cert.NotAfter).Returns(DateTime.Now.Date.AddDays(-1));
-            Mock<HttpRequestMessage> httpRequestMessageMock = new Mock<HttpRequestMessage>();
-            Mock<X509Chain> chainMock = new Mock<X509Chain>();
-            Mock<ICertificateVerifier> clientCertMock = new Mock<ICertificateVerifier>();
-            clientCertMock.Setup(cert => cert.Issuer).Returns("SameIssuer");
-
-            Mock<ILoggerFactory> loggerFactoryMock = new Mock<ILoggerFactory>();
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(true, GetLogger<KubeHttpClientSettingsProvider>());
-
-            bool actual = target.VerifyServerCertificate(httpRequestMessageMock.Object,
-                serverCertMock.Object,
-                chainMock.Object,
-                System.Net.Security.SslPolicyErrors.None,
-                clientCertMock.Object);
-            Assert.False(actual);
-        }
-
         [Fact(DisplayName = "ParseContainerId should return correct result")]
         public void ParseContainerIdShouldWork()
         {
@@ -227,6 +106,38 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 kubernetesServicePort: "8001");
 
             Assert.Equal("Test-token", target.GetToken());
+        }
+
+        [Fact(DisplayName = "Return true when certificate chain is valid")]
+        public void TrueWhenValidCertificate()
+        {
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+                pathToCGroup: "TestCGroup",
+                pathToNamespace: "namespace",
+                kubernetesServiceHost: "127.0.0.1",
+                kubernetesServicePort: "8001");
+            Assert.NotNull(target);
+
+            X509Certificate2 serverCert = new X509Certificate2(Convert.FromBase64String("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"));
+            X509Certificate2 clientCert = new X509Certificate2(Convert.FromBase64String("MIIEyDCCArCgAwIBAgIRAIfX73wgV0Iuukv1CtrAn68wDQYJKoZIhvcNAQELBQAwDTELMAkGA1UEAxMCY2EwHhcNMTgwMzE3MTgzOTQ4WhcNMjAwMzE2MTgzOTQ4WjANMQswCQYDVQQDEwJjYTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBANFBpYTAsxhjoNs9SYbXpM0GQnhg/wDv75Ldwufn3O3b4Li0T8BwlD1B9yOJlLLo+zNcBgPbfDbpU3QYuhl5AS7RufpmMcXqiIZeerhm18IQOfJQsBYSw5M58WLOzOK+SLD7jFmuNeeBNMjuSihktM+VGOuuU4YP0VOgURVns3lAX2zJjPKKenN68nJ612JWapZwNB/ZKVzecIAnFNzEEj66XbHCpnPXt4JKiMJszqTsp6v69S2kPnJ87TxPbbLAiItX4AQ3McVDf1wzI5SQvsC5sfklHdbOCKgkWBYwjDmzaZ/KkA+9zHBJKBg8/a4WjKxVUKI0RQ6f2j/VCj8ewXjQx4MRyHO/lUmAC3cDALXXTgob8jo2p4wkOqd6r53bdfsoDfbA8AwIF3f8uT3X2OsBGeNSgTZau61jOpGa2EZ7yb47hs7R3NceNkcGHjrDMm0EMDia0fLYFx9/wxjX2W4qR4NWOHahYgZPLcQMwJ83DfQQUiYlObPH68+N6eZo+Lf2vPbyEuhzo7Ub//USXiZQnnnWHkcWEC58o26Hg+CPONT9rakdb/mmHOgy4iIDv9N7aIoFgNpBRG03aaXeYweG53NwcCei+ypL4hOzcDzerMaHU0rcowWN7rgKBkkjoM1REEM+tKFpqpRxbsyWcfzPTFTslpt5GrAD634+8IP5AgMBAAGjIzAhMA4GA1UdDwEB/wQEAwICpDAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4ICAQBu3FldWoItvDqTfA9VIWCQ63EoSgLN1ou6kk3DoDKe+sgqQGnFnmPcKtSqDLLpk4YSEAvpB1twU1i3zyeq1xjNTFsSoytr/clgZ7en3LOVBlP9tErQkzTYqvDnmyFnKHhPjNrjjHbZmobUzopP99rJFhS2+OSZobxbbPSyWGCqxlthWqRF9biY1Pm3bCCbSrwz/leXW2HfSR5ZuiMOMOcXn2LrScD/6OlVMfQZRBkzOLN+kouVtdpjhRXSMGoBH83AnSol01ZXTm1SsS/C9ttj0c5cXY6Lfd7KxwCM1K2JtYexkY82gEKl1jrFSknVfTF6rgoZbbtvDQrovSeHiQQ8iyVuaEKCfZD0OkAuzuFckxgIjZm8NswzQAGgYAavylXjD5BIBBdP/ufoSSlsWMJ2bRT6dpQIukcyKVbJ+DKWtV/44JWRBuWgz4FWZIijGnX6ic+zDTYwVGzmupj7T5iGijicR63HyDwt3NamZ1mktXBij6rZmiLs5vqfUNlPKikyqJF8WNu5mFJcKnPgoQALsHvjb03llQsq4m3o6N1+MkGnPFiMVec0ZuZuzwcJfPAO+OgQ6w8Ei+Y0afxg/OGhxjOndlzCmqxP6VeXyDTJCopCCZlyFlXpHeFiLZq6PynMepzPXm+Rp9MDTdlG9HjPWxihRH117MDhzK9NzYQDJQ=="));
+            bool result = target.CertificateValidationCallBack(null, serverCert, clientCert, new X509Chain(), System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors);
+            Assert.True(result);
+        }
+
+        [Fact(DisplayName = "Return false when certificate chain is invalid")]
+        public void FalseWhenInvalidCertificate()
+        {
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+                pathToCGroup: "TestCGroup",
+                pathToNamespace: "namespace",
+                kubernetesServiceHost: "127.0.0.1",
+                kubernetesServicePort: "8001");
+            Assert.NotNull(target);
+
+            X509Certificate2 serverCert = new X509Certificate2(Convert.FromBase64String("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"));
+            X509Certificate2 clientCert = new X509Certificate2(Convert.FromBase64String("MIIFBTCCAu2gAwIBAgIJAOkgZEv/asZ7MA0GCSqGSIb3DQEBBQUAMBkxFzAVBgNVBAMMDmNhLmV4YW1wbGUuY29tMB4XDTEzMDIyMjIyNDQ0MloXDTE4MDIyMTIyNDQ0MlowGTEXMBUGA1UEAwwOY2EuZXhhbXBsZS5jb20wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDwaJhWm9FPsrwarEi70M0nB3kSiM/bOtRWDIH1fW8t0eLy7k6Ji7nuG2Z8tqspVKraEV09GVPiZYY8QzqMsntn937TLfqm21+sZ7bQT0JQAF+IKVQM2H2PCpvzakufktBvWgqBAzKOVHYEFrrEbqRqcfvM6RXBRKG9UkBv6cz/uYNsMBApH5EfIRYY8Cpg7R4ZqsifjbpfhC/vHRUzrs6STDW39YReHiU3/oTTIv7R1hTRfh8grEztWhknoG/4OMDVIhnjXFIwokHj5rEV3fuLLFDMiZTwiVr2GeV8/yK0uipgtUaSkDdCc2VMY7idOYT1+GBobc01S4wIfHMxwzEIGUhjOKyTwgwdTdCj3H4TqAZFXCViek9RK3wUsAUusp4ltn+jbiFr/FZnJWFMfVSmjInBziXjsQ+ZtCyxwVwE5vS9AVeeB6yTLznTW3DylMV45Rx4roFQETa3sx60rhiMl9CBqV99gQKOw+05oo0oEyZwsA8vLf1+orIDGVnqTN86VSI3n3lq1JBSB177doBSeeXX7xCRJ4nwfXKwphNnpwWU0tr+L5oEbiyXlbGTf8frbA9Rcwz+ZU2hcroAL9vTNguBO3Hb5kbVkMPCEJJ0mJPOdCVM2sxrBuH6quCm/PdOKESsDeQKw3FlBs1Xlokmlf5PyhS5T1oLtwnKrjpZFQIDAQABo1AwTjAdBgNVHQ4EFgQUy5axd6XcUkPK1gMDM+mG/B+uTEYwHwYDVR0jBBgwFoAUy5axd6XcUkPK1gMDM+mG/B+uTEYwDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOCAgEAHQLK7Zns9KJg3vikfp9OoNTwROnW7pCNUZHMwDDoO3pI9TWrAtDDB2o+ReBLlVoXh/kX3ragE+dra7jvp5sDR4Bbylf1exy0AQT0wHXhqN547J5Xg/Xr/bWrNUPquIX1DNLjcW4ALHBAZwp8SAC2SDLV70f+kSnzLTZHwKLWD/3JiUAotEgz7KomW9jA6kXhq5uvPIQ/d9JQ+BaXlvA0BM95DBhwYEjTaizk6PoslPeouXM7EScl2uGPaPhaSTVZwgfwBfIfsTadKVgseF9BVt/pjHOyKzgkdzRcSvv7QZFGUcsm6XKj+MH5JuLruuLBw+ldFL1q+7mkN/tol550pX6vABaIjZDZgHv5NAqZ/6l2ye6HNDsN+DkLAncLENzh/YfUtW5F+suB0114wanwUTzcEhkyU27eubNiJkc2IOhqwPq6lBrBPrpyVYcWVCc0tR4xhwm7Sh+VZsaW7FUWcQmgVo+ugly+z8x8e3zEe2MXWpKKktdTrFjnj1ey3aRxYZ9rwHDa7CFbATgp3mMYELNGDKUOV9vMrRTshxlZ+fzu9ypq8XAyxP/fwunAyWtQpRJsV2j4UKqO86+QcQqjQAye1n/6oo7RbH9UdNULaGwtG0p5xOmJub3qy4gaM7Xl/etf5MjsNKGgAt3gHnSWC9Zqgx4sP61XK3T/4JJaXVs="));
+            bool result = target.CertificateValidationCallBack(null, serverCert, clientCert, new X509Chain(), System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors);
+            Assert.False(result);
         }
     }
 }

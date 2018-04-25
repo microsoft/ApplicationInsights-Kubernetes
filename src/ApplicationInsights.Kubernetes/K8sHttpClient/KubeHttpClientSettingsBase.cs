@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Security;
@@ -56,11 +55,57 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 ServerCertificateCustomValidationCallback = (httpRequestMessage, serverCert, chain, policyErrors) =>
                 {
                     X509Certificate2 clientCert = new X509Certificate2(certFilePath);
-                    return VerifyServerCertificate(httpRequestMessage, new CertificateVerifier(serverCert), chain, policyErrors, new CertificateVerifier(clientCert));
+                    return CertificateValidationCallBack(httpRequestMessage, serverCert, clientCert, chain, policyErrors);
                 }
             };
 
             return handler;
+        }
+
+        /// <summary>
+        /// SSl Cert Validation Callback
+        /// </summary>
+        /// <param name="requestMessage">Http request message.</param>
+        /// <param name="caCert">Server certificate.</param>
+        /// <param name="clientCertificate">Client certificate</param>
+        /// <param name="chain">Chain</param>
+        /// <param name="sslPolicyErrors">SSL policy errors</param>
+        /// <returns>true if valid cert</returns>
+        internal bool CertificateValidationCallBack(
+#pragma warning disable CA1801 // Unused by design
+            HttpRequestMessage requestMessage,
+#pragma warning restore CA1801 // Restore the warning
+            X509Certificate2 caCert,
+            X509Certificate2 clientCertificate,
+            X509Chain chain,
+            SslPolicyErrors sslPolicyErrors)
+        {
+            // If the certificate is a valid, signed certificate, return true.
+            if (sslPolicyErrors == SslPolicyErrors.None)
+            {
+                _logger.LogTrace("This is a valid signed certificate.");
+                return true;
+            }
+
+            _logger.LogTrace("Not a authority signed certificate.");
+            _logger.LogTrace("Server Cert RAW: " + Environment.NewLine + Convert.ToBase64String(caCert.RawData));
+            // If there are errors in the certificate chain, look at each error to determine the cause.
+            if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateChainErrors) != 0)
+            {
+                _logger.LogTrace("Building certificate chain.");
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                // add all your extra certificate chain
+                chain.ChainPolicy.ExtraStore.Add(caCert);
+                chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+                _logger.LogTrace("Client Cert RAW: " + Environment.NewLine + Convert.ToBase64String(clientCertificate.RawData));
+                bool isValid = chain.Build(clientCertificate);
+                _logger.LogTrace($"Is Chain successfully bulit: {isValid}");
+                return isValid;
+            }
+
+            // In all other cases, return false.
+            _logger.LogError($"SSL Certificate validation failed.");
+            return false;
         }
 
         /// <summary>
@@ -87,59 +132,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 throw new FileNotFoundException("File contains namespace does not exist.", pathToNamespace);
             }
             return File.ReadAllText(pathToNamespace);
-        }
-
-        /// <summary>
-        /// Verify server certificate within returned HttpResponse to prevent MITM attack.
-        /// </summary>
-        /// <param name="httpRequestMessage">The httpRequestMessage returned.</param>
-        /// <param name="serverCertVerifier">The server certificate.</param>
-        /// <param name="chain">The X509Chain.</param>
-        /// <param name="policyErrors">SslPolicyErrors.</param>
-        /// <param name="clientCertVerifier">Client certificate.</param>
-        /// <returns>Returns true when server certificate is valid.</returns>
-        internal bool VerifyServerCertificate(HttpRequestMessage httpRequestMessage, ICertificateVerifier serverCertVerifier, X509Chain chain, SslPolicyErrors policyErrors, ICertificateVerifier clientCertVerifier)
-        {
-            Arguments.IsNotNull(clientCertVerifier, nameof(clientCertVerifier));
-            X509Certificate2 serverCert = serverCertVerifier.Certificate;
-            _logger.LogDebug("Server certification custom validation callback.");
-            _logger.LogTrace(httpRequestMessage?.ToString());
-            _logger.LogTrace(chain?.ToString());
-            _logger.LogTrace(policyErrors.ToString());
-            _logger.LogTrace("ServerCert:" + Environment.NewLine + serverCert);
-
-            try
-            {
-                // Verify Issuer. Issuer field is case-insensitive.
-                if (!string.Equals(clientCertVerifier.Issuer, serverCertVerifier.Issuer, StringComparison.OrdinalIgnoreCase))
-                {
-                    _logger.LogError(Invariant($"Issuer are different for server certificate and the client certificate. Server Certificate Issuer: {clientCertVerifier.Issuer}, Client Certificate Issuer: {serverCertVerifier.Issuer}"));
-                    return false;
-                }
-                else
-                {
-                    _logger.LogDebug(Invariant($"Issuer validation passed: {serverCertVerifier.Issuer}"));
-                }
-
-                // Server certificate is not expired.
-                DateTime now = DateTime.Now;
-                if (serverCertVerifier.NotBefore > now || serverCertVerifier.NotAfter.AddDays(1) <= now)
-                {
-                    _logger.LogError(Invariant($"Server certification is not in valid period from {serverCertVerifier.NotBefore.ToString(DateTimeFormatInfo.InvariantInfo)} until {serverCertVerifier.NotAfter.ToString(DateTimeFormatInfo.InvariantInfo)}"));
-                    return false;
-                }
-                else
-                {
-                    _logger.LogDebug("Server certificate validate date verification passed.");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                return false;
-            }
-            _logger.LogDebug("Server certification custom validation successed.");
-            return true;
         }
     }
 }
