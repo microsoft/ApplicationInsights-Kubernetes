@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
@@ -26,16 +24,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             ContainerId = null;
             DirectoryInfo serviceAccountDirectory =
                 new DirectoryInfo(Arguments.IsNotNullOrEmpty(serviceAccountFolder, nameof(serviceAccountFolder)));
-            foreach (FileSystemInfo fileSystemInfo in serviceAccountDirectory.EnumerateFileSystemInfos("*", SearchOption.AllDirectories))
+            foreach (FileInfo fileInfo in serviceAccountDirectory.EnumerateFiles("*", SearchOption.AllDirectories))
             {
                 // Per current symbolic linking settings, reading the file directly will fail.
-                if (!fileSystemInfo.Attributes.HasFlag(FileAttributes.ReparsePoint) && fileSystemInfo is FileInfo fileInfo)
+                if (!fileInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
                 {
                     string fileName = fileInfo.Name;
                     if (fileName.Equals(Arguments.IsNotNullOrEmpty(tokenFileName, nameof(tokenFileName)), StringComparison.OrdinalIgnoreCase))
                     {
                         _tokenFilePath = fileInfo.FullName;
-                        _logger.LogDebug($"Found token file paht: {_tokenFilePath}");
+                        _logger.LogDebug($"Found token file path: {_tokenFilePath}");
                     }
                     else if (fileName.Equals(Arguments.IsNotNullOrEmpty(certFileName, nameof(certFileName)), StringComparison.OrdinalIgnoreCase))
                     {
@@ -50,12 +48,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
             }
             QueryNamespace = FetchQueryNamespace(_namespaceFilePath);
-        }
-
-        public override HttpMessageHandler CreateMessageHandler()
-        {
-            HttpMessageHandler handler = base.CreateMessageHandler();
-            return handler;
         }
 
         protected override string GetTokenFilePath()
