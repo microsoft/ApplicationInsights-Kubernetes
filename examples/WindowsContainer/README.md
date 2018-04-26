@@ -1,4 +1,4 @@
-At this stage (1.0.0-beta7+), we start to have limited support for Windows Container managed by Kubernetes. This example is intended to show you how to wire everything up. You are welcome to try this scenario. But please expect a slow response for any issue reported.
+Starting from 1.0.0-beta7, Application Insights for Kubernetes will support running inside the Windows Containers managed by Kubernetes. This example is intended to show you how to wire everything up. You are welcome to try this scenario. But please expect a slow response for any issue reported.
 
 _Note: This is a simple example that does not follow all best practices, including security-related best practices. E.g. Application Insights instrumentation key is not adequately protected (it should be deployed as a secret)_
 

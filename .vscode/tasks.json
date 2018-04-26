@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/tests/UnitTests/UnitTests.csproj"
+                "${workspaceFolder}/ApplicationInsights.Kubernetes.sln"
             ],
             "problemMatcher": "$msCompile"
         }
