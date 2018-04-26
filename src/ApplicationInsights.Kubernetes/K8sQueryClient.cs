@@ -133,7 +133,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             Uri requestUri = GetQueryUri(relativeUrl);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            _logger.LogDebug($"Default Header: {KubeHttpClient.DefaultRequestHeaders}");
+            _logger.LogTrace($"Default Header: {KubeHttpClient.DefaultRequestHeaders}");
 
             HttpResponseMessage response = await KubeHttpClient.SendAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
