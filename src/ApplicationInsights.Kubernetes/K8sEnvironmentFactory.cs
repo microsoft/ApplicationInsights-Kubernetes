@@ -45,52 +45,61 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 {
                     // TODO: See if there's better way to fetch the container id
                     K8sPod myPod = await SpinWaitUntilGetPod(timeoutAt, queryClient).ConfigureAwait(false);
-                    string containerId = null;
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    if (myPod != null)
                     {
-                        // For Windows, is there a way to fetch the current container id from within the container?
-                        containerId = myPod.Status.ContainerStatuses.First().ContainerID;
-                    }
-                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                    {
-                        // For Linux, container id could be fetched directly from cGroup.
-                        containerId = _httpClientSettings.ContainerId;
-                    }
-                    // ~
-
-                    if (await SpinWaitContainerReady(timeoutAt, queryClient, containerId).ConfigureAwait(false))
-                    {
-                        instance = new K8sEnvironment()
+                        string containerId = null;
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         {
-                            ContainerID = containerId
-                        };
-
-                        instance.myPod = myPod;
-                        _logger.LogDebug(Invariant($"Getting container status of container-id: {containerId}"));
-                        instance.myContainerStatus = myPod.GetContainerStatus(containerId);
-
-                        IEnumerable<K8sReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
-                        instance.myReplicaSet = myPod.GetMyReplicaSet(replicaSetList);
-
-                        if (instance.myReplicaSet != null)
-                        {
-                            IEnumerable<K8sDeployment> deploymentList = await queryClient.GetDeploymentsAsync().ConfigureAwait(false);
-                            instance.myDeployment = instance.myReplicaSet.GetMyDeployment(deploymentList);
+                            // For Windows, is there a way to fetch the current container id from within the container?
+                            containerId = myPod.Status.ContainerStatuses.First().ContainerID;
                         }
-
-                        if (instance.myPod != null)
+                        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                         {
-                            IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync().ConfigureAwait(false);
-                            string nodeName = instance.myPod.Spec.NodeName;
-                            if (!string.IsNullOrEmpty(nodeName))
+                            // For Linux, container id could be fetched directly from cGroup.
+                            containerId = _httpClientSettings.ContainerId;
+                        }
+                        // ~
+
+                        if (await SpinWaitContainerReady(timeoutAt, queryClient, containerId).ConfigureAwait(false))
+                        {
+                            instance = new K8sEnvironment()
                             {
-                                instance.myNode = nodeList.FirstOrDefault(node => !string.IsNullOrEmpty(node.Metadata?.Name) && node.Metadata.Name.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
+                                ContainerID = containerId
+                            };
+
+                            instance.myPod = myPod;
+                            _logger.LogDebug(Invariant($"Getting container status of container-id: {containerId}"));
+                            instance.myContainerStatus = myPod.GetContainerStatus(containerId);
+
+                            IEnumerable<K8sReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
+                            instance.myReplicaSet = myPod.GetMyReplicaSet(replicaSetList);
+
+                            if (instance.myReplicaSet != null)
+                            {
+                                IEnumerable<K8sDeployment> deploymentList = await queryClient.GetDeploymentsAsync().ConfigureAwait(false);
+                                instance.myDeployment = instance.myReplicaSet.GetMyDeployment(deploymentList);
                             }
+
+                            if (instance.myPod != null)
+                            {
+                                IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync().ConfigureAwait(false);
+                                string nodeName = instance.myPod.Spec.NodeName;
+                                if (!string.IsNullOrEmpty(nodeName))
+                                {
+                                    instance.myNode = nodeList.FirstOrDefault(node => !string.IsNullOrEmpty(node.Metadata?.Name) && node.Metadata.Name.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogError(Invariant($"Kubernetes info is not available before the timeout at {timeoutAt}."));
                         }
                     }
                     else
                     {
-                        _logger.LogError(Invariant($"Kubernetes info is not available before the timeout at {timeoutAt}."));
+                        // MyPod is null, meaning query timed out.
+                        _logger.LogCritical("Fail to fetch the pod information in time. Kubernetes info will not be available for the telemetry.");
+                        return null;
                     }
                 }
                 return instance;

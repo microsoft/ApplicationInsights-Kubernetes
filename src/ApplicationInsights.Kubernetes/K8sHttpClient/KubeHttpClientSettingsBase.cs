@@ -89,8 +89,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             _logger.LogTrace("Not a authority signed certificate.");
             _logger.LogTrace("Server Cert RAW: " + Environment.NewLine + Convert.ToBase64String(caCert.RawData));
-            // If there are errors in the certificate chain, look at each error to determine the cause.
-            if ((sslPolicyErrors & SslPolicyErrors.RemoteCertificateChainErrors) != 0)
+
+            // When there is Remote Certificate Chain Error, verify the chain relation between the client and server certificates.
+            if (sslPolicyErrors.HasFlag(SslPolicyErrors.RemoteCertificateChainErrors))
             {
                 _logger.LogTrace("Building certificate chain.");
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;

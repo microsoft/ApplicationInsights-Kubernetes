@@ -2,12 +2,22 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "taskName": "build",
+            "label": "build",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
                 "${workspaceFolder}/ApplicationInsights.Kubernetes.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Run Unit Tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/tests/UnitTests"
             ],
             "problemMatcher": "$msCompile"
         }
