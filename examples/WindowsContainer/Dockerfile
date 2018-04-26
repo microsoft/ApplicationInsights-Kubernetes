@@ -16,9 +16,5 @@ RUN dotnet publish -c Release -o /app
 FROM base AS final
 WORKDIR /app
 
-# Debug
-COPY curl/curl.exe .
-COPY curl/ca-bundle.crt .
-# ~
 COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "AspNetCoreNano.dll"]
