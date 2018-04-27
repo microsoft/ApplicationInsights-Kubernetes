@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: iis
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: iis
+    spec:
+      containers:
+      - name: iis
+        image: dockeraccount/aspnetcorenano:latest
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        env:
+          - name: APPINSIGHTS_KUBERNETES_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+      nodeSelector:
+        beta.kubernetes.io/os: windows
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iis-svc
+spec:
+  ports:
+  - name: http-port
+    port: 80
+    targetPort: 80
+  selector:
+    app: iis
+  type: LoadBalancer

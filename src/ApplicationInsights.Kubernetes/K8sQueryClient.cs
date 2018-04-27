@@ -1,13 +1,15 @@
-﻿namespace Microsoft.ApplicationInsights.Kubernetes
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Microsoft.ApplicationInsights.Kubernetes.Entities;
-    using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.ApplicationInsights.Kubernetes.Entities;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
-    using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
+namespace Microsoft.ApplicationInsights.Kubernetes
+{
 
     /// <summary>
     /// High level query client for K8s concepts.
@@ -15,19 +17,22 @@
     internal class K8sQueryClient : IDisposable, IK8sQueryClient
     {
         internal bool disposed = false;
-        private IKubeHttpClient kubeHttpClient;
+        private IKubeHttpClient _kubeHttpClient;
+        private readonly ILogger _logger;
+
         internal IKubeHttpClient KubeHttpClient
         {
             get
             {
                 EnsureNotDisposed();
-                return this.kubeHttpClient;
+                return this._kubeHttpClient;
             }
         }
 
-        public K8sQueryClient(IKubeHttpClient kubeHttpClient)
+        public K8sQueryClient(IKubeHttpClient kubeHttpClient, ILogger<K8sQueryClient> logger)
         {
-            this.kubeHttpClient = Arguments.IsNotNull(kubeHttpClient, nameof(kubeHttpClient));
+            this._logger = Arguments.IsNotNull(logger, nameof(logger));
+            this._kubeHttpClient = Arguments.IsNotNull(kubeHttpClient, nameof(kubeHttpClient));
         }
 
 
@@ -51,16 +56,30 @@
         {
             EnsureNotDisposed();
 
-            string myContainerId = KubeHttpClient.Settings.ContainerId;
-            IEnumerable<K8sPod> possiblePods = await GetPodsAsync().ConfigureAwait(false);
-            if (possiblePods == null)
+            IEnumerable<K8sPod> allPods = await GetPodsAsync().ConfigureAwait(false);
+            if (allPods == null)
             {
                 return null;
             }
-            K8sPod targetPod = possiblePods.FirstOrDefault(pod => pod.Status != null &&
-                                pod.Status.ContainerStatuses != null &&
-                                pod.Status.ContainerStatuses.Any(
-                                    cs => !string.IsNullOrEmpty(cs.ContainerID) && cs.ContainerID.EndsWith(myContainerId, StringComparison.Ordinal)));
+
+            K8sPod targetPod = null;
+            string podName = Environment.GetEnvironmentVariable(@"APPINSIGHTS_KUBERNETES_POD_NAME");
+            string myContainerId = KubeHttpClient.Settings.ContainerId;
+            if (!string.IsNullOrEmpty(podName))
+            {
+                targetPod = allPods.FirstOrDefault(p => p.Metadata.Name.Equals(podName, StringComparison.Ordinal));
+            }
+            else if (!string.IsNullOrEmpty(myContainerId))
+            {
+                targetPod = allPods.FirstOrDefault(pod => pod.Status != null &&
+                                    pod.Status.ContainerStatuses != null &&
+                                    pod.Status.ContainerStatuses.Any(
+                                        cs => !string.IsNullOrEmpty(cs.ContainerID) && cs.ContainerID.EndsWith(myContainerId, StringComparison.Ordinal)));
+            }
+            else
+            {
+                _logger.LogError("Neight container id or %APPINSIGHTS_KUBERNETES_POD_NAME% could be fetched.");
+            }
             return targetPod;
         }
         #endregion
@@ -113,9 +132,22 @@
         private async Task<IEnumerable<TEntity>> GetAllItemsAsync<TEntity>(string relativeUrl)
         {
             Uri requestUri = GetQueryUri(relativeUrl);
-            string resultString = await this.KubeHttpClient.GetStringAsync(requestUri).ConfigureAwait(false);
-            K8sEntityList<TEntity> resultList = JsonConvert.DeserializeObject<K8sEntityList<TEntity>>(resultString);
-            return resultList.Items;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            _logger.LogTrace($"Default Header: {KubeHttpClient.DefaultRequestHeaders}");
+
+            HttpResponseMessage response = await KubeHttpClient.SendAsync(request).ConfigureAwait(false);
+            if (response.IsSuccessStatusCode)
+            {
+                _logger.LogDebug("Query succeeded.");
+                string resultString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                K8sEntityList<TEntity> resultList = JsonConvert.DeserializeObject<K8sEntityList<TEntity>>(resultString);
+                return resultList.Items;
+            }
+            else
+            {
+                _logger.LogDebug($"Query Failed. Request Message: {response.RequestMessage}. Status Code: {response.StatusCode}. Phase: {response.ReasonPhrase}");
+                return null;
+            }
         }
 
         private Uri GetQueryUri(string relativeUrl)
@@ -138,10 +170,10 @@
             this.disposed = true;
             if (disposing)
             {
-                if (this.kubeHttpClient != null)
+                if (this._kubeHttpClient != null)
                 {
-                    this.kubeHttpClient.Dispose();
-                    this.kubeHttpClient = null;
+                    this._kubeHttpClient.Dispose();
+                    this._kubeHttpClient = null;
                 }
             }
         }
@@ -150,7 +182,7 @@
         {
             if (disposed)
             {
-                throw new ObjectDisposedException(nameof(kubeHttpClient));
+                throw new ObjectDisposedException(nameof(_kubeHttpClient));
             }
         }
     }
