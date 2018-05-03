@@ -42,7 +42,6 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         public void AddTheInitializerToGivenConfiguration()
         {
             Mock<ITelemetryChannel> channelMock = new Mock<ITelemetryChannel>();
-            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration("123", channelMock.Object);
             Mock<IKubernetesServiceCollectionBuilder> serviceCollectionBuilderMock = new Mock<IKubernetesServiceCollectionBuilder>();
             ServiceCollection sc = new ServiceCollection();
             sc.AddLogging();
@@ -56,6 +55,8 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             });
             serviceCollectionBuilderMock.Setup(b => b.InjectServices(It.IsAny<IServiceCollection>(), It.IsAny<TimeSpan>()))
                 .Returns(sc);
+
+            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration("123", channelMock.Object);
             telemetryConfiguration.EnableKubernetes(null, serviceCollectionBuilderMock.Object);
 
             Assert.NotNull(telemetryConfiguration.TelemetryInitializers);
