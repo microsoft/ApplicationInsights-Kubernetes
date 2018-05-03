@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.Logging;
 
@@ -11,6 +14,13 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ApplicationInsightsExtensions
     {
+        /// <summary>
+        /// Enable Application Insights Kubernetes for the Default TelemtryConfiguration in the dependency injection system.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="timeout"></param>
+        /// <param name="kubernetesServiceCollectionBuilder"></param>
+        /// <returns></returns>
         public static IServiceCollection EnableKubernetes(
             this IServiceCollection services,
             TimeSpan? timeout = null,
@@ -22,11 +32,35 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
+        /// Enable Application Insights Kubernetes for a given TelemetryConfiguration.
+        /// Note: The use of EnableKubernetes() on the ServiceCollection is always preferred unless you have more than one
+        /// TelemetryConfiguration instances.
+        /// </summary>
+        public static void EnableKubernetes(
+            this TelemetryConfiguration telemetryConfiguration,
+            TimeSpan? timeout = null,
+            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
+        {
+            if (telemetryConfiguration == null)
+            {
+                return;
+            }
+
+            IServiceCollection standaloneServiceCollection = new ServiceCollection();
+            standaloneServiceCollection = EnableKubernetesImpl(standaloneServiceCollection, timeout, kubernetesServiceCollectionBuilder);
+
+            IServiceProvider serviceProvider = standaloneServiceCollection.BuildServiceProvider();
+
+            ITelemetryInitializer k8sTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>()
+                .First(ti => ti.GetType() == typeof(KubernetesTelemetryInitializer));
+
+            telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
+        }
+
+        /// <summary>
         /// Enable applicaiton insights for kubernetes.
         /// </summary>
-        /// <param name="loggerFactory"></param>
-        /// <param name="timeout"></param>
-        private static void EnableKubernetesImpl(IServiceCollection serviceCollection,
+        private static IServiceCollection EnableKubernetesImpl(IServiceCollection serviceCollection,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
@@ -49,9 +83,10 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 logger.LogError("Failed to fetch ApplicaitonInsights.Kubernetes' version info. Details" + ex.ToString());
             }
+            return serviceCollection;
         }
 
-        internal static IServiceCollection BuildK8sServiceCollection(
+        private static IServiceCollection BuildK8sServiceCollection(
             IServiceCollection services,
             TimeSpan timeout,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)

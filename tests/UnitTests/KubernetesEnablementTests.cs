@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
+using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -35,10 +38,28 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             serviceProvider.GetRequiredService<IK8sEnvironmentFactory>();
         }
 
-        [Fact(DisplayName = "Slow Kubernetes query should not blocking the service injection.")]
-        public void NoBlockingServiceInjection()
+        [Fact(DisplayName = "Support adding KubernetesTelemetryInitializer to given TelemetryConfiguration")]
+        public void AddTheInitializerToGivenConfiguration()
         {
+            Mock<ITelemetryChannel> channelMock = new Mock<ITelemetryChannel>();
+            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration("123", channelMock.Object);
+            Mock<IKubernetesServiceCollectionBuilder> serviceCollectionBuilderMock = new Mock<IKubernetesServiceCollectionBuilder>();
+            ServiceCollection sc = new ServiceCollection();
+            sc.AddLogging();
             
+            sc.AddSingleton<ITelemetryInitializer>(p => {
+                var envMock = new Mock<IK8sEnvironment>();
+                envMock.Setup(env => env.ContainerID).Returns("Cid");
+                var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
+                envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
+                return new KubernetesTelemetryInitializer(envFactoryMock.Object, TimeSpan.FromSeconds(5), SDKVersionUtils.Instance, p.GetService<ILogger<KubernetesTelemetryInitializer>>());
+            });
+            serviceCollectionBuilderMock.Setup(b => b.InjectServices(It.IsAny<IServiceCollection>(), It.IsAny<TimeSpan>()))
+                .Returns(sc);
+            telemetryConfiguration.EnableKubernetes(null, serviceCollectionBuilderMock.Object);
+
+            Assert.NotNull(telemetryConfiguration.TelemetryInitializers);
+            Assert.True(telemetryConfiguration.TelemetryInitializers.Count == 1);
         }
     }
 }
