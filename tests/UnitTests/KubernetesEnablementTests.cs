@@ -61,6 +61,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
 
             Assert.NotNull(telemetryConfiguration.TelemetryInitializers);
             Assert.True(telemetryConfiguration.TelemetryInitializers.Count == 1);
+            Assert.True(telemetryConfiguration.TelemetryInitializers.First() is KubernetesTelemetryInitializer);
         }
     }
 }

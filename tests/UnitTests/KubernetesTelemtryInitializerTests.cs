@@ -174,8 +174,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Null(target._k8sEnvironment);
             // And is not yet timed out.
             Assert.False(target._isK8sQueryTimeout);
-            // But we reached this point:
-            Assert.True(true);
         }
 
         private ILogger<KubernetesTelemetryInitializer> GetLogger()

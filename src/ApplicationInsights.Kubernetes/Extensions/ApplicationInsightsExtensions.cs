@@ -14,6 +14,14 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ApplicationInsightsExtensions
     {
+        static ILogger _logger { get; }
+        static ApplicationInsightsExtensions()
+        {
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging();
+            _logger = serviceCollection.BuildServiceProvider().GetService<ILogger<IServiceCollection>>();
+        }
+
         /// <summary>
         /// Enable Application Insights Kubernetes for the Default TelemtryConfiguration in the dependency injection system.
         /// </summary>
@@ -41,20 +49,21 @@ namespace Microsoft.Extensions.DependencyInjection
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
-            if (telemetryConfiguration == null)
-            {
-                return;
-            }
-
             IServiceCollection standaloneServiceCollection = new ServiceCollection();
             standaloneServiceCollection = EnableKubernetesImpl(standaloneServiceCollection, timeout, kubernetesServiceCollectionBuilder);
-
+            
             IServiceProvider serviceProvider = standaloneServiceCollection.BuildServiceProvider();
-
             ITelemetryInitializer k8sTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>()
-                .First(ti => ti.GetType() == typeof(KubernetesTelemetryInitializer));
+                .FirstOrDefault(ti => ti is KubernetesTelemetryInitializer);
 
-            telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
+            if (k8sTelemetryInitializer != null)
+            {
+                telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
+            }
+            else
+            {
+                _logger.LogError($"Getting ${nameof(KubernetesTelemetryInitializer)} from the service provider failed.");
+            }
         }
 
         /// <summary>
@@ -72,16 +81,14 @@ namespace Microsoft.Extensions.DependencyInjection
             // Becuase it uses 'TryAdd()' extenion method on service collection.
             serviceCollection.AddLogging();
 
-            IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-            ILogger logger = serviceProvider.GetService<ILogger<IServiceCollection>>();
-            logger.LogInformation(Invariant($"ApplicationInsights.Kubernetes.Version:{SDKVersionUtils.Instance.CurrentSDKVersion}"));
+            _logger.LogInformation(Invariant($"ApplicationInsights.Kubernetes.Version:{SDKVersionUtils.Instance.CurrentSDKVersion}"));
             try
             {
                 serviceCollection = BuildK8sServiceCollection(serviceCollection, timeout.Value, kubernetesServiceCollectionBuilder);
             }
             catch (Exception ex)
             {
-                logger.LogError("Failed to fetch ApplicaitonInsights.Kubernetes' version info. Details" + ex.ToString());
+                _logger.LogError("Failed to fetch ApplicaitonInsights.Kubernetes' info. Details " + ex.ToString());
             }
             return serviceCollection;
         }
