@@ -161,6 +161,21 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.True(target._isK8sQueryTimeout);
         }
 
+        [Fact(DisplayName = "Slow K8s Env will not block the TelemetryInitializer")]
+        public void SlowK8sEnvironmentBuildWillNotBlockTelemetryInitializerConstructor()
+        {
+            var envMock = new Mock<IK8sEnvironment>();
+            envMock.Setup(env => env.ContainerID).Returns("Cid");
+            var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envFactoryMock.Object, TimeSpan.FromSeconds(30), SDKVersionUtils.Instance, GetLogger());
+
+            // K8s Enviornment is still null.
+            Assert.Null(target._k8sEnvironment);
+            // And is not yet timed out.
+            Assert.False(target._isK8sQueryTimeout);
+        }
+
         private ILogger<KubernetesTelemetryInitializer> GetLogger()
         {
             return GetLogger<KubernetesTelemetryInitializer>(GetTestServiceProvider());
