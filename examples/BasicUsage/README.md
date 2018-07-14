@@ -40,7 +40,7 @@ public void ConfigureServices(IServiceCollection services)
 docker pull microsoft/aspnetcore-build:2.0
 docker pull microsoft/aspnetcore:2.0
 ```
-* Build the docker container (dockeraccount/aik8sbasic, for example) using [Dockerfile](Dockerfile) and upload it to an image registry.
+* Add [Dockerfile](Dockerfile) to the project folder. Build the docker container (dockeraccount/aik8sbasic, for example) using [Dockerfile](Dockerfile) and upload it to an image registry.
 ```
 docker build . -t dockeraccount/aik8sbasic:latest
 docker push dockeraccount/aik8sbasic:latest

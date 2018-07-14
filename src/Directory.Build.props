@@ -32,7 +32,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(IsCIBuild)' == 'true' ">
-    <PackageReference Include="MicroBuild.Core" Version="0.2.0">
+    <PackageReference Include="MicroBuild.Core" Version="0.3.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>

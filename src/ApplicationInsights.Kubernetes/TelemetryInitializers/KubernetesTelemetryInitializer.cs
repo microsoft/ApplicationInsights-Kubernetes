@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
@@ -32,21 +33,32 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private readonly ILogger _logger;
         private readonly SDKVersionUtils _sdkVersionUtils;
-        internal IK8sEnvironment K8sEnvironment { get; private set; }
+        private readonly DateTime _timeoutAt;
+
+        internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
+        internal IK8sEnvironment _k8sEnvironment { get; private set; }
+
+        internal bool _isK8sQueryTimeout = false;
+        private bool _isK8sQueryTimeoutReported = false;
 
         public KubernetesTelemetryInitializer(
-            IK8sEnvironment k8sEnv,
+            IK8sEnvironmentFactory k8sEnvFactory,
+            TimeSpan timeout,
             SDKVersionUtils sdkVersionUtils,
             ILogger<KubernetesTelemetryInitializer> logger)
         {
+            _k8sEnvironment = null;
             _logger = logger;
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
-            this.K8sEnvironment = Arguments.IsNotNull(k8sEnv, nameof(k8sEnv));
+            _timeoutAt = DateTime.Now.Add(Arguments.IsNotNull(timeout, nameof(timeout)));
+            _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
+
+            var _forget = SetK8sEnvironment();
         }
 
         public void Initialize(ITelemetry telemetry)
         {
-            if (K8sEnvironment != null)
+            if (_k8sEnvironment != null)
             {
 #if NETSTANDARD2_0
                 Stopwatch cpuWatch = Stopwatch.StartNew();
@@ -55,7 +67,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 // Setting the container name to role name
                 if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
                 {
-                    telemetry.Context.Cloud.RoleName = this.K8sEnvironment.ContainerName;
+                    telemetry.Context.Cloud.RoleName = this._k8sEnvironment.ContainerName;
                 }
 
 #if NETSTANDARD2_0
@@ -66,9 +78,35 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
             else
             {
-                _logger.LogError("K8s Environemnt is null.");
+                if (_isK8sQueryTimeout)
+                {
+                    if (!_isK8sQueryTimeoutReported)
+                    {
+                        _isK8sQueryTimeoutReported = true;
+                        _logger.LogError("Query Kubernetes Environment timeout.");
+                    }
+                }
             }
+
             telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
+        }
+
+        private async Task SetK8sEnvironment()
+        {
+            Task<IK8sEnvironment> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt);
+            await Task.WhenAny(
+                createK8sEnvTask,
+                Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
+
+            if(createK8sEnvTask.IsCompleted)
+            {
+                _k8sEnvironment = createK8sEnvTask.Result;
+            }
+            else
+            {
+                _isK8sQueryTimeout = true;
+                _k8sEnvironment = null;
+            }
         }
 
         private void SetCustomDimensions(ITelemetry telemetry)
@@ -76,23 +114,23 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             // Adding pod name into custom dimension
 
             // Container
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.ID"), this.K8sEnvironment.ContainerID);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.Name"), this.K8sEnvironment.ContainerName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.ID"), this._k8sEnvironment.ContainerID);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.Name"), this._k8sEnvironment.ContainerName);
 
             // Pod
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.ID"), this.K8sEnvironment.PodID);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Name"), this.K8sEnvironment.PodName);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this.K8sEnvironment.PodLabels);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.ID"), this._k8sEnvironment.PodID);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Name"), this._k8sEnvironment.PodName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this._k8sEnvironment.PodLabels);
 
             // Replica Set
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.Name"), this.K8sEnvironment.ReplicaSetName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.Name"), this._k8sEnvironment.ReplicaSetName);
 
             // Deployment
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this.K8sEnvironment.DeploymentName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this._k8sEnvironment.DeploymentName);
 
             // Ndoe
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this.K8sEnvironment.NodeUid);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this.K8sEnvironment.NodeName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this._k8sEnvironment.NodeUid);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this._k8sEnvironment.NodeName);
         }
 
 #if NETSTANDARD2_0
@@ -151,11 +189,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 string existingValue = telemetry.Context.Properties[key];
                 if (string.Equals(existingValue, value, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogDebug(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
+                    _logger.LogTrace(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
                 }
                 else
                 {
-                    _logger.LogWarning(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
+                    telemetry.Context.Properties[key] = value;
+                    _logger.LogDebug(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
                 }
             }
         }
