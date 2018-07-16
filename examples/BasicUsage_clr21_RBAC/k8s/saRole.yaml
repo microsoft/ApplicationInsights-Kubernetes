@@ -16,9 +16,9 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: default
-  namespace: default
+  namespace: YOUR-NAMESPACE
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: metrics-reader
+  apiGroup: rbac.authorization.k8s.io
 
