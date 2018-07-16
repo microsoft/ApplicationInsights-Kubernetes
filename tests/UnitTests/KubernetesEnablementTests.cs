@@ -17,7 +17,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         public void ServiceInjected()
         {
             IServiceCollection services = new ServiceCollection();
-            services = services.EnableKubernetes();
+            services = services.EnableKubernetes(k8sDetector: new K8sDetectorStub(true));
 
             // Replace the IKubeHttpClientSetingsProvider in case the test is not running inside a container.
             Assert.NotNull(services.FirstOrDefault(s => s.ServiceType == typeof(IKubeHttpClientSettingsProvider)));
@@ -57,7 +57,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 .Returns(sc);
 
             TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration("123", channelMock.Object);
-            telemetryConfiguration.EnableKubernetes(null, serviceCollectionBuilderMock.Object);
+            telemetryConfiguration.EnableKubernetes(null, serviceCollectionBuilderMock.Object, new K8sDetectorStub(true));
 
             Assert.NotNull(telemetryConfiguration.TelemetryInitializers);
             Assert.True(telemetryConfiguration.TelemetryInitializers.Count == 1);

@@ -1,17 +1,11 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
     public sealed class KubernetesDebuggingServiceCollectionBuilder : KubernetesServiceCollectionBuilder
     {
-        #region Singleton
-        private KubernetesDebuggingServiceCollectionBuilder() { }
-        private static KubernetesDebuggingServiceCollectionBuilder _instance = new KubernetesDebuggingServiceCollectionBuilder();
-
-        [Obsolete("This instance is used only for debugging. Never use this in production!", false)]
-        public static KubernetesDebuggingServiceCollectionBuilder Instance => _instance;
-        #endregion
+        public KubernetesDebuggingServiceCollectionBuilder(ILogger<KubernetesDebuggingServiceCollectionBuilder> logger) : base(new DebuggingK8sDetector(), logger) { }
 
         protected override void InjectChangableServices(IServiceCollection serviceCollection)
         {
