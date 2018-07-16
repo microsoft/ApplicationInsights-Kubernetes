@@ -107,9 +107,8 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         private static ILogger<T> GetLogger<T>(this IServiceCollection services)
         {
-            // According to the code, adding logging will not overwrite existing logging classes
-            // https://github.com/aspnet/Logging/blob/c821494678a30c323174bea8056f43b93a3ca6f4/src/Microsoft.Extensions.Logging/LoggingServiceCollectionExtensions.cs
-            // Becuase it uses 'TryAdd()' extenion method on service collection.
+            // AddLogging() is safe to call multiple times.
+            // https://github.com/aspnet/Logging/blob/75a1cecf24f8418a45426b6cc3606f0d53640f89/src/Microsoft.Extensions.Logging/LoggingServiceCollectionExtensions.cs#L41
             return services.AddLogging().BuildServiceProvider().GetService<ILogger<T>>();
         }
     }
