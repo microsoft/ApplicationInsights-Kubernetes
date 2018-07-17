@@ -9,6 +9,16 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
+        private readonly ILogger _logger;
+        private readonly Func<bool> _isRunningInKubernetes;
+        public KubernetesServiceCollectionBuilder(
+            Func<bool> isRunningInKubernetes,
+            ILogger<KubernetesServiceCollectionBuilder> logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _isRunningInKubernetes = isRunningInKubernetes ?? throw new ArgumentNullException(nameof(isRunningInKubernetes));
+        }
+
         /// <summary>
         /// Inject Kubernetes related service into the service collection.
         /// </summary>
@@ -16,25 +26,33 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public IServiceCollection InjectServices(IServiceCollection serviceCollection, TimeSpan timeout)
         {
-            IServiceCollection services = serviceCollection ?? new ServiceCollection();
-            InjectCommonServices(services);
-
-            InjectChangableServices(services);
-
-            // Inject the telemetry initializer.
-            services.AddSingleton<ITelemetryInitializer>(provider =>
+            if (_isRunningInKubernetes())
             {
-                KubernetesTelemetryInitializer initializer = new KubernetesTelemetryInitializer(
-                    provider.GetRequiredService<IK8sEnvironmentFactory>(),
-                    timeout,
-                    SDKVersionUtils.Instance,
-                    provider.GetRequiredService<ILogger<KubernetesTelemetryInitializer>>()
-                );
-                provider.GetRequiredService<ILogger<KubernetesServiceCollectionBuilder>>()
-                    .LogDebug("Application Insights Kubernetes injected the service successfully.");
-                return initializer;
-            });
-            return services;
+
+                IServiceCollection services = serviceCollection ?? new ServiceCollection();
+                InjectCommonServices(services);
+
+                InjectChangableServices(services);
+
+                // Inject the telemetry initializer.
+                services.AddSingleton<ITelemetryInitializer>(provider =>
+                {
+                    KubernetesTelemetryInitializer initializer = new KubernetesTelemetryInitializer(
+                        provider.GetRequiredService<IK8sEnvironmentFactory>(),
+                        timeout,
+                        SDKVersionUtils.Instance,
+                        provider.GetRequiredService<ILogger<KubernetesTelemetryInitializer>>()
+                    );
+                    _logger.LogDebug("Application Insights Kubernetes injected the service successfully.");
+                    return initializer;
+                });
+                return services;
+            }
+            else
+            {
+                _logger.LogWarning("Application is not running inside a Kubernetes cluster.");
+                return serviceCollection;
+            }
         }
 
         private static void InjectCommonServices(IServiceCollection serviceCollection)
