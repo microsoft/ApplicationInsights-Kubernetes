@@ -10,13 +10,13 @@ namespace Microsoft.Extensions.DependencyInjection
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
         private readonly ILogger _logger;
-        private readonly K8sDetector _k8sDetector;
+        private readonly Func<bool> _isRunningInKubernetes;
         public KubernetesServiceCollectionBuilder(
-            K8sDetector k8SDetector,
+            Func<bool> isRunningInKubernetes,
             ILogger<KubernetesServiceCollectionBuilder> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _k8sDetector = k8SDetector ?? throw new ArgumentNullException(nameof(k8SDetector));
+            _isRunningInKubernetes = isRunningInKubernetes ?? throw new ArgumentNullException(nameof(isRunningInKubernetes));
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public IServiceCollection InjectServices(IServiceCollection serviceCollection, TimeSpan timeout)
         {
-            if (_k8sDetector.IsRunningInKubernetes())
+            if (_isRunningInKubernetes())
             {
 
                 IServiceCollection services = serviceCollection ?? new ServiceCollection();

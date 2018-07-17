@@ -5,7 +5,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
     public sealed class KubernetesDebuggingServiceCollectionBuilder : KubernetesServiceCollectionBuilder
     {
-        public KubernetesDebuggingServiceCollectionBuilder(ILogger<KubernetesDebuggingServiceCollectionBuilder> logger) : base(new DebuggingK8sDetector(), logger) { }
+        public KubernetesDebuggingServiceCollectionBuilder(ILogger<KubernetesDebuggingServiceCollectionBuilder> logger) : base(() => true, logger) { }
 
         protected override void InjectChangableServices(IServiceCollection serviceCollection)
         {

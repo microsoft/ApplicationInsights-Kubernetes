@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
@@ -25,10 +26,10 @@ namespace Microsoft.Extensions.DependencyInjection
             this IServiceCollection services,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
-            K8sDetector k8sDetector = null)
+            Func<bool> detectKubernetes = null)
         {
             // Inject of the service shall return immediately.
-            EnableKubernetesImpl(services, k8sDetector, kubernetesServiceCollectionBuilder, null, timeout);
+            EnableKubernetesImpl(services, detectKubernetes, kubernetesServiceCollectionBuilder, null, timeout);
             return services;
         }
 
@@ -41,10 +42,10 @@ namespace Microsoft.Extensions.DependencyInjection
             this TelemetryConfiguration telemetryConfiguration,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
-            K8sDetector k8sDetector = null)
+            Func<bool> detectKubernetes = null)
         {
             IServiceCollection standaloneServiceCollection = new ServiceCollection();
-            standaloneServiceCollection = EnableKubernetesImpl(standaloneServiceCollection, k8sDetector, kubernetesServiceCollectionBuilder, null, timeout);
+            standaloneServiceCollection = EnableKubernetesImpl(standaloneServiceCollection, detectKubernetes, kubernetesServiceCollectionBuilder, null, timeout);
 
             // Static class can't used as generic types.
             ILogger logger = standaloneServiceCollection.GetLogger<IKubernetesServiceCollectionBuilder>();
@@ -66,7 +67,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Enable applicaiton insights for kubernetes.
         /// </summary>
         private static IServiceCollection EnableKubernetesImpl(IServiceCollection serviceCollection,
-            K8sDetector k8sDetector,
+            Func<bool> detectKubernetes,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
             ILogger<KubernetesServiceCollectionBuilder> logger = null,
             TimeSpan? timeout = null)
@@ -79,7 +80,7 @@ namespace Microsoft.Extensions.DependencyInjection
             logger.LogInformation(Invariant($"ApplicationInsights.Kubernetes.Version:{SDKVersionUtils.Instance.CurrentSDKVersion}"));
             try
             {
-                serviceCollection = BuildK8sServiceCollection(serviceCollection, timeout.Value, k8sDetector, logger, kubernetesServiceCollectionBuilder);
+                serviceCollection = BuildK8sServiceCollection(serviceCollection, timeout.Value, detectKubernetes, logger, kubernetesServiceCollectionBuilder);
             }
             catch (Exception ex)
             {
@@ -91,15 +92,17 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection BuildK8sServiceCollection(
             IServiceCollection services,
             TimeSpan timeout,
-            K8sDetector k8sDetector,
+            Func<bool> detectKubernetes,
             ILogger<KubernetesServiceCollectionBuilder> logger,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
-            k8sDetector = k8sDetector ?? K8sDetectorFactory.Instance.CreateDetector();
-            kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ?? new KubernetesServiceCollectionBuilder(k8sDetector, logger);
+            detectKubernetes = detectKubernetes ?? IsRunningInKubernetes;
+            kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ?? new KubernetesServiceCollectionBuilder(detectKubernetes, logger);
             services = kubernetesServiceCollectionBuilder.InjectServices(services, timeout);
             return services;
         }
+
+        private static bool IsRunningInKubernetes() => Directory.Exists(@"/var/run/secrets/kubernetes.io") || Directory.Exists(@"C:\var\run\secrets\kubernetes.io");
 
         /// <summary>
         /// Gets a logger for given type.
