@@ -2,7 +2,7 @@ Microsoft Application Insights for Kubernetes
 ==
 This repository has code for Application Insights for Kubernetes, which works on .NET Core applications within the containers, managed by Kubernetes, on Azure Container Service.
 
-**Note:** This library enhanced the [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore) but is **not required** to run applicaiton insights in Kubernetes. When you choose to use Microsoft Application Insights for Kubernetes, you will see Kubernetes related properties like *Pod-Name, Deployment ...* on all your telemetry entries. Rich features like Appliation Map to show the multiple micro service on your application map will also be provided.
+**Note:** `Microsoft Application Insights for Kubernetes` (this library) is an enhancement to the [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore). You can choose to run **Application Insights** without this library in Kubernetes cluster too. However, when using `Microsoft Application Insights for Kubernetes`, you will see Kubernetes related properties like *Pod-Name, Deployment ...* on all your telemetry entries. Proper values will also be set to make use of the rich features like enabling the Application Map to show the multiple micro services on the same map.
 
 ### Continous Integration Status
 |Rolling Build                    | Nightly Build                |
