@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ai-k8s-troubleshooting
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: ai-k8s-troubleshooting-container
+        image: appinsightskubernetes/aik8s_troubleshoot:1.0.1
+        ports:
+        - containerPort: 80
+        env:
+        - name: APPINSIGHTS_INSTRUMENTATIONKEY
+          value: Your-Own-Application-Insights-Key
