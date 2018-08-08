@@ -1,5 +1,5 @@
 # Troubleshooting the Environment
-Kubernetes cluster configuration could be complex. To run the app with `Application Insights for Kubernetes` on does not always work for the first shoot. It is a challenge when it is not clear where the issue comes from - the configuration for Kubernetes, the build of the images or the library of `Application Insights for Kubernetes`.
+Kubernetes cluster configuration could be complex. To run the app with `Application Insights for Kubernetes` on does not always work on the first try. It is a challenge when it is not clear where the issue comes from - the configuration for Kubernetes, the build of the images or the library of `Application Insights for Kubernetes`.
 
 The purpose of this project is to provide a known good image with `Application Insights for Kubernetes` pre-installed, that can be easily deployed to the K8s cluster to verify it runs. The image also takes the role to gather trace logs to identify the possible cause of the issues.
 
