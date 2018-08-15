@@ -17,12 +17,12 @@ The purpose of this project is to provide a known good image with `Application I
   * The latest Docker for Windows Community Edition also supports using Kubernetes as its orchestrator.
 
 ## Deploy the troubleshooting image
-* Save [k8s.yaml](AIK8sTroubleShooting/k8s/k8s.yaml) to a local folder.
+* Review the content in [k8s.yaml](AIK8sTroubleShooting/k8s/k8s.yaml).
 * Deploy it:
 ```
-kubectl create -f k8s.yaml
+kubectl create -f https://raw.githubusercontent.com/Microsoft/ApplicationInsights-Kubernetes/develop/troubleshooting/AIK8sTroubleShooting/k8s/k8s.yaml
 ```
-* Wait until the pod becomes 'Running':
+* Wait until the pod becomes `Running`:
 ```
 kubectl get pods
 ```
@@ -54,6 +54,11 @@ crit: Microsoft.ApplicationInsights.Kubernetes.K8sEnvironmentFactory[0]
 ```
 
 _Tips:_ after fixing the configuration, delete the pod directly, another pod will be created automatically so that you don't have to do the redeployment.
+
+* Remove the troubleshooting deployment once done
+```
+kubectl delete -f https://raw.githubusercontent.com/Microsoft/ApplicationInsights-Kubernetes/develop/troubleshooting/AIK8sTroubleShooting/k8s/k8s.yaml
+```
 
 ## Under the hood
 If you are interested in how the troubleshooting image is built, reference the code in [AIK8sTroubleShooting](./AIK8sTroubleShooting) folder.
