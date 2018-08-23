@@ -24,6 +24,9 @@ We support **ASP.NET Core** application as well as **.NET Core** application.
 
 * Follow [this example](examples/BasicUsage_clr21_RBAC) for Role-based access control (RBAC) enabled Kubernetes clusters.
 
+### Verify the cluster configuration
+Use the [troubleshooting image](https://github.com/Microsoft/ApplicationInsights-Kubernetes/tree/develop/troubleshooting) to verify the cluster is properly configured.
+
 ### Learn more
 * To build a container for Kubernetes that have Application Insights baked in for the existing applications, please refer the example of [Zero Code light up](https://github.com/Microsoft/ApplicationInsights-Kubernetes/tree/develop/examples/ZeroUserCodeLightup).
 * To enable Application Insights for Kubernetes by environement variable instead of code, please refer [Hosting startup for ApplicationInsights.Kubernetes](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Hosting-startup-for-ApplicationInsights.Kubernetes).
