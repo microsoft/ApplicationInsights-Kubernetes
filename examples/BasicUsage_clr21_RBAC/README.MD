@@ -36,7 +36,7 @@ dotnet new mvc
 * Add the NuGet Packages:
 ```
 dotnet add package Microsoft.ApplicationInsights.AspNetCore
-dotnet add package Microsoft.ApplicationInsights.Kubernetes --version 1.0.0-beta8
+dotnet add package Microsoft.ApplicationInsights.Kubernetes --version 1.0.0-*
 ```
 
 * Enable Application Insights in Program.cs by calling UseApplicaitonInsights() on WebHostBuilder:

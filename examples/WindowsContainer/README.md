@@ -9,7 +9,7 @@ dotnet new mvc
 * Add the NuGet Packages:
 ```
 dotnet add package Microsoft.ApplicationInsights.AspNetCore
-dotnet add package Microsoft.ApplicationInsights.Kubernetes --version 1.0.0-beta7
+dotnet add package Microsoft.ApplicationInsights.Kubernetes --version 1.0.0-*
 ```
 
 * Edit the [project file](AspNetCoreNano.csproj), add the following property:
