@@ -148,10 +148,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 
         /// <summary>
-        /// Wait until the container is ready.
+        /// Waits until the container is ready.
         /// Refer document @ https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase for the Pod's lifecycle.
         /// </summary>
-        /// <param name="timeoutAt">Timeout on Application Insights data when the container is not ready after the period.</param>
+        /// <param name="timeoutAt">A point in time when the wait on container startup is abandoned.</param>
         /// <param name="client">Query client to try getting info from the Kubernetes cluster API.</param>
         /// <param name="myContainerId">The container that we are interested in.</param>
         /// <returns></returns>

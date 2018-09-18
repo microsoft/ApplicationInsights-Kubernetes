@@ -38,7 +38,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         #region Pods
         /// <summary>
-        /// Get all pods in this cluster
+        /// Gets all pods in this cluster
         /// </summary>
         /// <returns></returns>
         public Task<IEnumerable<K8sPod>> GetPodsAsync()
@@ -49,7 +49,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 
         /// <summary>
-        /// Get the pod the current container is running upon.
+        /// Gets the pod the current container is running upon.
         /// </summary>
         /// <returns></returns>
         public async Task<K8sPod> GetMyPodAsync()
@@ -116,7 +116,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         #region ContainerStatus
         /// <summary>
-        /// Get the container status for the pod, where the current container is running upon.
+        /// Gets the container status for the pod, where the current container is running upon.
         /// </summary>
         /// <returns></returns>
         public async Task<ContainerStatus> GetMyContainerStatusAsync()

@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
         private readonly Func<bool> _isRunningInKubernetes;
         
         /// <summary>
-        /// Construction for the Service Collection builder.
+        /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.
         /// </summary>
         /// <param name="isRunningInKubernetes"></param>
         /// <param name="logger"></param>
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Inject Kubernetes related service into the service collection.
+        /// Injects Kubernetes related service into the service collection.
         /// </summary>
         /// <param name="serviceCollection">The service collector to inject the services into.</param>
         /// <param name="timeout">Maximum time to wait for spinning up the container.</param>
@@ -72,7 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Inject the services of Application Insights for Kubernetes.
+        /// Injects the services of Application Insights for Kubernetes.
         /// </summary>
         /// <param name="serviceCollection">The service collector to inject the services into.</param>
         protected virtual void InjectChangableServices(IServiceCollection serviceCollection)

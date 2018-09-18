@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection">The collection of service descriptors.</param>
         /// <param name="timeout">Maximum time to wait for spinning up the container.</param>
-        /// <returns>The collection of services descripters we injected into.</returns>
+        /// <returns>The collection of services descriptors we injected into.</returns>
         IServiceCollection InjectServices(IServiceCollection serviceCollection, TimeSpan timeout);
     }
 }

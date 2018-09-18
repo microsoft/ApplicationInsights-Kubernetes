@@ -9,13 +9,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     public sealed class KubernetesDebuggingServiceCollectionBuilder : KubernetesServiceCollectionBuilder
     {
         /// <summary>
-        /// Constructor for KubernetesDebuggingServiceCollectionBuilder.
+        /// Constructor for <see cref="KubernetesDebuggingServiceCollectionBuilder"/>.
         /// </summary>
         /// <param name="logger">The logger.</param>
         public KubernetesDebuggingServiceCollectionBuilder(ILogger<KubernetesDebuggingServiceCollectionBuilder> logger) : base(() => true, logger) { }
 
         /// <summary>
-        /// Inject Application Insights for Kubernetes debugging services.
+        /// Injects the Application Insights for Kubernetes debugging services.
         /// </summary>
         /// <param name="serviceCollection">The service collection to inject the debugging services into.</param>
         protected override void InjectChangableServices(IServiceCollection serviceCollection)

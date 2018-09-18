@@ -16,10 +16,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         public static KubernetesDebuggingServiceCollectionBuilderFactory Instance { get; } = new KubernetesDebuggingServiceCollectionBuilderFactory();
 
         /// <summary>
-        /// Create a debugging instance of the service collection builder for Application Insights for Kubernetes.
+        /// Creates a debugging instance of the service collection builder for Application Insights for Kubernetes.
         /// </summary>
         /// <param name="logger">The logger.</param>
-        /// <returns>Returns a debugging instace of the service collectino builder for Application Insights for Kubernetes.</returns>
+        /// <returns>Returns a debugging instace of the service collection builder for Application Insights for Kubernetes.</returns>
         [Obsolete("This instance is used only for debugging. Never use this in production!", false)]
 #pragma warning disable CA1822 // Mark members as static
         public KubernetesDebuggingServiceCollectionBuilder Create(ILogger<KubernetesDebuggingServiceCollectionBuilder> logger)

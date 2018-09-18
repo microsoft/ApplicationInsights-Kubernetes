@@ -16,13 +16,13 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ApplicationInsightsExtensions
     {
         /// <summary>
-        /// Enable Application Insights Kubernetes for the Default TelemtryConfiguration in the dependency injection system.
+        /// Enables Application Insights Kubernetes for the Default TelemtryConfiguration in the dependency injection system.
         /// </summary>
         /// <param name="services">Collection of service descriptors.</param>
         /// <param name="timeout">Maximum time to wait for spinning up the container.</param>
         /// <param name="kubernetesServiceCollectionBuilder">Collection builder.</param>
         /// <param name="detectKubernetes">Delegate to detect if the current application is running in Kubernetes hosted container.</param>
-        /// <returns>The collection of services descripters we injected into.</returns>
+        /// <returns>The collection of services descriptors we injected into.</returns>
         public static IServiceCollection EnableKubernetes(
             this IServiceCollection services,
             TimeSpan? timeout = null,
@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Enable Application Insights Kubernetes for a given
+        /// Enables Application Insights Kubernetes for a given
         /// TelemetryConfiguration.
         /// </summary>
         /// <remarks>
@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Enable applicaiton insights for kubernetes.
+        /// Enables applicaiton insights for kubernetes.
         /// </summary>
         private static IServiceCollection EnableKubernetesImpl(IServiceCollection serviceCollection,
             Func<bool> detectKubernetes,
