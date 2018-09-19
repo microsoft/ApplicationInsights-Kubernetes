@@ -110,7 +110,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 
         /// <summary>
-        /// Get access token for querying Kubernetes.
+        /// Gets access token for querying Kubernetes.
         /// </summary>
         /// <returns></returns>
         public string GetToken()
