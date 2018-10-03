@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.Extensions.Hosting;
 
 namespace HostBuilderExample
@@ -16,8 +17,10 @@ namespace HostBuilderExample
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-
-            Console.WriteLine("Hello Hosted Service!!");
+            string message = "Hello Hosted Service!!!";
+            Console.WriteLine(message);
+            this._client.TrackEvent(new EventTelemetry(message));
+            this._client.Flush();
             return Task.CompletedTask;
         }
 

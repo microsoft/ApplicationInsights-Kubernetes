@@ -1,10 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.IO;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.ApplicationInsights;
+using WebHosting = Microsoft.AspNetCore.Hosting;
 
 namespace HostBuilderExample
 {
@@ -12,24 +11,26 @@ namespace HostBuilderExample
     {
         static void Main(string[] args)
         {
-            var host = new HostBuilder().ConfigureHostConfiguration(configHost =>
-                {
-                    configHost.SetBasePath(Directory.GetCurrentDirectory());
-                    configHost.AddJsonFile("hostsettings.json", optional: true);
-                    configHost.AddEnvironmentVariables();
-                }).ConfigureServices((hostContext, services) =>
-                {
-                    services.AddApplicationInsightsTelemetry(options =>{
-                        options.InstrumentationKey="9558b686-2a23-441c-b389-37b04312c4ad";
-                        options.
-                    });
-                    // Enable Application Insights with iKey configured in the environemnt variable
-                    services.AddSingleton<IHostedService, PrintHelloService>();
-                    // Enable Application Insights for Kubernetes when running inside Kubernetes.
-                    services.EnableKubernetes();
-                })
-                .UseConsoleLifetime()
-                .Build();
+
+            IHost host = new HostBuilder().ConfigureHostConfiguration(configHost =>
+            {
+                configHost.SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
+                // Althrough we can customize where the hostsettings, due to current limitation, 
+                // application insights settings has to be put in appsettings.json / appsettings.{environemntName}.json. Reference:
+                // https://github.com/Microsoft/ApplicationInsights-aspnetcore/blob/04b5485d4a8aa498b2d99c60bdf8ca59bc9103fc/src/Microsoft.ApplicationInsights.AspNetCore/Extensions/DefaultApplicationInsightsServiceConfigureOptions.cs#L31
+                configHost.AddJsonFile("hostsettings.json", optional: false);
+                configHost.AddEnvironmentVariables();
+            }).ConfigureServices((hostContext, services) =>
+            {
+                services.AddSingleton<WebHosting.IHostingEnvironment>(provider => hostContext.HostingEnvironment.ToAspNetCoreHostingEnvironment());
+                services.AddApplicationInsightsTelemetry();
+                // Enable Application Insights with iKey configured in the environemnt variable
+                services.AddSingleton<IHostedService, PrintHelloService>();
+                // Enable Application Insights for Kubernetes when running inside Kubernetes.
+                services.EnableKubernetes();
+            })
+            .UseConsoleLifetime()
+            .Build();
 
             host.Run();
         }
