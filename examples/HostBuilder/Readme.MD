@@ -1,4 +1,4 @@
-# Enable Application Insights for Kubernetes in Generic HostBuilder in .NET Core Microservices
+# Enable Application Insights for Kubernetes in Generic HostBuilder for .NET Core Microservices
 The generic `host builder` and `host` are provided in .NET Core 2.1. The host builder configures and launches a host. The host is responsible for app startup and lifetime management. The concept isn't new in ASP.NET Core world but is extended to the generic `.NET Core Applications`.
 
 This is a great model for building a microservice that doesn't serve HTTP requests.
