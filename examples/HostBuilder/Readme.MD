@@ -48,10 +48,12 @@ namespace HostBuilderExample
 ```
 `StartAsync` will be invoked upon the service's started; `StopAsync` will be invoked when the service is shutdown; The constructor takes TelemetryClient object as the parameter and that will be used to send data to Application Insights.
 
-In the example, as you can see, we send the message of `Hello Hosted Service!!!` to the Application Insights every 30 seconds.
+In the example, as you can see, we send the message of `Hello Hosted Service!!!` to the Application Insights every 30 seconds through a timer.
+
+It could, as a matter of fact, be driven by a lot of things. For example, a message arrives in a queue; A specific event happens in EventHub; A blob shows up in a storage service and so on.
 
 ## Inject the Service
-Now that we have the service, we need to inject it into the service collection. Please refer the full code in [Program.cs](./src/Program.cs). You can find the outline below:
+Now that we have the service, we need to inject it into the service collection. At the same time, anything required by our service, `TelemetryClient` for example, will also be registed in the inject container. Please refer the full code in [Program.cs](./src/Program.cs). You can find the outline below:
 ```csharp
 ...
 using Microsoft.Extensions.Hosting;
@@ -100,7 +102,7 @@ There are some interesting points here:
 
 
 ## Deploy the Service
-Once these hoops are jumped, everything just turns out easy. Follow the routine to create the [Dockerfile](./src/Dockerfile) to build the image and then push it:
+Once those hoops are jumped, everything just turns out easy. Follow the routine to create the [Dockerfile](./src/Dockerfile) to build the image and then push it:
 ```
 docker build . -t dockerrepo/ai_k8s_selfhost:latest
 docker push dockerrepo/ai_k8s_selfhost:latest
