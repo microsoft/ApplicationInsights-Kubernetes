@@ -3,6 +3,8 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Logging;
 using WebHosting = Microsoft.AspNetCore.Hosting;
 
 namespace HostBuilderExample
@@ -22,12 +24,16 @@ namespace HostBuilderExample
                 configHost.AddEnvironmentVariables();
             }).ConfigureServices((hostContext, services) =>
             {
+                // Enable console logging for ILogger
+                services.AddLogging(cfg => { cfg.AddConsole(); });
+                // Microsoft.AspNetCore.Hosting.IHostingEnvironment is required by Application Insights SDK
                 services.AddSingleton<WebHosting.IHostingEnvironment>(provider => hostContext.HostingEnvironment.ToAspNetCoreHostingEnvironment());
                 services.AddApplicationInsightsTelemetry();
-                // Enable Application Insights with iKey configured in the environemnt variable
-                services.AddSingleton<IHostedService, PrintHelloService>();
-                // Enable Application Insights for Kubernetes when running inside Kubernetes.
+                // Enable Application Insights for Kubernetes.
                 services.EnableKubernetes();
+
+                // Inject the service.
+                services.AddSingleton<IHostedService, PrintHelloService>();
             })
             .UseConsoleLifetime()
             .Build();

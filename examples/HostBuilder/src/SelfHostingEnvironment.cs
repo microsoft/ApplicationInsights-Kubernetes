@@ -3,6 +3,12 @@ using Microsoft.Extensions.FileProviders;
 using Hosting = Microsoft.Extensions.Hosting;
 namespace HostBuilderExample
 {
+    /// <summary>
+    /// This is a simple wrapper of Microsoft.AspNetCore.Hosting.IHostingEnvironment.
+    /// It is mainly to migarte the fact there is no common class that implements both
+    /// that and Microsoft.Extensions.Hosting.IHostingEnvironment.
+    /// It is possibile to merge the implementations.
+    /// </summary>
     public class SelfHostingEnvironment : IHostingEnvironment
     {
         public SelfHostingEnvironment(Hosting.IHostingEnvironment env)

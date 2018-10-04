@@ -1,6 +1,3 @@
 {
-    "environment": "Development",
-    "ApplicationInsights": {
-        "InstrumentationKey": "9558b686-2a23-441c-b389-37b04312c4ad"
-    }
+    "environment": "Development"
 }
