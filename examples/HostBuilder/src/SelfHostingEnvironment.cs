@@ -5,7 +5,7 @@ namespace HostBuilderExample
 {
     /// <summary>
     /// This is a simple wrapper of Microsoft.AspNetCore.Hosting.IHostingEnvironment.
-    /// It is mainly to migarte the fact there is no common class that implements both
+    /// It is mainly to mitigate the fact there is no class that implements both
     /// that and Microsoft.Extensions.Hosting.IHostingEnvironment.
     /// It is possibile to merge the implementations.
     /// </summary>
