@@ -16,7 +16,7 @@
         }
 
         /// <summary>
-        /// Get the ReplicaSet for the current pod.
+        /// Gets the ReplicaSet for the current pod.
         /// </summary>
         /// <param name="self">The target pod.</param>
         /// <param name="scope">List of replicas to search from.</param>

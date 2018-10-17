@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes.HostingStartup</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Microsoft.ApplicationInsights.Kubernetes.HostingStartup</PackageId>

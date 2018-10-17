@@ -7,10 +7,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
+    /// <summary>
+    /// Builder of Service Collection for Application Insights for Kubernetes.
+    /// </summary>
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
         private readonly ILogger _logger;
         private readonly Func<bool> _isRunningInKubernetes;
+        
+        /// <summary>
+        /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.
+        /// </summary>
+        /// <param name="isRunningInKubernetes"></param>
+        /// <param name="logger"></param>
         public KubernetesServiceCollectionBuilder(
             Func<bool> isRunningInKubernetes,
             ILogger<KubernetesServiceCollectionBuilder> logger)
@@ -20,10 +29,11 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Inject Kubernetes related service into the service collection.
+        /// Injects Kubernetes related service into the service collection.
         /// </summary>
-        /// <param name="serviceCollection"></param>
-        /// <returns></returns>
+        /// <param name="serviceCollection">The service collector to inject the services into.</param>
+        /// <param name="timeout">Maximum time to wait for spinning up the container.</param>
+        /// <returns>Returns the service collector with services injected.</returns>
         public IServiceCollection InjectServices(IServiceCollection serviceCollection, TimeSpan timeout)
         {
             if (_isRunningInKubernetes())
@@ -61,6 +71,10 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.AddSingleton<K8sQueryClientFactory>();
         }
 
+        /// <summary>
+        /// Injects the services of Application Insights for Kubernetes.
+        /// </summary>
+        /// <param name="serviceCollection">The service collector to inject the services into.</param>
         protected virtual void InjectChangableServices(IServiceCollection serviceCollection)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
