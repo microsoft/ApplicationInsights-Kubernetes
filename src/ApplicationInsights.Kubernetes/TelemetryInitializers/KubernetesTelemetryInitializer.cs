@@ -98,7 +98,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 createK8sEnvTask,
                 Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
 
-            if(createK8sEnvTask.IsCompleted)
+            if (createK8sEnvTask.IsCompleted)
             {
                 _k8sEnvironment = createK8sEnvTask.Result;
             }
@@ -122,11 +122,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Name"), this._k8sEnvironment.PodName);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this._k8sEnvironment.PodLabels);
 
+            // Pod will have no replica name or deployment when deployed through other means. For example, as a daemonset.
             // Replica Set
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.Name"), this._k8sEnvironment.ReplicaSetName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.Name"), this._k8sEnvironment.ReplicaSetName, true);
 
             // Deployment
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this._k8sEnvironment.DeploymentName);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this._k8sEnvironment.DeploymentName, true);
 
             // Ndoe
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this._k8sEnvironment.NodeUid);
@@ -160,7 +161,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 #endif
 
-        private void SetCustomDimension(ITelemetry telemetry, string key, string value)
+        private void SetCustomDimension(ITelemetry telemetry, string key, string value, bool isValueOptional = false)
         {
             if (telemetry == null)
             {
@@ -176,7 +177,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             if (string.IsNullOrEmpty(value))
             {
-                _logger.LogError(Invariant($"Value is required to set custom dimension. Key: {key}"));
+                if (isValueOptional)
+                {
+                    _logger.LogTrace(Invariant($"Value is null or empty for key: {key}"));
+                }
+                else
+                {
+                    _logger.LogError(Invariant($"Value is required to set custom dimension. Key: {key}"));
+                }
                 return;
             }
 
