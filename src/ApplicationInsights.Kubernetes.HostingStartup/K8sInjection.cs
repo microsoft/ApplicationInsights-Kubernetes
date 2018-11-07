@@ -17,7 +17,7 @@ namespace ApplicationInsights.Kubernetes.HostingStartup
             builder.UseApplicationInsights()
                 .ConfigureServices(services =>
                 {
-                    services.AddAppInsightsTelemetryKubernetesEnricher();
+                    services.AddApplicationInsightsKubernetesEnricher();
                 });
         }
     }

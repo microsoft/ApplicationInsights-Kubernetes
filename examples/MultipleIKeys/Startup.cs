@@ -41,13 +41,13 @@ namespace MultipleIKeys
 
             // uService_prototype
             TelemetryConfiguration aiConfig = new TelemetryConfiguration("8e9838a3-ad63-4d30-96f7-2f0a505bc0f6", app.ApplicationServices.GetService<ITelemetryChannel>());
-            aiConfig.AddAppInsightsTelemetryKubernetesEnricher();
+            aiConfig.AddApplicationInsightsKubernetesEnricher();
             TelemetryClient client = new TelemetryClient(aiConfig);
             // Invoking the constructor for the TelemetryInitializer
             client.TrackEvent("Hello");
             // saarsfun01
             TelemetryConfiguration aiConfig2 = new TelemetryConfiguration("5789ad10-8b39-4f8a-88dc-632d1342d5e0", app.ApplicationServices.GetService<ITelemetryChannel>());
-            aiConfig2.AddAppInsightsTelemetryKubernetesEnricher();
+            aiConfig2.AddApplicationInsightsKubernetesEnricher();
             TelemetryClient client2 = new TelemetryClient(aiConfig2);
 
             var _forget = ThrowAnotherHelloAsync(client, client2);

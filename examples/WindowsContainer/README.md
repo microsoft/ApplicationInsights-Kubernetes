@@ -36,7 +36,7 @@ public static IWebHost BuildWebHost(string[] args) =>
 ```
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddAppInsightsTelemetryKubernetesEnricher();
+    services.AddApplicationInsightsKubernetesEnricher();
     services.AddMvc();
 }
 ```

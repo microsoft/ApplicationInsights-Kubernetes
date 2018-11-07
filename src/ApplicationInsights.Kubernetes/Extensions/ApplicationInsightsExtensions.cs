@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="kubernetesServiceCollectionBuilder">Collection builder.</param>
         /// <param name="detectKubernetes">Delegate to detect if the current application is running in Kubernetes hosted container.</param>
         /// <returns>The collection of services descriptors we injected into.</returns>
-        public static IServiceCollection AddAppInsightsTelemetryKubernetesEnricher(
+        public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
@@ -38,10 +38,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Enables Application Insights Kubernetes for a given TelemetryConfiguration.
         /// </summary>
         /// <remarks>
-        /// The use of AddAppInsightsTelemetryKubernetesEnricher() on the ServiceCollection is always preferred unless you have more than one TelemetryConfiguration
+        /// The use of AddApplicationInsightsKubernetesEnricher() on the ServiceCollection is always preferred unless you have more than one TelemetryConfiguration
         /// instance, or if you are using Application Insights from a non ASP.NET environment, like a console app.
         /// </remarks>
-        public static void AddAppInsightsTelemetryKubernetesEnricher(
+        public static void AddApplicationInsightsKubernetesEnricher(
             this TelemetryConfiguration telemetryConfiguration,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
@@ -67,7 +67,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Please use AddAppInsightsTelemetryKubernetesEnricher() insead.
+        /// Please use AddApplicationInsightsKubernetesEnricher() insead.
         /// Enables Application Insights Kubernetes for the Default TelemtryConfiguration in the dependency injection system.
         /// </summary>
         /// <param name="services">Collection of service descriptors.</param>
@@ -75,35 +75,35 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="kubernetesServiceCollectionBuilder">Collection builder.</param>
         /// <param name="detectKubernetes">Delegate to detect if the current application is running in Kubernetes hosted container.</param>
         /// <returns>The collection of services descriptors we injected into.</returns>
-        [Obsolete("Use AddAppInsightsTelemetryKubernetesEnricher() instead", false)]
+        [Obsolete("Use AddApplicationInsightsKubernetesEnricher() instead", false)]
         public static IServiceCollection EnableKubernetes(
             this IServiceCollection services,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
             Func<bool> detectKubernetes = null)
         {
-            return services.AddAppInsightsTelemetryKubernetesEnricher(timeout, kubernetesServiceCollectionBuilder, detectKubernetes);
+            return services.AddApplicationInsightsKubernetesEnricher(timeout, kubernetesServiceCollectionBuilder, detectKubernetes);
         }
 
         /// <summary>
-        /// Please use "AddAppInsightsTelemetryKubernetesEnricher()" insead.
+        /// Please use "AddApplicationInsightsKubernetesEnricher()" insead.
         /// Enables Application Insights Kubernetes for a given
         /// TelemetryConfiguration.
         /// </summary>
         /// <remarks>
-        /// The use of AddAppInsightsTelemetryKubernetesEnricher() on the ServiceCollection is always
+        /// The use of AddApplicationInsightsKubernetesEnricher() on the ServiceCollection is always
         /// preferred unless you have more than one TelemetryConfiguration
         /// instance, or if you are using Application Insights from a non ASP.NET
         /// environment, like a console app.
         /// </remarks>
-        [Obsolete("Use AddAppInsightsTelemetryKubernetesEnricher() instead", false)]
+        [Obsolete("Use AddApplicationInsightsKubernetesEnricher() instead", false)]
         public static void EnableKubernetes(
             this TelemetryConfiguration telemetryConfiguration,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
             Func<bool> detectKubernetes = null)
         {
-            telemetryConfiguration.AddAppInsightsTelemetryKubernetesEnricher(
+            telemetryConfiguration.AddApplicationInsightsKubernetesEnricher(
                 timeout, kubernetesServiceCollectionBuilder, detectKubernetes);
         }
 
