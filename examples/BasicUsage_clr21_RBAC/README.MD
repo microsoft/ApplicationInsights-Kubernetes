@@ -51,7 +51,7 @@ public static IWebHost BuildWebHost(string[] args) =>
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    services.EnableKubernetes();  // Add this line of code
+    services.AddAppInsightsTelemetryKubernetesEnricher();  // Add this line of code
     services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 }
 ```

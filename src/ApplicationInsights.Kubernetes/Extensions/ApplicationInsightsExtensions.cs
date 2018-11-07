@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Enables Application Insights Kubernetes for a given TelemetryConfiguration.
         /// </summary>
         /// <remarks>
-        /// The use of EnableKubernetes() on the ServiceCollection is always preferred unless you have more than one TelemetryConfiguration
+        /// The use of AddAppInsightsTelemetryKubernetesEnricher() on the ServiceCollection is always preferred unless you have more than one TelemetryConfiguration
         /// instance, or if you are using Application Insights from a non ASP.NET environment, like a console app.
         /// </remarks>
         public static void AddAppInsightsTelemetryKubernetesEnricher(
@@ -91,7 +91,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// TelemetryConfiguration.
         /// </summary>
         /// <remarks>
-        /// The use of EnableKubernetes() on the ServiceCollection is always
+        /// The use of AddAppInsightsTelemetryKubernetesEnricher() on the ServiceCollection is always
         /// preferred unless you have more than one TelemetryConfiguration
         /// instance, or if you are using Application Insights from a non ASP.NET
         /// environment, like a console app.
