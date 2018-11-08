@@ -32,7 +32,7 @@ namespace app
             });
 
 
-            services.EnableKubernetes();
+            services.AddApplicationInsightsKubernetesEnricher();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
