@@ -5,6 +5,7 @@
             "label": "build",
             "command": "dotnet",
             "type": "process",
+            "group": "build",
             "args": [
                 "build",
                 "${workspaceFolder}/ApplicationInsights.Kubernetes.sln"
@@ -15,6 +16,7 @@
             "label": "Run Unit Tests",
             "command": "dotnet",
             "type": "process",
+            "group": "test",
             "args": [
                 "test",
                 "${workspaceFolder}/tests/UnitTests"
