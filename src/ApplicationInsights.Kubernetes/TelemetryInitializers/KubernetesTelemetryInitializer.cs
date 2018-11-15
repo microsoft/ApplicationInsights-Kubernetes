@@ -4,8 +4,9 @@ using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.Extensions.Options;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 #if !NETSTANDARD1_3 && !NETSTANDARD1_6
@@ -43,14 +44,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
-            TimeSpan timeout,
+            IOptions<AppInsightsForKubernetesOptions> options,
             SDKVersionUtils sdkVersionUtils,
             ILogger<KubernetesTelemetryInitializer> logger)
         {
             _k8sEnvironment = null;
             _logger = logger;
+
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
-            _timeoutAt = DateTime.Now.Add(Arguments.IsNotNull(timeout, nameof(timeout)));
+            _timeoutAt = DateTime.Now.Add(Arguments.IsNotNull(options.Value.InitializationTimeout, nameof(options.Value.InitializationTimeout)));
             _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
 
             var _forget = SetK8sEnvironment();

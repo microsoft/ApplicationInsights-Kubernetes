@@ -6,6 +6,7 @@ using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -18,12 +19,14 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         {
             IServiceCollection services = new ServiceCollection();
             services = services.AddApplicationInsightsKubernetesEnricher(detectKubernetes: () => true);
+            Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
             // Replace the IKubeHttpClientSetingsProvider in case the test is not running inside a container.
             Assert.NotNull(services.FirstOrDefault(s => s.ServiceType == typeof(IKubeHttpClientSettingsProvider)));
             Mock<IKubeHttpClientSettingsProvider> mock = new Mock<IKubeHttpClientSettingsProvider>();
             services.Remove(new ServiceDescriptor(typeof(IKubeHttpClientSettingsProvider), typeof(KubeHttpClientSettingsProvider), ServiceLifetime.Singleton));
             services.AddSingleton<IKubeHttpClientSettingsProvider>(p => mock.Object);
+            ITelemetryInitializer targetTelemetryInitializer = services.BuildServiceProvider().GetServices<ITelemetryInitializer>().FirstOrDefault(ti => ti is KubernetesTelemetryInitializer);
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
 
@@ -45,6 +48,8 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             Mock<IKubernetesServiceCollectionBuilder> serviceCollectionBuilderMock = new Mock<IKubernetesServiceCollectionBuilder>();
             ServiceCollection sc = new ServiceCollection();
             sc.AddLogging();
+            sc.AddOptions();
+            sc.Configure<AppInsightsForKubernetesOptions>(options => options.InitializationTimeout=TimeSpan.FromSeconds(5));
 
             sc.AddSingleton<ITelemetryInitializer>(p =>
             {
@@ -52,13 +57,20 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 envMock.Setup(env => env.ContainerID).Returns("Cid");
                 var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
                 envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
-                return new KubernetesTelemetryInitializer(envFactoryMock.Object, TimeSpan.FromSeconds(5), SDKVersionUtils.Instance, p.GetService<ILogger<KubernetesTelemetryInitializer>>());
+                return new KubernetesTelemetryInitializer(
+                    envFactoryMock.Object,
+                    p.GetService<IOptions<AppInsightsForKubernetesOptions>>(),
+                    SDKVersionUtils.Instance,
+                    p.GetService<ILogger<KubernetesTelemetryInitializer>>());
             });
-            serviceCollectionBuilderMock.Setup(b => b.InjectServices(It.IsAny<IServiceCollection>(), It.IsAny<TimeSpan>()))
+            serviceCollectionBuilderMock.Setup(b => b.InjectServices(It.IsAny<IServiceCollection>()))
                 .Returns(sc);
 
             TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration("123", channelMock.Object);
-            telemetryConfiguration.AddApplicationInsightsKubernetesEnricher(null, serviceCollectionBuilderMock.Object, detectKubernetes: () => true);
+            telemetryConfiguration.AddApplicationInsightsKubernetesEnricher(
+                timeout: null, 
+                kubernetesServiceCollectionBuilder: serviceCollectionBuilderMock.Object,
+                detectKubernetes: () => true);
 
             Assert.NotNull(telemetryConfiguration.TelemetryInitializers);
             Assert.True(telemetryConfiguration.TelemetryInitializers.Count == 1);

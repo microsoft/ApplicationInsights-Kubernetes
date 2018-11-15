@@ -4,9 +4,9 @@ using System.Linq;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
-using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -15,6 +15,8 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ApplicationInsightsExtensions
     {
+        private const string ConfigurationSectionName = "AppInsightsForKubernetes";
+
         /// <summary>
         /// Enables Application Insights for Kubernetes on the Default TelemtryConfiguration in the dependency injection system.
         /// </summary>
@@ -22,16 +24,17 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="timeout">Maximum time to wait for spinning up the container.</param>
         /// <param name="kubernetesServiceCollectionBuilder">Collection builder.</param>
         /// <param name="detectKubernetes">Delegate to detect if the current application is running in Kubernetes hosted container.</param>
+        /// <param name="logger">Sets a logger for building the service collection.</param>
         /// <returns>The collection of services descriptors we injected into.</returns>
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
-            Func<bool> detectKubernetes = null)
+            Func<bool> detectKubernetes = null,
+            ILogger<IKubernetesServiceCollectionBuilder> logger = null)
         {
             // Inject of the service shall return immediately.
-            EnableKubernetesImpl(services, detectKubernetes, kubernetesServiceCollectionBuilder, null, timeout);
-            return services;
+            return EnableKubernetesImpl(services, detectKubernetes, kubernetesServiceCollectionBuilder, logger: logger, timeout: timeout);
         }
 
         /// <summary>
@@ -45,13 +48,14 @@ namespace Microsoft.Extensions.DependencyInjection
             this TelemetryConfiguration telemetryConfiguration,
             TimeSpan? timeout = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
-            Func<bool> detectKubernetes = null)
+            Func<bool> detectKubernetes = null,
+            ILogger<IKubernetesServiceCollectionBuilder> logger = null)
         {
             IServiceCollection standaloneServiceCollection = new ServiceCollection();
-            standaloneServiceCollection = EnableKubernetesImpl(standaloneServiceCollection, detectKubernetes, kubernetesServiceCollectionBuilder, null, timeout);
+            standaloneServiceCollection = standaloneServiceCollection.AddApplicationInsightsKubernetesEnricher(
+                timeout, kubernetesServiceCollectionBuilder, detectKubernetes);
 
             // Static class can't used as generic types.
-            ILogger logger = standaloneServiceCollection.GetLogger<IKubernetesServiceCollectionBuilder>();
             IServiceProvider serviceProvider = standaloneServiceCollection.BuildServiceProvider();
             ITelemetryInitializer k8sTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>()
                 .FirstOrDefault(ti => ti is KubernetesTelemetryInitializer);
@@ -59,10 +63,11 @@ namespace Microsoft.Extensions.DependencyInjection
             if (k8sTelemetryInitializer != null)
             {
                 telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
+                logger?.LogInformation($"{nameof(KubernetesTelemetryInitializer)} is injected.");
             }
             else
             {
-                logger.LogError($"Getting ${nameof(KubernetesTelemetryInitializer)} from the service provider failed.");
+                logger?.LogError($"Getting ${nameof(KubernetesTelemetryInitializer)} from the service provider failed.");
             }
         }
 
@@ -113,50 +118,63 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection EnableKubernetesImpl(IServiceCollection serviceCollection,
             Func<bool> detectKubernetes,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
-            ILogger<KubernetesServiceCollectionBuilder> logger = null,
-            TimeSpan? timeout = null)
+            TimeSpan? timeout = null,
+            ILogger<IKubernetesServiceCollectionBuilder> logger = null)
         {
-            logger = logger ?? serviceCollection.GetLogger<KubernetesServiceCollectionBuilder>();
-
-            // 2 minutes by default maximum to wait for spinning up the container.
-            timeout = timeout ?? TimeSpan.FromMinutes(2);
-
-            logger.LogInformation(Invariant($"ApplicationInsights.Kubernetes.Version:{SDKVersionUtils.Instance.CurrentSDKVersion}"));
-            try
-            {
-                serviceCollection = BuildK8sServiceCollection(serviceCollection, timeout.Value, detectKubernetes, logger, kubernetesServiceCollectionBuilder);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError("Failed to fetch ApplicaitonInsights.Kubernetes' info. Details " + ex.ToString());
-            }
+            BindOptions(serviceCollection, timeout);
+            serviceCollection.AddLogging();
+            serviceCollection = BuildK8sServiceCollection(
+                serviceCollection,
+                detectKubernetes,
+                logger: logger,
+                kubernetesServiceCollectionBuilder: kubernetesServiceCollectionBuilder);
             return serviceCollection;
+        }
+
+        private static void BindOptions(IServiceCollection serviceCollection, TimeSpan? timeout)
+        {
+            serviceCollection.AddOptions();
+            IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+            IOptions<AppInsightsForKubernetesOptions> options = serviceProvider.GetService<IOptions<AppInsightsForKubernetesOptions>>();
+
+            if (options.Value == null)
+            {
+                serviceCollection.AddSingleton<IOptions<AppInsightsForKubernetesOptions>>(
+                           new OptionsWrapper<AppInsightsForKubernetesOptions>(new AppInsightsForKubernetesOptions()));
+            }
+
+            // Update settings from configuration.
+            IConfiguration configuration = serviceProvider.GetService<IConfiguration>();
+            if (configuration != null)
+            {
+                serviceCollection.Configure<AppInsightsForKubernetesOptions>(configuration.GetSection(ConfigurationSectionName));
+            }
+
+            // Update settings when parameter is provided for backward compatibility.
+            if (timeout != null)
+            {
+                serviceCollection.Configure<AppInsightsForKubernetesOptions>(option =>
+                {
+                    option.InitializationTimeout = timeout.Value;
+                });
+            }
         }
 
         private static IServiceCollection BuildK8sServiceCollection(
             IServiceCollection services,
-            TimeSpan timeout,
             Func<bool> detectKubernetes,
-            ILogger<KubernetesServiceCollectionBuilder> logger,
+            ILogger<IKubernetesServiceCollectionBuilder> logger,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
             detectKubernetes = detectKubernetes ?? IsRunningInKubernetes;
-            kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ?? new KubernetesServiceCollectionBuilder(detectKubernetes, logger);
-            services = kubernetesServiceCollectionBuilder.InjectServices(services, timeout);
+            kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ??
+                new KubernetesServiceCollectionBuilder(detectKubernetes, logger);
+
+            services = kubernetesServiceCollectionBuilder.InjectServices(services);
+
             return services;
         }
 
         private static bool IsRunningInKubernetes() => Directory.Exists(@"/var/run/secrets/kubernetes.io") || Directory.Exists(@"C:\var\run\secrets\kubernetes.io");
-
-        /// <summary>
-        /// Gets a logger for given type.
-        /// Note: This method leads to build service provider during the injection of services and shall be avoid whenever possible.
-        /// </summary>
-        private static ILogger<T> GetLogger<T>(this IServiceCollection services)
-        {
-            // AddLogging() is safe to call multiple times.
-            // https://github.com/aspnet/Logging/blob/75a1cecf24f8418a45426b6cc3606f0d53640f89/src/Microsoft.Extensions.Logging/LoggingServiceCollectionExtensions.cs#L41
-            return services.AddLogging().BuildServiceProvider().GetService<ILogger<T>>();
-        }
     }
 }
