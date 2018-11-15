@@ -122,8 +122,6 @@ namespace Microsoft.Extensions.DependencyInjection
             ILogger<IKubernetesServiceCollectionBuilder> logger = null)
         {
             BuildServiceBases(serviceCollection, timeout, ref logger);
-
-            serviceCollection.AddLogging();
             serviceCollection = BuildK8sServiceCollection(
                 serviceCollection,
                 detectKubernetes,
@@ -137,8 +135,8 @@ namespace Microsoft.Extensions.DependencyInjection
             TimeSpan? timeout,
             ref ILogger<IKubernetesServiceCollectionBuilder> logger)
         {
-            serviceCollection.AddOptions();
             serviceCollection.AddLogging();
+            serviceCollection.AddOptions();
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
             // Create a default logger when not passed in.

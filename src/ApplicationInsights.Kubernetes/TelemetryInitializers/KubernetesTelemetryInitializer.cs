@@ -7,6 +7,7 @@ using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 #if !NETSTANDARD1_3 && !NETSTANDARD1_6
@@ -50,6 +51,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             _k8sEnvironment = null;
             _logger = logger;
+
+            _logger.LogTrace($@"Initialize Application Insihgts for Kubernetes telemetry initializer with Options:
+{JsonConvert.SerializeObject(options.Value)}");
 
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
             _timeoutAt = DateTime.Now.Add(Arguments.IsNotNull(options.Value.InitializationTimeout, nameof(options.Value.InitializationTimeout)));
