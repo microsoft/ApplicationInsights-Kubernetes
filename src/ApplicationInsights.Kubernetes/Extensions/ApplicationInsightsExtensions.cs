@@ -121,7 +121,8 @@ namespace Microsoft.Extensions.DependencyInjection
             TimeSpan? timeout = null,
             ILogger<IKubernetesServiceCollectionBuilder> logger = null)
         {
-            BindOptions(serviceCollection, timeout);
+            BuildServiceBases(serviceCollection, timeout, ref logger);
+
             serviceCollection.AddLogging();
             serviceCollection = BuildK8sServiceCollection(
                 serviceCollection,
@@ -131,10 +132,19 @@ namespace Microsoft.Extensions.DependencyInjection
             return serviceCollection;
         }
 
-        private static void BindOptions(IServiceCollection serviceCollection, TimeSpan? timeout)
+        private static void BuildServiceBases(
+            IServiceCollection serviceCollection,
+            TimeSpan? timeout,
+            ref ILogger<IKubernetesServiceCollectionBuilder> logger)
         {
             serviceCollection.AddOptions();
+            serviceCollection.AddLogging();
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+
+            // Create a default logger when not passed in.
+            logger = logger ?? serviceProvider.GetService<ILogger<IKubernetesServiceCollectionBuilder>>();
+
+            // Apply the conifguraitons ifnot yet.
             IOptions<AppInsightsForKubernetesOptions> options = serviceProvider.GetService<IOptions<AppInsightsForKubernetesOptions>>();
 
             if (options.Value == null)
