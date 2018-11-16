@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -11,7 +12,6 @@ using Newtonsoft.Json;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 #if !NETSTANDARD1_3 && !NETSTANDARD1_6
-using System.Diagnostics;
 using System.Globalization;
 #endif
 
@@ -33,16 +33,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public const string CPU = "CPU";
         public const string Memory = "Memory";
 
-        private readonly ILogger _logger;
-        private readonly SDKVersionUtils _sdkVersionUtils;
-        private readonly DateTime _timeoutAt;
-
-        internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
-        internal IK8sEnvironment _k8sEnvironment { get; private set; }
-
-        internal bool _isK8sQueryTimeout = false;
-        private bool _isK8sQueryTimeoutReported = false;
-
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
             IOptions<AppInsightsForKubernetesOptions> options,
@@ -52,11 +42,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             _k8sEnvironment = null;
             _logger = logger;
 
+            // Options can't be null.
+            Debug.Assert(options != null, "Options can't be null.");
+            _options = Arguments.IsNotNull(options?.Value, nameof(options));
+
             _logger.LogDebug($@"Initialize Application Insihgts for Kubernetes telemetry initializer with Options:
-{JsonConvert.SerializeObject(options.Value)}");
+{JsonConvert.SerializeObject(_options)}");
 
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
-            _timeoutAt = DateTime.Now.Add(Arguments.IsNotNull(options.Value.InitializationTimeout, nameof(options.Value.InitializationTimeout)));
+            _timeoutAt = DateTime.Now.Add(_options.InitializationTimeout);
             _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
 
             var _forget = SetK8sEnvironment();
@@ -212,5 +206,17 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
             }
         }
+
+        private readonly ILogger _logger;
+        private readonly SDKVersionUtils _sdkVersionUtils;
+        private readonly DateTime _timeoutAt;
+
+        internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
+        internal IK8sEnvironment _k8sEnvironment { get; private set; }
+
+        internal AppInsightsForKubernetesOptions _options { get; private set; }
+
+        internal bool _isK8sQueryTimeout = false;
+        private bool _isK8sQueryTimeoutReported = false;
     }
 }
