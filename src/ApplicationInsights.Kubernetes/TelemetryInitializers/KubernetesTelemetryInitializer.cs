@@ -52,7 +52,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             _k8sEnvironment = null;
             _logger = logger;
 
-            _logger.LogTrace($@"Initialize Application Insihgts for Kubernetes telemetry initializer with Options:
+            _logger.LogDebug($@"Initialize Application Insihgts for Kubernetes telemetry initializer with Options:
 {JsonConvert.SerializeObject(options.Value)}");
 
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
