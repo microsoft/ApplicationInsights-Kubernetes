@@ -41,9 +41,9 @@ Customize configurations are supported for `v1.0.2+`. There are several ways to 
         "Logging": {
             // ...
         },
-        // Adding the following section
+        // Adding the following section to set the timeout to 15 seconds
         "AppInsightsForKubernetes": {
-            "InitializationTimeout": "3.1:12:15.34"
+            "InitializationTimeout": "00:00:15"
         }
     }
     ```
@@ -56,9 +56,9 @@ Customize configurations are supported for `v1.0.2+`. There are several ways to 
 
     | Key                   | Value/Types | Default Value | Description                                                                                            |
     |-----------------------|-------------|---------------|--------------------------------------------------------------------------------------------------------|
-    | InitializationTimeout | TimeSpan    | 02:00:00      |  Maximum time to wait for spinning up the container. Accepted format: [d.]hh:mm:ss[.fffffff]. |
+    | InitializationTimeout | TimeSpan    | 00:02:00      |  Maximum time to wait for spinning up the container. Accepted format: [d.]hh:mm:ss[.fffffff]. |
 
-The configuration aligns with the conventions in ASP.NET Core. Refer [Configuration in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-2.1) for more information.
+The configuration uses with the conventions in ASP.NET Core. Refer [Configuration in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-2.1) for more information.
 
 ### Verify the cluster configuration
 Use the [troubleshooting image](https://github.com/Microsoft/ApplicationInsights-Kubernetes/tree/develop/troubleshooting) to verify the cluster is properly configured.
