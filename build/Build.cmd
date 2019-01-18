@@ -3,6 +3,9 @@ SETLOCAL
 SET CONFIG=%1
 SET REBUILD=%2
 IF '%CONFIG%' == '' SET CONFIG=Debug
+SET REBUILD_PARAM=--no-incremental
+IF '%REBUILD%' == '' SET REBUILD_PARAM=
+
 
 ECHO Target Configuration: %CONFIG%.
 FOR /F "TOKENS=1* DELIMS= " %%A IN ('DATE/T') DO SET CDATE=%%B
@@ -13,7 +16,7 @@ FOR /F "TOKENS=1-2 delims=/:" %%a in ("%TIME%") DO SET mytime=%%a%%b
 SET CURRENT_DATE_TIME=%yyyy%%mm%%dd%%mytime%
 ECHO Version:%CURRENT_DATE_TIME%
 
-dotnet build %~dp0\..\ApplicationInsights.Kubernetes.sln
+dotnet build -c %CONFIG% %REBUILD_PARAM% %~dp0\..\ApplicationInsights.Kubernetes.sln
 
 :HELP
 GOTO :EXIT

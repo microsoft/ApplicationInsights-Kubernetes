@@ -51,7 +51,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             using (KubeHttpClient httpClient = new KubeHttpClient(settingsMock.Object, GetLogger<KubeHttpClient>()))
             using (K8sQueryClient target = new K8sQueryClient(httpClient, GetLogger<K8sQueryClient>()))
             {
-                Assert.Equal(httpClient, target.KubeHttpClient);
+                Assert.Same(httpClient, target.KubeHttpClient);
             }
         }
 
