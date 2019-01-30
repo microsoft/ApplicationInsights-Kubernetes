@@ -6,7 +6,7 @@ Starting from 1.0.0-beta7, Application Insights for Kubernetes will support runn
 
 _Note: This is a simple example that does not follow all best practices, including security-related best practices. E.g. Application Insights instrumentation key is not adequately protected (it should be deployed as a secret)._
 
-## Getting Started
+## Build the application
 
 * Let's start by creating an ASP.NET Core MVC application:
 
@@ -57,6 +57,8 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
+## Build the image
+
 * Optionally, pull the base images:
 
 ```shell
@@ -73,6 +75,8 @@ docker build . -t dockeraccount/aspnetcorenano
 docker push dockeraccount/aspnetcorenano:latest
 ```
 
+## Write the Kubernetes Specs
+
 * Create the Kubernetes spec for the deployment and the service. Referencing [k8s.yaml](k8s/k8s.yaml). Be noticed, different than the Application Insights for Kubernetes running in Linux container, pod name is passed in as an environment variable at this point:
 
 ```yaml
@@ -83,12 +87,22 @@ docker push dockeraccount/aspnetcorenano:latest
                 fieldPath: metadata.name
 ```
 
-Deploy it:
+## Setup the default Service Account for RBAC enabled cluster
+
+* If the cluster is RBAC enabled, the service account used will need to bind to proper cluster role so that the application can fetch Kubernetes related properties. In [saRole.yaml](./k8s/saRole.yaml), a cluster role named metrics-reader is created and then bind to the default service account. Permissions needed are listed in the resources property. To deploy it, update the value for the namespace and then:
+
+```shell
+kubectl create -f k8s/saRole.yaml
+```
+
+* Please replace the `NAMESPACE` accordingly.
+
+## Deploy it
 
 ```shell
 kubectl create -f k8s.yaml
 ```
 
-Known issues:
+## Known issues
 
 * Multiple containers in one pod is not supported.
