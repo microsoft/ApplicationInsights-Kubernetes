@@ -89,7 +89,7 @@ docker push dockeraccount/aspnetcorenano:latest
 
 ## Setup the default Service Account for RBAC enabled cluster
 
-* If the cluster is RBAC enabled, the service account used will need to bind to proper cluster role so that the application can fetch Kubernetes related properties. In [saRole.yaml](./k8s/saRole.yaml), a cluster role named metrics-reader is created and then bind to the default service account. Permissions needed are listed in the resources property. To deploy it, update the value for the namespace and then:
+* If the cluster is RBAC enabled, the service account used will need to bind to proper cluster role so that the application can fetch Kubernetes related properties. In [saRole.yaml](./k8s/saRole.yaml), a cluster role named appinsights-k8s-property-reader is created and then bind to the default service account. Permissions needed are listed in the resources property. To deploy it, update the value for the namespace and then:
 
 ```shell
 kubectl create -f k8s/saRole.yaml
