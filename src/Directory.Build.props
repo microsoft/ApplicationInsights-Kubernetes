@@ -20,7 +20,8 @@
         <Authors>Microsoft</Authors>
         <Company>Microsoft</Company>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-        <PackageLicenseUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/blob/master/LICENSE</PackageLicenseUrl>
+        <!-- <PackageLicenseUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/blob/master/LICENSE</PackageLicenseUrl> -->
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageProjectUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</PackageProjectUrl>
         <PackageIconUrl>http://appanacdn.blob.core.windows.net/cdn/icons/aic.png</PackageIconUrl>
         <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
@@ -37,5 +38,8 @@
             <Authenticode>Microsoft</Authenticode>
             <StrongName>StrongName</StrongName>
         </FilesToSign>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath=""/>
     </ItemGroup>
 </Project>
