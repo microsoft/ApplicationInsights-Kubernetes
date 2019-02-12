@@ -134,7 +134,7 @@ namespace Microsoft.Extensions.DependencyInjection
             // Create a default logger when not passed in.
             logger = logger ?? serviceProvider.GetService<ILogger<IKubernetesServiceCollectionBuilder>>();
 
-            // Apply the conifguraitons ifnot yet.
+            // Apply the configurations if not yet.
             IOptions<AppInsightsForKubernetesOptions> options = serviceProvider.GetService<IOptions<AppInsightsForKubernetesOptions>>();
 
             if (options.Value == null)

@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static partial class ApplicationInsightsExtensions
     {
         /// <summary>
-        /// Enables Application Insights for Kubernetes on the Default TelemtryConfiguration in the dependency injection system.
+        /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection system.
         /// </summary>
         /// <param name="services">Sets the collection of service descriptors.</param>
         /// <param name="timeout">Sets the maximum time to wait for spinning up the container.</param>
@@ -73,8 +73,8 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Please use AddApplicationInsightsKubernetesEnricher() insead.
-        /// Enables Application Insights Kubernetes for the Default TelemtryConfiguration in the dependency injection system.
+        /// Please use AddApplicationInsightsKubernetesEnricher() instead.
+        /// Enables Application Insights Kubernetes for the Default TelemetryConfiguration in the dependency injection system.
         /// </summary>
         /// <param name="services">Collection of service descriptors.</param>
         /// <param name="timeout">Maximum time to wait for spinning up the container.</param>
@@ -92,7 +92,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Please use "AddApplicationInsightsKubernetesEnricher()" insead.
+        /// Please use "AddApplicationInsightsKubernetesEnricher()" instead.
         /// Enables Application Insights Kubernetes for a given
         /// TelemetryConfiguration.
         /// </summary>

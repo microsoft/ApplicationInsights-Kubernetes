@@ -23,7 +23,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             services = services.AddApplicationInsightsKubernetesEnricher(applyOptions: null, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true, logger: null);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
-            // Replace the IKubeHttpClientSetingsProvider in case the test is not running inside a container.
+            // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
             Assert.NotNull(services.FirstOrDefault(s => s.ServiceType == typeof(IKubeHttpClientSettingsProvider)));
             Mock<IKubeHttpClientSettingsProvider> mock = new Mock<IKubeHttpClientSettingsProvider>();
             services.Remove(new ServiceDescriptor(typeof(IKubeHttpClientSettingsProvider), typeof(KubeHttpClientSettingsProvider), ServiceLifetime.Singleton));
@@ -54,7 +54,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 logger: null);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
-            // Replace the IKubeHttpClientSetingsProvider in case the test is not running inside a container.
+            // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
             Assert.NotNull(services.FirstOrDefault(s => s.ServiceType == typeof(IKubeHttpClientSettingsProvider)));
             Mock<IKubeHttpClientSettingsProvider> mock = new Mock<IKubeHttpClientSettingsProvider>();
             services.Remove(new ServiceDescriptor(typeof(IKubeHttpClientSettingsProvider), typeof(KubeHttpClientSettingsProvider), ServiceLifetime.Singleton));
@@ -69,7 +69,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             }
             else
             {
-                Assert.True(false, "Not the target telementry initializer.");
+                Assert.True(false, "Not the target telemetry initializer.");
             }
         }
 
@@ -84,7 +84,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 }, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true, logger: null);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
-            // Replace the IKubeHttpClientSetingsProvider in case the test is not running inside a container.
+            // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
             Assert.NotNull(services.FirstOrDefault(s => s.ServiceType == typeof(IKubeHttpClientSettingsProvider)));
             Mock<IKubeHttpClientSettingsProvider> mock = new Mock<IKubeHttpClientSettingsProvider>();
             services.Remove(new ServiceDescriptor(typeof(IKubeHttpClientSettingsProvider), typeof(KubeHttpClientSettingsProvider), ServiceLifetime.Singleton));
@@ -99,7 +99,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             }
             else
             {
-                Assert.True(false, "Not the target telementry initializer.");
+                Assert.True(false, "Not the target telemetry initializer.");
             }
         }
 
@@ -118,7 +118,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 applyOptions: null, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true, logger: null);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
-            // Replace the IKubeHttpClientSetingsProvider in case the test is not running inside a container.
+            // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
             Assert.NotNull(services.FirstOrDefault(s => s.ServiceType == typeof(IKubeHttpClientSettingsProvider)));
             Mock<IKubeHttpClientSettingsProvider> mock = new Mock<IKubeHttpClientSettingsProvider>();
             services.Remove(new ServiceDescriptor(typeof(IKubeHttpClientSettingsProvider), typeof(KubeHttpClientSettingsProvider), ServiceLifetime.Singleton));
@@ -133,7 +133,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             }
             else
             {
-                Assert.True(false, "Not the target telementry initializer.");
+                Assert.True(false, "Not the target telemetry initializer.");
             }
         }
 
@@ -155,7 +155,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 }, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true, logger: null);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
-            // Replace the IKubeHttpClientSetingsProvider in case the test is not running inside a container.
+            // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
             Assert.NotNull(services.FirstOrDefault(s => s.ServiceType == typeof(IKubeHttpClientSettingsProvider)));
             Mock<IKubeHttpClientSettingsProvider> mock = new Mock<IKubeHttpClientSettingsProvider>();
             services.Remove(new ServiceDescriptor(typeof(IKubeHttpClientSettingsProvider), typeof(KubeHttpClientSettingsProvider), ServiceLifetime.Singleton));
@@ -170,7 +170,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             }
             else
             {
-                Assert.True(false, "Not the target telementry initializer.");
+                Assert.True(false, "Not the target telemetry initializer.");
             }
         }
 
