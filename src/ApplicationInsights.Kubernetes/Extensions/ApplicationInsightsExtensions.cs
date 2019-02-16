@@ -11,14 +11,14 @@ using Microsoft.Extensions.Options;
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
-    /// Extnesion method to inject Kubernetes Telemtry Initializer.
+    /// Extension method to inject Kubernetes Telemetry Initializer.
     /// </summary>
     public static partial class ApplicationInsightsExtensions
     {
         private const string ConfigurationSectionName = "AppInsightsForKubernetes";
 
         /// <summary>
-        /// Enables Application Insights for Kubernetes on the Default TelemtryConfiguration in the dependency injection system.
+        /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection system.
         /// </summary>
         /// <param name="services">Collection of service descriptors.</param>
         /// <returns>The collection of services descriptors injected into.</returns>
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Enables Application Insights for Kubernetes on the Default TelemtryConfiguration in the dependency injection system with custom options.
+        /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection system with custom options.
         /// </summary>
         /// <param name="services">Collection of service descriptors.</param>
         /// <param name="applyOptions">Action to customize the configuration of Application Insights for Kubernetes.</param>
@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Enables Application Insights for Kubernetes on the Default TelemtryConfiguration in the dependency injection system with custom options and debugging components.
+        /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection system with custom options and debugging components.
         /// </summary>
         /// <param name="services">Collection of service descriptors.</param>
         /// <param name="applyOptions">Action to customize the configuration of Application Insights for Kubernetes.</param>
@@ -105,7 +105,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Enables applicaiton insights for kubernetes.
+        /// Enables application insights for kubernetes.
         /// </summary>
         private static IServiceCollection EnableKubernetesImpl(IServiceCollection serviceCollection,
             Func<bool> detectKubernetes,
