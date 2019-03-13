@@ -4,7 +4,7 @@ When running a Console Application inside a Kubernetes managed container, and if
 
 _Note: This is an example that does not follow all best practices, including security-related best practices. E.g. Application Insights instrumentation key is not adequately protected (it should be deployed as a secret)._
 
-## Prerequisite
+## Prerequisites
 
 * .NET Core SDK 2.1.300 or above
 
