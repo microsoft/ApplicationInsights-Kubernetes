@@ -1,0 +1,57 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Debug",
+            "command": "${workspaceFolder}/../build/Build.cmd",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Build Release",
+            "command": "${workspaceFolder}/../build/Build.cmd",
+            "type": "shell",
+            "group": "build",
+            "args": [
+                "Release",
+            ],
+            "problemMatcher": "$msCompile",
+        },
+        {
+            "label": "ReBuild Debug",
+            "command": "${workspaceFolder}/../build/Build.cmd",
+            "type": "shell",
+            "group": "build",
+            "args": [
+                "Debug",
+                "True",
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "ReBuild Release",
+            "command": "${workspaceFolder}/../build/Build.cmd",
+            "type": "shell",
+            "group": "build",
+            "args": [
+                "Release",
+                "True",
+            ],
+            "problemMatcher": "$msCompile",
+        },
+        {
+            "label": "Run Unit Tests",
+            "command": "dotnet",
+            "type": "process",
+            "group": "test",
+            "options": {
+                "cwd": "${workspaceFolder}/../tests/UnitTests"
+            },
+            "args": [
+                "test"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

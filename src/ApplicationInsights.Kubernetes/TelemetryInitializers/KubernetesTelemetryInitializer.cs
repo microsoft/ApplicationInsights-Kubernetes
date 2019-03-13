@@ -46,7 +46,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Debug.Assert(options != null, "Options can't be null.");
             _options = Arguments.IsNotNull(options?.Value, nameof(options));
 
-            _logger.LogDebug($@"Initialize Application Insihgts for Kubernetes telemetry initializer with Options:
+            _logger.LogDebug($@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
 {JsonConvert.SerializeObject(_options)}");
 
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
