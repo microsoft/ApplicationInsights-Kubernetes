@@ -25,7 +25,10 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services)
         {
-            return services.AddApplicationInsightsKubernetesEnricher(applyOptions: null);
+            return services.Configure<TelemetryConfiguration>(
+                (config) =>
+                    config.AddApplicationInsightsKubernetesEnricher(
+                            applyOptions: null));
         }
 
         /// <summary>
