@@ -15,10 +15,10 @@ namespace ApplicationInsights.Kubernetes.HostingStartup
         public void Configure(IWebHostBuilder builder)
         {
             builder
-                .ConfigureServices((ctxt, services) =>
+                .ConfigureServices((cxt, services) =>
                 {
                     services.AddApplicationInsightsKubernetesEnricher();
-                    services.AddApplicationInsightsTelemetry(ctxt.Configuration);
+                    services.AddApplicationInsightsTelemetry(cxt.Configuration);
                 });
         }
     }
