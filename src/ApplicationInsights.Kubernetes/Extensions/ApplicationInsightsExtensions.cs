@@ -3,9 +3,8 @@ using System.IO;
 using System.Linq;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
-using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -16,6 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static partial class ApplicationInsightsExtensions
     {
         private const string ConfigurationSectionName = "AppInsightsForKubernetes";
+        private static readonly ApplicationInsightsKubernetesDiagnosticSource _diagnosticSource = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
         /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection system.
@@ -25,10 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services)
         {
-            return services.Configure<TelemetryConfiguration>(
-                (config) =>
-                    config.AddApplicationInsightsKubernetesEnricher(
-                            applyOptions: null));
+            return AddApplicationInsightsKubernetesEnricher(services, applyOptions: null);
         }
 
         /// <summary>
@@ -44,8 +41,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services.AddApplicationInsightsKubernetesEnricher(
                 applyOptions,
                 kubernetesServiceCollectionBuilder: null,
-                detectKubernetes: null,
-                logger: null
+                detectKubernetes: null
             );
         }
 
@@ -56,17 +52,17 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="applyOptions">Action to customize the configuration of Application Insights for Kubernetes.</param>
         /// <param name="kubernetesServiceCollectionBuilder">Sets the service collection builder for Application Insights for Kubernetes to overwrite the default one.</param>
         /// <param name="detectKubernetes">Sets a delegate overwrite the default detector of the Kubernetes environment.</param>
-        /// <param name="logger">Sets a logger to overwrite the default logger from the given service collection.</param>
         /// <returns>The collection of services descriptors injected into.</returns>
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services,
             Action<AppInsightsForKubernetesOptions> applyOptions,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
-            Func<bool> detectKubernetes,
-            ILogger<IKubernetesServiceCollectionBuilder> logger)
+            Func<bool> detectKubernetes)
         {
-            // Inject of the service shall return immediately.
-            return EnableKubernetesImpl(services, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions: applyOptions, logger: logger);
+            return services.Configure<TelemetryConfiguration>((config) =>
+            {
+                config.AddApplicationInsightsKubernetesEnricher(applyOptions: applyOptions, kubernetesServiceCollectionBuilder: kubernetesServiceCollectionBuilder, detectKubernetes: detectKubernetes);
+            });
         }
 
         /// <summary>
@@ -76,20 +72,14 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="applyOptions">Sets a delegate to apply the configuration for the telemetry initializer.</param>
         /// <param name="kubernetesServiceCollectionBuilder">Sets a service collection builder.</param>
         /// <param name="detectKubernetes">Sets a delegate to detect if the current application is running in Kubernetes hosted container.</param>
-        /// <param name="logger">Sets a logger for building the service collection.</param>
         public static void AddApplicationInsightsKubernetesEnricher(
             this TelemetryConfiguration telemetryConfiguration,
             Action<AppInsightsForKubernetesOptions> applyOptions = null,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
-            Func<bool> detectKubernetes = null,
-            ILogger<IKubernetesServiceCollectionBuilder> logger = null)
+            Func<bool> detectKubernetes = null)
         {
             IServiceCollection standaloneServiceCollection = new ServiceCollection();
-            standaloneServiceCollection = standaloneServiceCollection.AddApplicationInsightsKubernetesEnricher(
-                applyOptions,
-                kubernetesServiceCollectionBuilder,
-                detectKubernetes,
-                logger);
+            standaloneServiceCollection = EnableKubernetesImpl(standaloneServiceCollection, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
 
             // Static class can't used as generic types.
             IServiceProvider serviceProvider = standaloneServiceCollection.BuildServiceProvider();
@@ -99,11 +89,11 @@ namespace Microsoft.Extensions.DependencyInjection
             if (k8sTelemetryInitializer != null)
             {
                 telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
-                logger?.LogInformation($"{nameof(KubernetesTelemetryInitializer)} is injected.");
+                _diagnosticSource.LogInformation("{0} is injected.", nameof(KubernetesTelemetryInitializer));
             }
             else
             {
-                logger?.LogError($"Getting ${nameof(KubernetesTelemetryInitializer)} from the service provider failed.");
+                _diagnosticSource.LogError("Getting {0} from the service provider failed.", nameof(KubernetesTelemetryInitializer));
             }
         }
 
@@ -113,29 +103,22 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection EnableKubernetesImpl(IServiceCollection serviceCollection,
             Func<bool> detectKubernetes,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
-            Action<AppInsightsForKubernetesOptions> applyOptions,
-            ILogger<IKubernetesServiceCollectionBuilder> logger = null)
+            Action<AppInsightsForKubernetesOptions> applyOptions)
         {
-            BuildServiceBases(serviceCollection, applyOptions, ref logger);
+            BuildServiceBases(serviceCollection, applyOptions);
             serviceCollection = BuildK8sServiceCollection(
                 serviceCollection,
                 detectKubernetes,
-                logger: logger,
                 kubernetesServiceCollectionBuilder: kubernetesServiceCollectionBuilder);
             return serviceCollection;
         }
 
         private static void BuildServiceBases(
             IServiceCollection serviceCollection,
-            Action<AppInsightsForKubernetesOptions> applyOptions,
-            ref ILogger<IKubernetesServiceCollectionBuilder> logger)
+            Action<AppInsightsForKubernetesOptions> applyOptions)
         {
-            serviceCollection.AddLogging();
             serviceCollection.AddOptions();
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-
-            // Create a default logger when not passed in.
-            logger = logger ?? serviceProvider.GetService<ILogger<IKubernetesServiceCollectionBuilder>>();
 
             // Apply the configurations if not yet.
             IOptions<AppInsightsForKubernetesOptions> options = serviceProvider.GetService<IOptions<AppInsightsForKubernetesOptions>>();
@@ -166,12 +149,11 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection BuildK8sServiceCollection(
             IServiceCollection services,
             Func<bool> detectKubernetes,
-            ILogger<IKubernetesServiceCollectionBuilder> logger,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
             detectKubernetes = detectKubernetes ?? IsRunningInKubernetes;
             kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ??
-                new KubernetesServiceCollectionBuilder(detectKubernetes, logger);
+                new KubernetesServiceCollectionBuilder(detectKubernetes);
 
             services = kubernetesServiceCollectionBuilder.InjectServices(services);
 

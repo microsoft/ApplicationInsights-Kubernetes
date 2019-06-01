@@ -3,8 +3,6 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Xunit;
 
-using static Microsoft.ApplicationInsights.Netcore.Kubernetes.TestUtils;
-
 namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
 {
     public class KuteHttpClientSettingsProviderTests
@@ -47,7 +45,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         [Fact(DisplayName = "Base address is formed by constructor")]
         public void BaseAddressShouldBeFormed()
         {
-            IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+            IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 pathToCGroup: "TestCGroup",
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -61,7 +59,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         [Fact(DisplayName = "Base address is formed by constructor of windows kube settings provider")]
         public void BaseAddressShouldBeFormedWin()
         {
-            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(GetLogger<KubeHttpSettingsWinContainerProvider>(),
+            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -74,7 +72,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         [Fact(DisplayName = "Container id is set to null for windows container settings")]
         public void ContainerIdIsAlwaysNullForWinSettings()
         {
-            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(GetLogger<KubeHttpSettingsWinContainerProvider>(),
+            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -86,7 +84,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
 
         public void TokenShoudBeFetched()
         {
-            IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+            IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 pathToCGroup: "TestCGroup",
                 pathToNamespace: "namespace",
                 pathToToken: "token",
@@ -98,7 +96,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         [Fact(DisplayName = "Token can be fetched by windows settings provider")]
         public void TokenShouldBeFetchedForWin()
         {
-            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(GetLogger<KubeHttpSettingsWinContainerProvider>(),
+            IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 tokenFileName:"token",
@@ -111,7 +109,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         [Fact(DisplayName = "Return true when certificate chain is valid")]
         public void TrueWhenValidCertificate()
         {
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 pathToCGroup: "TestCGroup",
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -128,7 +126,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         [Fact(DisplayName = "Return false when certificate chain is invalid")]
         public void FalseWhenInvalidCertificate()
         {
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 pathToCGroup: "TestCGroup",
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -145,7 +143,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         [Fact(DisplayName = "Return false when certificate out of date")]
         public void FalseWhenOutOfDateCertificate()
         {
-            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(GetLogger<KubeHttpClientSettingsProvider>(),
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 pathToCGroup: "TestCGroup",
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",

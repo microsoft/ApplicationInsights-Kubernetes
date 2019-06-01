@@ -2,8 +2,8 @@
 using System.Runtime.InteropServices;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -12,19 +12,15 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
-        private readonly ILogger _logger;
         private readonly Func<bool> _isRunningInKubernetes;
+        private readonly ApplicationInsightsKubernetesDiagnosticSource _diagnosticSource = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
         /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.
         /// </summary>
         /// <param name="isRunningInKubernetes"></param>
-        /// <param name="logger"></param>
-        public KubernetesServiceCollectionBuilder(
-            Func<bool> isRunningInKubernetes,
-            ILogger<IKubernetesServiceCollectionBuilder> logger)
+        public KubernetesServiceCollectionBuilder(Func<bool> isRunningInKubernetes)
         {
-            _logger = logger;
             _isRunningInKubernetes = isRunningInKubernetes ?? throw new ArgumentNullException(nameof(isRunningInKubernetes));
         }
 
@@ -42,12 +38,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 InjectChangableServices(services);
 
                 services.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
-                _logger?.LogDebug("Application Insights Kubernetes injected the service successfully.");
+                _diagnosticSource.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 return services;
             }
             else
             {
-                _logger?.LogWarning("Application is not running inside a Kubernetes cluster.");
+                _diagnosticSource.LogWarning("Application is not running inside a Kubernetes cluster.");
                 return serviceCollection;
             }
         }
@@ -71,7 +67,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else
             {
-                _logger?.LogWarning("Application is not running inside a Kubernetes cluster.");
+                _diagnosticSource.LogWarning("Application is not running inside a Kubernetes cluster.");
                 return serviceCollection;
             }
         }
@@ -91,18 +87,15 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider>(p =>
-                    new KubeHttpClientSettingsProvider(logger: p.GetService<ILogger<KubeHttpClientSettingsProvider>>()));
+                serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsProvider>();
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider>(p =>
-                    new KubeHttpSettingsWinContainerProvider(logger: p.GetService<ILogger<KubeHttpSettingsWinContainerProvider>>()));
+                serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpSettingsWinContainerProvider>();
             }
             else
             {
-                // TODO: See if there is a way to get rid of intermediate service provider when getting logger.
-                serviceCollection.BuildServiceProvider().GetService<ILogger<KubernetesServiceCollectionBuilder>>().LogError("Unsupported OS.");
+                _diagnosticSource.LogError("Unsupported OS.");
             }
             serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
         }

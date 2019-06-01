@@ -10,8 +10,6 @@ using Moq;
 using Newtonsoft.Json;
 using Xunit;
 
-using static Microsoft.ApplicationInsights.Netcore.Kubernetes.TestUtils;
-
 namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
 {
     public class K8sQueryClientTests
@@ -35,7 +33,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         {
             Exception ex = Assert.Throws<ArgumentNullException>(() =>
             {
-                using (new K8sQueryClient(null, GetLogger<K8sQueryClient>())) { }
+                using (new K8sQueryClient(null)) { }
             });
 
             Assert.Equal("Value cannot be null." + Environment.NewLine +
@@ -48,8 +46,8 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         {
             var settingsMock = new Mock<IKubeHttpClientSettingsProvider>();
             settingsMock.Setup(p => p.CreateMessageHandler()).Returns(new HttpClientHandler());
-            using (KubeHttpClient httpClient = new KubeHttpClient(settingsMock.Object, GetLogger<KubeHttpClient>()))
-            using (K8sQueryClient target = new K8sQueryClient(httpClient, GetLogger<K8sQueryClient>()))
+            using (KubeHttpClient httpClient = new KubeHttpClient(settingsMock.Object))
+            using (K8sQueryClient target = new K8sQueryClient(httpClient))
             {
                 Assert.Same(httpClient, target.KubeHttpClient);
             }
@@ -74,7 +72,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 }))
             };
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetPodsAsync();
             }
@@ -102,7 +100,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             };
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
 
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 IEnumerable<K8sPod> result = await target.GetPodsAsync();
 
@@ -130,7 +128,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(
                 response));
 
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetMyPodAsync();
             }
@@ -153,15 +151,15 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 {
                     Items = new List<K8sPod>
                     {
-                        new K8sPod(){ Status = new K8sPodStatus(){ ContainerStatuses= new List<ContainerStatus>(){ new ContainerStatus() { ContainerID="noizy in front" } } }},
+                        new K8sPod(){ Status = new K8sPodStatus(){ ContainerStatuses= new List<ContainerStatus>(){ new ContainerStatus() { ContainerID="noisy in front" } } }},
                         new K8sPod(){ Status = new K8sPodStatus(){ ContainerStatuses= new List<ContainerStatus>(){ new ContainerStatus() { ContainerID="containerId" } } }},
-                        new K8sPod(){ Status = new K8sPodStatus(){ ContainerStatuses= new List<ContainerStatus>(){ new ContainerStatus() { ContainerID="noizy after" } } }}
+                        new K8sPod(){ Status = new K8sPodStatus(){ ContainerStatuses= new List<ContainerStatus>(){ new ContainerStatus() { ContainerID="noisy after" } } }}
                     }
                 }))
             };
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
 
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 K8sPod result = await target.GetMyPodAsync();
 
@@ -186,12 +184,12 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 }))
             };
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetReplicasAsync();
             }
 
-            httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m => 
+            httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m =>
                 m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/extensions/v1beta1/namespaces/queryNamespace/replicasets"))), Times.Once);
         }
 
@@ -216,7 +214,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
 
             IEnumerable<K8sReplicaSet> result;
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 result = await target.GetReplicasAsync();
             }
@@ -240,7 +238,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             };
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
 
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetDeploymentsAsync();
             }
@@ -267,7 +265,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             };
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
 
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 IEnumerable<K8sDeployment> result = await target.GetDeploymentsAsync();
                 Assert.NotNull(result);
@@ -289,7 +287,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 Content = new StringContent(JsonConvert.SerializeObject(new K8sEntityList<K8sPod>()))
             };
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetNodesAsync();
             }
@@ -319,7 +317,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(
                 response));
 
-            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object, GetLogger<K8sQueryClient>()))
+            using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 IEnumerable<K8sNode> result = await target.GetNodesAsync();
 

@@ -1,25 +1,25 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal class KubeHttpClient : HttpClient, IKubeHttpClient
     {
+        private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
         public IKubeHttpClientSettingsProvider Settings { get; private set; }
 
         public KubeHttpClient(
-            IKubeHttpClientSettingsProvider settingsProvider,
-            ILogger<KubeHttpClient> logger)
+            IKubeHttpClientSettingsProvider settingsProvider)
             : base(settingsProvider.CreateMessageHandler())
         {
-            _logger = Arguments.IsNotNull(logger, nameof(logger));
             this.Settings = settingsProvider;
             string token = settingsProvider.GetToken();
 
             if (!string.IsNullOrEmpty(token))
             {
-                _logger.LogDebug($"Access token is not null. Set default request header.");
+                _logger.LogDebug("Access token is not null. Set default request header.");
                 this.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             }
             else
@@ -30,6 +30,5 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             this.BaseAddress = settingsProvider.ServiceBaseAddress;
         }
 
-        private readonly ILogger _logger;
     }
 }

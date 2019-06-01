@@ -14,20 +14,19 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private readonly string _certFilePath;
         private readonly string _tokenFilePath;
 
-        public KubeHttpClientSettingsProvider(ILogger<KubeHttpClientSettingsProvider> logger)
-            : this(logger, kubernetesServiceHost: null)
+        public KubeHttpClientSettingsProvider()
+            : this(kubernetesServiceHost: null)
         {
         }
 
         public KubeHttpClientSettingsProvider(
-            ILogger<KubeHttpClientSettingsProvider> logger,
             string pathToToken = @"/var/run/secrets/kubernetes.io/serviceaccount/token",
             string pathToCert = @"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
             string pathToNamespace = @"/var/run/secrets/kubernetes.io/serviceaccount/namespace",
             string pathToCGroup = @"/proc/self/cgroup",
             string kubernetesServiceHost = null,
             string kubernetesServicePort = null)
-            : base(kubernetesServiceHost, kubernetesServicePort, logger)
+            : base(kubernetesServiceHost, kubernetesServicePort)
         {
             _tokenFilePath = Arguments.IsNotNullOrEmpty(pathToToken, nameof(pathToToken));
             _certFilePath = Arguments.IsNotNullOrEmpty(pathToCert, nameof(pathToCert));
@@ -70,8 +69,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             return _certFilePath;
         }
 
-        internal KubeHttpClientSettingsProvider(bool isForTesting, ILogger<KubeHttpClientSettingsProvider> logger)
-            :base("http://127.0.0.1", "8001", logger)
+        internal KubeHttpClientSettingsProvider(bool isForTesting)
+            : base("http://127.0.0.1", "8001")
         {
             if (!isForTesting)
             {

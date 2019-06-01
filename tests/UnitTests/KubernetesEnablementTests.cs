@@ -20,7 +20,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
         public void ServiceInjected()
         {
             IServiceCollection services = new ServiceCollection();
-            services = services.AddApplicationInsightsKubernetesEnricher(applyOptions: null, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true, logger: null);
+            services = services.AddApplicationInsightsKubernetesEnricher(applyOptions: null, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
             // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
@@ -31,10 +31,6 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             ITelemetryInitializer targetTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>().FirstOrDefault(ti => ti is KubernetesTelemetryInitializer);
-
-            // Logging
-            serviceProvider.GetRequiredService<ILoggerFactory>();
-            serviceProvider.GetRequiredService<ILogger<KubernetesEnablementTest>>();
 
             // K8s services
             serviceProvider.GetRequiredService<IKubeHttpClientSettingsProvider>();
@@ -50,8 +46,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             services = services.AddApplicationInsightsKubernetesEnricher(
                 applyOptions:null,
                 kubernetesServiceCollectionBuilder: null,
-                detectKubernetes: () => true,
-                logger: null);
+                detectKubernetes: () => true);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
             // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
@@ -81,7 +76,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 option =>
                 {
                     option.InitializationTimeout = TimeSpan.FromSeconds(5);
-                }, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true, logger: null);
+                }, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
             // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
@@ -115,7 +110,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             services.AddSingleton<IConfiguration>(config);
 
             services = services.AddApplicationInsightsKubernetesEnricher(
-                applyOptions: null, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true, logger: null);
+                applyOptions: null, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
             // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
@@ -152,7 +147,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 applyOptions: option =>
                 {
                     option.InitializationTimeout = TimeSpan.FromSeconds(30);
-                }, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true, logger: null);
+                }, kubernetesServiceCollectionBuilder: null, detectKubernetes: () => true);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
             // Replace the IKubeHttpClientSettingsProvider in case the test is not running inside a container.
@@ -193,8 +188,7 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
                 return new KubernetesTelemetryInitializer(
                     envFactoryMock.Object,
                     p.GetService<IOptions<AppInsightsForKubernetesOptions>>(),
-                    SDKVersionUtils.Instance,
-                    p.GetService<ILogger<KubernetesTelemetryInitializer>>());
+                    SDKVersionUtils.Instance);
             });
             serviceCollectionBuilderMock.Setup(b => b.InjectServices(It.IsAny<IServiceCollection>()))
                 .Returns(sc);

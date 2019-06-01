@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Entities;
-using Microsoft.Extensions.Logging;
 
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
@@ -13,7 +13,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal class K8sEnvironmentFactory : IK8sEnvironmentFactory
     {
-        private readonly ILogger _logger;
+        private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
         private readonly IKubeHttpClientSettingsProvider _httpClientSettings;
         private readonly KubeHttpClientFactory _httpClientFactory;
         private readonly K8sQueryClientFactory _k8sQueryClientFactory;
@@ -21,10 +21,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public K8sEnvironmentFactory(
             IKubeHttpClientSettingsProvider httpClientSettingsProvider,
             KubeHttpClientFactory httpClientFactory,
-            K8sQueryClientFactory k8SQueryClientFactory,
-            ILogger<K8sEnvironmentFactory> logger)
+            K8sQueryClientFactory k8SQueryClientFactory)
         {
-            _logger = Arguments.IsNotNull(logger, nameof(logger));
             _httpClientSettings = Arguments.IsNotNull(httpClientSettingsProvider, nameof(httpClientSettingsProvider));
             _httpClientFactory = Arguments.IsNotNull(httpClientFactory, nameof(httpClientFactory));
             _k8sQueryClientFactory = Arguments.IsNotNull(k8SQueryClientFactory, nameof(k8SQueryClientFactory));

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,6 @@ using System.Globalization;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-
     /// <summary>
     /// Telemetry Initializer for K8s Environment
     /// </summary>
@@ -36,18 +36,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
             IOptions<AppInsightsForKubernetesOptions> options,
-            SDKVersionUtils sdkVersionUtils,
-            ILogger<KubernetesTelemetryInitializer> logger)
+            SDKVersionUtils sdkVersionUtils)
         {
             _k8sEnvironment = null;
-            _logger = logger;
 
             // Options can't be null.
             Debug.Assert(options != null, "Options can't be null.");
             _options = Arguments.IsNotNull(options?.Value, nameof(options));
 
-            _logger.LogDebug($@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
-{JsonConvert.SerializeObject(_options)}");
+            _logger.LogDebug(@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
+{0}", JsonConvert.SerializeObject(_options));
 
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
             _timeoutAt = DateTime.Now.Add(_options.InitializationTimeout);
@@ -129,7 +127,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             // Deployment
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this._k8sEnvironment.DeploymentName, isValueOptional: true);
 
-            // Ndoe
+            // Node
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this._k8sEnvironment.NodeUid);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this._k8sEnvironment.NodeName);
         }
@@ -149,7 +147,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 int processorCount = Environment.ProcessorCount;
                 Debug.Assert(processorCount > 0, $"How could process count be {processorCount}?");
-                // A very simple but not that accruate evaluation of how much CPU the process is take out of a core.
+                // A very simple but not that accurate evaluation of how much CPU the process is take out of a core.
                 double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds);
                 cpuString = CPUPercentage.ToString("P2", CultureInfo.InvariantCulture);
             }
@@ -161,11 +159,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 #endif
 
-        private void SetCustomDimension(ITelemetry telemetry, string key, string value, bool isValueOptional = false)
+        private static void SetCustomDimension(ITelemetry telemetry, string key, string value, bool isValueOptional = false)
         {
             if (telemetry == null)
             {
-                _logger.LogError("telemetry object is null in telememtry initializer.");
+                _logger.LogError("telemetry object is null in telemetry initializer.");
                 return;
             }
 
@@ -179,11 +177,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 if (isValueOptional)
                 {
-                    _logger.LogTrace(Invariant($"Value is null or empty for key: {key}"));
+                    _logger.LogTrace("Value is null or empty for key: {0}", key);
                 }
                 else
                 {
-                    _logger.LogError(Invariant($"Value is required to set custom dimension. Key: {key}"));
+                    _logger.LogError("Value is required to set custom dimension. Key: {0}", key);
                 }
                 return;
             }
@@ -197,17 +195,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 string existingValue = telemetry.Context.Properties[key];
                 if (string.Equals(existingValue, value, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogTrace(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
+                    _logger.LogTrace("The telemetry already contains the property of {0} with the same value of {1}.", key, existingValue);
                 }
                 else
                 {
                     telemetry.Context.Properties[key] = value;
-                    _logger.LogDebug(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
+                    _logger.LogDebug("The telemetry already contains the property of {0} with value {1}. The new value is: {2}", key, existingValue, value);
                 }
             }
         }
 
-        private readonly ILogger _logger;
         private readonly SDKVersionUtils _sdkVersionUtils;
         private readonly DateTime _timeoutAt;
 
@@ -218,5 +215,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         internal bool _isK8sQueryTimeout = false;
         private bool _isK8sQueryTimeoutReported = false;
+        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     }
 }
