@@ -37,7 +37,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// </summary>
         public void LogCritical(string message, params object[] args)
         {
-            Write(Level.Critical, message, args);
+            Write(ApplicationInsightsKubernetesDiagnosticSourceLevel.Critical, message, args);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// </summary>
         public void LogError(string message, params object[] args)
         {
-            Write(Level.Error, message, args);
+            Write(ApplicationInsightsKubernetesDiagnosticSourceLevel.Error, message, args);
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// </summary>
         public void LogWarning(string message, params object[] args)
         {
-            Write(Level.Warning, message, args);
+            Write(ApplicationInsightsKubernetesDiagnosticSourceLevel.Warning, message, args);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <param name="args"></param>
         public void LogInformation(string message, params object[] args)
         {
-            Write(Level.Information, message, args);
+            Write(ApplicationInsightsKubernetesDiagnosticSourceLevel.Information, message, args);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <param name="args"></param>
         public void LogDebug(string message, params object[] args)
         {
-            Write(Level.Debug, message, args);
+            Write(ApplicationInsightsKubernetesDiagnosticSourceLevel.Debug, message, args);
         }
 
         /// <summary>
@@ -83,44 +83,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <param name="args"></param>
         public void LogTrace(string message, params object[] args)
         {
-            Write(Level.Trace, message, args);
-        }
-
-        /// <summary>
-        /// Diagnostic Source message levels
-        /// </summary>
-        public static class Level
-        {
-            /// <summary>
-            /// Gets the level of critical.
-            /// </summary>
-            /// <returns></returns>
-            public const string Critical = nameof(Critical);
-            /// <summary>
-            /// Gets the level of error.
-            /// </summary>
-            /// <returns></returns>
-            public const string Error = nameof(Error);
-            /// <summary>
-            /// Gets the level of warning.
-            /// </summary>
-            /// <returns></returns>
-            public const string Warning = nameof(Warning);
-            /// <summary>
-            /// Gets the level of information.
-            /// </summary>
-            /// <returns></returns>
-            public const string Information = nameof(Information);
-            /// <summary>
-            /// Gets the level of debug.
-            /// </summary>
-            /// <returns></returns>
-            public const string Debug = nameof(Debug);
-            /// <summary>
-            /// Gets the level of trace.
-            /// </summary>
-            /// <returns></returns>
-            public const string Trace = nameof(Trace);
+            Write(ApplicationInsightsKubernetesDiagnosticSourceLevel.Trace, message, args);
         }
 
         private void Write(string level, string message, params object[] args)
@@ -133,5 +96,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
                 });
             }
         }
+
     }
 }

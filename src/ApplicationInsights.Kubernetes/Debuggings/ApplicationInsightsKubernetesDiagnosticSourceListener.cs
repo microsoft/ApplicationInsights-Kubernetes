@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.DiagnosticAdapter;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
@@ -5,68 +6,77 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     /// <summary>
     /// The default listener of Application Insights for Kubernetes.
     /// </summary>
-    public class ApplicationInsightsKubernetesDiagnosticSourceConsoleListener
+    public sealed class ApplicationInsightsKubernetesDiagnosticSourceConsoleListener
     {
+
+        private ApplicationInsightsKubernetesDiagnosticSourceConsoleListener() { }
+        /// <summary>
+        /// Gets the singleton instance of Application Insights for Kubernetes diagnostic source listener
+        /// </summary>
+        /// <returns></returns>
+        public static ApplicationInsightsKubernetesDiagnosticSourceConsoleListener Instance { get; } = new ApplicationInsightsKubernetesDiagnosticSourceConsoleListener();
+
+#pragma warning disable CA1822
         /// <summary>
         /// Invokes the message of critical.
         /// </summary>
         /// <param name="content"></param>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSource.Level.Critical)]
+        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Critical)]
         public void OnLogCritical(string content)
         {
-            WriteLine(ApplicationInsightsKubernetesDiagnosticSource.Level.Critical, content);
+            WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Critical, content);
         }
 
         /// <summary>
         /// Invokes the message of error.
         /// </summary>
         /// <param name="content"></param>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSource.Level.Error)]
+        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Error)]
         public void OnLogError(string content)
         {
-            WriteLine(ApplicationInsightsKubernetesDiagnosticSource.Level.Error, content);
+            WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Error, content);
         }
 
         /// <summary>
         /// Invokes the message of warning.
         /// </summary>
         /// <param name="content"></param>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSource.Level.Warning)]
+        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Warning)]
         public void OnLogWarning(string content)
         {
-            WriteLine(ApplicationInsightsKubernetesDiagnosticSource.Level.Warning, content);
+            WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Warning, content);
         }
 
         /// <summary>
         /// Invokes the message of information.
         /// </summary>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSource.Level.Information)]
+        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Information)]
         public void OnLogInfo(string content)
         {
-            WriteLine(ApplicationInsightsKubernetesDiagnosticSource.Level.Information, content);
+            WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Information, content);
         }
 
         /// <summary>
         /// Invokes the message of debugging.
         /// </summary>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSource.Level.Debug)]
+        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Debug)]
         public void OnLogDebug(string content)
         {
-            WriteLine(ApplicationInsightsKubernetesDiagnosticSource.Level.Debug, content);
+            WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Debug, content);
         }
 
         /// <summary>
         /// Invokes the message of tracing.
         /// </summary>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSource.Level.Trace)]
+        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Trace)]
         public void OnLogTrace(string content)
         {
-            WriteLine(ApplicationInsightsKubernetesDiagnosticSource.Level.Trace, content);
+            WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Trace, content);
         }
-
-        private void WriteLine(string level, string content)
+#pragma warning restore CA1822
+        private static void WriteLine(string level, string content)
         {
-            System.Console.WriteLine($"[{level}] {content}");
+            Console.WriteLine($"[{level}]::{content}");
         }
     }
 }
