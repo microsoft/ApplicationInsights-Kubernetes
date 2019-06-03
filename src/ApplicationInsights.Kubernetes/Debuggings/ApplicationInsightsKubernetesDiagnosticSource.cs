@@ -46,7 +46,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 
         private void Write(string level, string message, params object[] args)
         {
-            if (_inner.IsEnabled(level))
+            if (_inner.IsEnabled(DiagnosticSourceName + "." + level))
             {
                 _inner.Write(level, new
                 {
