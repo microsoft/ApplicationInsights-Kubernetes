@@ -7,7 +7,6 @@ using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
@@ -175,7 +174,6 @@ namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
             Mock<ITelemetryChannel> channelMock = new Mock<ITelemetryChannel>();
             Mock<IKubernetesServiceCollectionBuilder> serviceCollectionBuilderMock = new Mock<IKubernetesServiceCollectionBuilder>();
             ServiceCollection sc = new ServiceCollection();
-            sc.AddLogging();
             sc.AddOptions();
             sc.Configure<AppInsightsForKubernetesOptions>(options => options.InitializationTimeout = TimeSpan.FromSeconds(5));
 

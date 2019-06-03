@@ -1,5 +1,4 @@
 ﻿using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {

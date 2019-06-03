@@ -4,8 +4,6 @@ using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Internal;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
@@ -274,7 +272,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private IServiceProvider GetTestServiceProvider()
         {
             IServiceCollection serviceCollection = new ServiceCollection();
-            serviceCollection.AddLogging();
             return serviceCollection.BuildServiceProvider();
         }
 

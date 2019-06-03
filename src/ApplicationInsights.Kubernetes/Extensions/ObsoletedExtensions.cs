@@ -2,12 +2,12 @@ using System;
 using System.Linq;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
     /// This class holds all the obsoleted methods for ApplicationInsightsExtensions for readability.
+    /// This file is NOT built or maintained. It is here just for reference.
     /// </summary>
     public static partial class ApplicationInsightsExtensions
     {

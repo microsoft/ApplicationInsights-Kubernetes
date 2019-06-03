@@ -1,7 +1,6 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {

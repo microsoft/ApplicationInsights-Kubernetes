@@ -4,7 +4,6 @@ using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.Extensions.Logging;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
