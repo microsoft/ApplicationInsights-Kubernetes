@@ -14,12 +14,11 @@ namespace ApplicationInsights.Kubernetes.HostingStartup
         /// <param name="builder">The web host builder.</param>
         public void Configure(IWebHostBuilder builder)
         {
-            builder
-                .ConfigureServices((cxt, services) =>
-                {
-                    services.AddApplicationInsightsKubernetesEnricher();
-                    services.AddApplicationInsightsTelemetry(cxt.Configuration);
-                });
+            builder.ConfigureServices((cxt, services) =>
+            {
+                services.AddApplicationInsightsKubernetesEnricher();
+                services.AddApplicationInsightsTelemetry(cxt.Configuration);
+            });
         }
     }
 }

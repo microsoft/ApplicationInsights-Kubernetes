@@ -61,7 +61,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return services.Configure<TelemetryConfiguration>((config) =>
             {
-                config.AddApplicationInsightsKubernetesEnricher(applyOptions: applyOptions, kubernetesServiceCollectionBuilder: kubernetesServiceCollectionBuilder, detectKubernetes: detectKubernetes);
+                config.AddApplicationInsightsKubernetesEnricher(applyOptions, kubernetesServiceCollectionBuilder, detectKubernetes);
             });
         }
 
@@ -89,6 +89,7 @@ namespace Microsoft.Extensions.DependencyInjection
             if (k8sTelemetryInitializer != null)
             {
                 telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
+                _diagnosticSource.LogTrace("KubernetesTelemetryInitializer has been injected into telemetry configuration #{0}.", telemetryConfiguration.GetHashCode());
                 _diagnosticSource.LogInformation("{0} is injected.", nameof(KubernetesTelemetryInitializer));
             }
             else
