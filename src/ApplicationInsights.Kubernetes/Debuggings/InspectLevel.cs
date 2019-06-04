@@ -3,7 +3,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     /// <summary>
     /// Diagnostic Source message levels
     /// </summary>
-    public enum ApplicationInsightsKubernetesDiagnosticSourceLevel
+    public enum InspectLevel
     {
         /// <summary>
         /// Gets the level of critical.

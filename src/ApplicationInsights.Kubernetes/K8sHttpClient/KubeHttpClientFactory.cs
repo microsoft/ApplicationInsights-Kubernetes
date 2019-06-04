@@ -4,7 +4,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal class KubeHttpClientFactory
     {
-        private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+        private readonly Inspect _logger = Inspect.Instance;
 
         public KubeHttpClientFactory()
         {

@@ -6,7 +6,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal class KubeHttpClient : HttpClient, IKubeHttpClient
     {
-        private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+        private readonly Inspect _logger = Inspect.Instance;
         public IKubeHttpClientSettingsProvider Settings { get; private set; }
 
         public KubeHttpClient(
