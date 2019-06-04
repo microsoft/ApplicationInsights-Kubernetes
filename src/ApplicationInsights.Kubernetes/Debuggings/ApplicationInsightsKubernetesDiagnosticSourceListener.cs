@@ -8,12 +8,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     /// </summary>
     public sealed class ApplicationInsightsKubernetesDiagnosticSourceConsoleListener
     {
+        private ApplicationInsightsKubernetesDiagnosticSourceLevel _minimumLevel = ApplicationInsightsKubernetesDiagnosticSourceLevel.Warning;
         private ApplicationInsightsKubernetesDiagnosticSourceConsoleListener() { }
         /// <summary>
         /// Gets the singleton instance of Application Insights for Kubernetes diagnostic source listener
         /// </summary>
         /// <returns></returns>
         public static ApplicationInsightsKubernetesDiagnosticSourceConsoleListener Instance { get; } = new ApplicationInsightsKubernetesDiagnosticSourceConsoleListener();
+
+        /// <summary>
+        /// Sets the minimum level of the logs to show.
+        /// </summary>
+        public void SetMinimumLevel(ApplicationInsightsKubernetesDiagnosticSourceLevel newLevel) => _minimumLevel = newLevel;
 
 #pragma warning disable CA1822
         /// <summary>
@@ -74,9 +80,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         }
 #pragma warning restore CA1822
 
-        private static void WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel level, string content)
+        private void WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel level, string content)
         {
-            Console.WriteLine($"[{level}] {content}");
+            if (level >= _minimumLevel)
+            {
+                Console.WriteLine($"[{level}] {content}");
+            }
         }
     }
 }

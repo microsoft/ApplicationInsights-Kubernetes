@@ -9,31 +9,31 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// Gets the level of critical.
         /// </summary>
         /// <returns></returns>
-        Critical = 0,
+        Critical = 5,
         /// <summary>
         /// Gets the level of error.
         /// </summary>
         /// <returns></returns>
-        Error,
+        Error = 4,
         /// <summary>
         /// Gets the level of warning.
         /// </summary>
         /// <returns></returns>
-        Warning,
+        Warning = 3,
         /// <summary>
         /// Gets the level of information.
         /// </summary>
         /// <returns></returns>
-        Information,
+        Information = 2,
         /// <summary>
         /// Gets the level of debug.
         /// </summary>
         /// <returns></returns>
-        Debug,
+        Debug = 1,
         /// <summary>
         /// Gets the level of trace.
         /// </summary>
         /// <returns></returns>
-        Trace,
+        Trace = 0,
     }
 }
