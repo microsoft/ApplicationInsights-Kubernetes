@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -86,11 +87,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
             Write(ApplicationInsightsKubernetesDiagnosticSourceLevel.Trace, message, args);
         }
 
-        private void Write(string level, string message, params object[] args)
+        private void Write(ApplicationInsightsKubernetesDiagnosticSourceLevel level, string message, params object[] args)
         {
-            if (_innerSource.IsEnabled(level))
+            if (_innerSource.IsEnabled(level.ToString()))
             {
-                _innerSource.Write(level, new
+                _innerSource.Write(level.ToString(), new
                 {
                     content = string.Format(CultureInfo.InvariantCulture, message, args),
                 });

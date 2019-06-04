@@ -8,7 +8,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     /// </summary>
     public sealed class ApplicationInsightsKubernetesDiagnosticSourceConsoleListener
     {
-
         private ApplicationInsightsKubernetesDiagnosticSourceConsoleListener() { }
         /// <summary>
         /// Gets the singleton instance of Application Insights for Kubernetes diagnostic source listener
@@ -21,7 +20,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// Invokes the message of critical.
         /// </summary>
         /// <param name="content"></param>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Critical)]
+        [DiagnosticName(nameof(ApplicationInsightsKubernetesDiagnosticSourceLevel.Critical))]
         public void OnLogCritical(string content)
         {
             WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Critical, content);
@@ -31,7 +30,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// Invokes the message of error.
         /// </summary>
         /// <param name="content"></param>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Error)]
+        [DiagnosticName(nameof(ApplicationInsightsKubernetesDiagnosticSourceLevel.Error))]
         public void OnLogError(string content)
         {
             WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Error, content);
@@ -41,7 +40,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// Invokes the message of warning.
         /// </summary>
         /// <param name="content"></param>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Warning)]
+        [DiagnosticName(nameof(ApplicationInsightsKubernetesDiagnosticSourceLevel.Warning))]
         public void OnLogWarning(string content)
         {
             WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Warning, content);
@@ -50,7 +49,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <summary>
         /// Invokes the message of information.
         /// </summary>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Information)]
+        [DiagnosticName(nameof(ApplicationInsightsKubernetesDiagnosticSourceLevel.Information))]
         public void OnLogInfo(string content)
         {
             WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Information, content);
@@ -59,7 +58,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <summary>
         /// Invokes the message of debugging.
         /// </summary>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Debug)]
+        [DiagnosticName(nameof(ApplicationInsightsKubernetesDiagnosticSourceLevel.Debug))]
         public void OnLogDebug(string content)
         {
             WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Debug, content);
@@ -68,15 +67,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <summary>
         /// Invokes the message of tracing.
         /// </summary>
-        [DiagnosticName(ApplicationInsightsKubernetesDiagnosticSourceLevel.Trace)]
+        [DiagnosticName(nameof(ApplicationInsightsKubernetesDiagnosticSourceLevel.Trace))]
         public void OnLogTrace(string content)
         {
             WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel.Trace, content);
         }
 #pragma warning restore CA1822
-        private static void WriteLine(string level, string content)
+
+        private static void WriteLine(ApplicationInsightsKubernetesDiagnosticSourceLevel level, string content)
         {
-            Console.WriteLine($"[{level}]::{content}");
+            Console.WriteLine($"[{level}] {content}");
         }
     }
 }
