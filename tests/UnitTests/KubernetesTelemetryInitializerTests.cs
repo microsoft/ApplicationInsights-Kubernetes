@@ -175,23 +175,25 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
-            Assert.Equal("Cid", telemetry.Context.Properties["Kubernetes.Container.ID"]);
-            Assert.Equal("CName", telemetry.Context.Properties["Kubernetes.Container.Name"]);
+            ISupportProperties telemetryWithProperties = telemetry as ISupportProperties;
 
-            Assert.Equal("Pid", telemetry.Context.Properties["Kubernetes.Pod.ID"]);
-            Assert.Equal("PName", telemetry.Context.Properties["Kubernetes.Pod.Name"]);
-            Assert.Equal("PLabels", telemetry.Context.Properties["Kubernetes.Pod.Labels"]);
+            Assert.Equal("Cid", telemetryWithProperties.Properties["Kubernetes.Container.ID"]);
+            Assert.Equal("CName", telemetryWithProperties.Properties["Kubernetes.Container.Name"]);
 
-            Assert.Equal("RName", telemetry.Context.Properties["Kubernetes.ReplicaSet.Name"]);
+            Assert.Equal("Pid", telemetryWithProperties.Properties["Kubernetes.Pod.ID"]);
+            Assert.Equal("PName", telemetryWithProperties.Properties["Kubernetes.Pod.Name"]);
+            Assert.Equal("PLabels", telemetryWithProperties.Properties["Kubernetes.Pod.Labels"]);
 
-            Assert.Equal("DName", telemetry.Context.Properties["Kubernetes.Deployment.Name"]);
+            Assert.Equal("RName", telemetryWithProperties.Properties["Kubernetes.ReplicaSet.Name"]);
 
-            Assert.Equal("Nid", telemetry.Context.Properties["Kubernetes.Node.ID"]);
-            Assert.Equal("NName", telemetry.Context.Properties["Kubernetes.Node.Name"]);
+            Assert.Equal("DName", telemetryWithProperties.Properties["Kubernetes.Deployment.Name"]);
+
+            Assert.Equal("Nid", telemetryWithProperties.Properties["Kubernetes.Node.ID"]);
+            Assert.Equal("NName", telemetryWithProperties.Properties["Kubernetes.Node.Name"]);
 
 #if !NETSTANDARD1_3 && !NETSTANDARD1_6
-            Assert.NotNull(telemetry.Context.Properties["Process.CPU(%)"]);
-            Assert.NotNull(telemetry.Context.Properties["Process.Memory"]);
+            Assert.NotNull(telemetryWithProperties.Properties["Process.CPU(%)"]);
+            Assert.NotNull(telemetryWithProperties.Properties["Process.Memory"]);
 #endif
         }
 
@@ -210,10 +212,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 GetOptions(TimeSpan.FromSeconds(1)),
                 SDKVersionUtils.Instance);
             ITelemetry telemetry = new TraceTelemetry();
-            telemetry.Context.Properties["K8s.Container.ID"] = "Existing Cid";
+            ISupportProperties telemetryWithProperties = telemetry as ISupportProperties;
+            telemetryWithProperties.Properties["K8s.Container.ID"] = "Existing Cid";
             target.Initialize(telemetry);
 
-            Assert.Equal("Existing Cid", telemetry.Context.Properties["K8s.Container.ID"]);
+            Assert.Equal("Existing Cid", telemetryWithProperties.Properties["K8s.Container.ID"]);
         }
 
         [Fact(DisplayName = "When timeout happens on fetching the Kubernetes properties, initializer fails gracefully")]
@@ -229,10 +232,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 SDKVersionUtils.Instance);
 
             ITelemetry telemetry = new TraceTelemetry();
-            telemetry.Context.Properties["K8s.Container.ID"] = "No Crash";
+            ISupportProperties telemetryWithProperties = telemetry as ISupportProperties;
+
+            telemetryWithProperties.Properties["K8s.Container.ID"] = "No Crash";
             target.Initialize(telemetry);
 
-            Assert.Equal("No Crash", telemetry.Context.Properties["K8s.Container.ID"]);
+            Assert.Equal("No Crash", telemetryWithProperties.Properties["K8s.Container.ID"]);
         }
 
         [Fact(DisplayName = "Query Kubernetes Environment will timeout.")]
