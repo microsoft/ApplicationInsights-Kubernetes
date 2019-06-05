@@ -31,7 +31,7 @@ namespace app
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-
+            services.AddApplicationInsightsTelemetry();
             services.AddApplicationInsightsKubernetesEnricher();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
