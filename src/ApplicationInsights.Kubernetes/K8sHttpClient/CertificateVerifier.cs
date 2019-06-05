@@ -4,18 +4,18 @@
     using System.Security.Cryptography.X509Certificates;
     internal class CertificateVerifier : ICertificateVerifier
     {
-        X509Certificate2 certificate;
+        readonly X509Certificate2 _certificate;
         public CertificateVerifier(X509Certificate2 certificate)
         {
-            this.certificate = Arguments.IsNotNull(certificate, nameof(certificate));
+            _certificate = Arguments.IsNotNull(certificate, nameof(certificate));
         }
 
-        public X509Certificate2 Certificate => this.certificate;
+        public X509Certificate2 Certificate => _certificate;
 
-        public string Issuer => this.certificate.Issuer;
+        public string Issuer => _certificate.Issuer;
 
-        public DateTime NotBefore => this.certificate.NotBefore;
+        public DateTime NotBefore => _certificate.NotBefore;
 
-        public DateTime NotAfter => this.certificate.NotAfter;
+        public DateTime NotAfter => _certificate.NotAfter;
     }
 }

@@ -102,11 +102,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
                 return instance;
             }
+#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
             {
                 _logger.LogCritical(ex.ToString());
                 return null;
             }
+#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         private async Task<K8sPod> SpinWaitUntilGetPod(DateTime timeoutAt, K8sQueryClient client)
@@ -121,12 +123,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 {
                     myPod = await client.GetMyPodAsync().ConfigureAwait(false);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
                 {
                     _logger.LogWarning($"Query exception while trying to get pod info: {ex.Message}");
-                    _logger.LogDebug(ex.StackTrace);
+                    _logger.LogDebug(ex.ToString());
                     myPod = null;
                 }
+#pragma warning restore CA1031 // Do not catch general exception types
 
                 if (myPod != null)
                 {
@@ -165,10 +169,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 {
                     myPod = await client.GetMyPodAsync().ConfigureAwait(false);
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch
                 {
                     myPod = null;
                 }
+#pragma warning restore CA1031 // Do not catch general exception types
 
                 if (myPod != null && myPod.GetContainerStatus(myContainerId).Ready)
                 {

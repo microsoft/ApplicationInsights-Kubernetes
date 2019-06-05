@@ -88,10 +88,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                     _logger.LogTrace("Finish telemetry initializer.");
                 }
+#pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
                 {
                     _logger.LogError(ex.ToString());
                 }
+#pragma warning restore CA1031 // Do not catch general exception types
             }
             else
             {
