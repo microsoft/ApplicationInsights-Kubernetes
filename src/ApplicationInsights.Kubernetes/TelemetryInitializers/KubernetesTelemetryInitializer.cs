@@ -59,7 +59,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             IK8sEnvironment k8sEnv = _k8sEnvironment;
             if (k8sEnv != null)
             {
-                _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is used - pod: {0}", k8sEnv.PodName);
+                _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is invoked.", k8sEnv.PodName);
                 try
                 {
 
