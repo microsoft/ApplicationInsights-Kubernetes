@@ -33,37 +33,16 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (_isRunningInKubernetes())
             {
-                IServiceCollection services = serviceCollection ?? throw new ArgumentNullException(nameof(serviceCollection));
-                InjectCommonServices(services);
-                InjectChangableServices(services);
+                if (serviceCollection == null)
+                {
+                    throw new ArgumentNullException(nameof(serviceCollection));
+                }
+                InjectCommonServices(serviceCollection);
+                InjectChangableServices(serviceCollection);
 
-                services.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
+                serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
                 _diagnosticSource.LogDebug("Application Insights Kubernetes injected the service successfully.");
-                return services;
-            }
-            else
-            {
-                _diagnosticSource.LogWarning("Application is not running inside a Kubernetes cluster.");
                 return serviceCollection;
-            }
-        }
-
-        /// <summary>
-        /// Injects Kubernetes related service into the service collection.
-        /// </summary>
-        /// <param name="serviceCollection">The service collector to inject the services into.</param>
-        /// <param name="timeout">Maximum time to wait for spinning up the container.</param>
-        /// <returns>Returns the service collector with services injected.</returns>
-        public IServiceCollection InjectServices(IServiceCollection serviceCollection, TimeSpan timeout)
-        {
-            if (_isRunningInKubernetes())
-            {
-                IServiceCollection services = serviceCollection ?? new ServiceCollection();
-                InjectCommonServices(services);
-
-                InjectChangableServices(services);
-
-                return services;
             }
             else
             {
