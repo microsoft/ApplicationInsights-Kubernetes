@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.ApplicationInsights.Kubernetes;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public class KuteHttpClientSettingsProviderTests
     {

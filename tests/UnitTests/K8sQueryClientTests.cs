@@ -4,13 +4,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Entities;
 using Moq;
 using Newtonsoft.Json;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public class K8sQueryClientTests
     {

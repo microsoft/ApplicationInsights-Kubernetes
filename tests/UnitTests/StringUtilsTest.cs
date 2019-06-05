@@ -1,6 +1,5 @@
-﻿using Microsoft.ApplicationInsights.Kubernetes;
-using Xunit;
-namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+﻿using Xunit;
+namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public class StringUtilsTest
     {

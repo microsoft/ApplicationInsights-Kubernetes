@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes.UnitTests</AssemblyName>
-    <RootNamespace>Microsoft.ApplicationInsights.Netcore.Kubernetes</RootNamespace>
+    <RootNamespace>Microsoft.ApplicationInsights.Kubernetes</RootNamespace>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\src\PublicKey.snk</AssemblyOriginatorKeyFile>
     <DelaySign>True</DelaySign>

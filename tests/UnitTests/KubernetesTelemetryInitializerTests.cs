@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -79,73 +81,77 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Equal("Existing RoleName", telemetry.Context.Cloud.RoleName);
         }
 
-        // [Fact]
-        // public void InitializeWithEmptyForOptionalPropertyDoesNotLogError()
-        // {
-        //     var envMock = new Mock<IK8sEnvironment>();
-        //     envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
+        [Fact]
+        public void InitializeWithEmptyForOptionalPropertyDoesNotLogError()
+        {
+            var listener = new TestInspectListener();
+            Inspect.Instance.Observer.SubscribeWithAdapter(listener);
 
-        //     envMock.Setup(env => env.ContainerID).Returns("Cid");
-        //     envMock.Setup(env => env.ContainerName).Returns("CName");
-        //     envMock.Setup(env => env.PodID).Returns("Pid");
-        //     envMock.Setup(env => env.PodName).Returns("PName");
-        //     envMock.Setup(env => env.PodLabels).Returns("PLabels");
-        //     // The following properties are optional.
-        //     envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
-        //     envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
-        //     envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
-        //     envMock.Setup(env => env.DeploymentName).Returns<string>(null);
-        //     envMock.Setup(env => env.NodeUid).Returns("Nid");
-        //     envMock.Setup(env => env.NodeName).Returns("NName");
+            var envMock = new Mock<IK8sEnvironment>();
+            envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
 
-        //     var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        //     envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            envMock.Setup(env => env.ContainerID).Returns("Cid");
+            envMock.Setup(env => env.ContainerName).Returns("CName");
+            envMock.Setup(env => env.PodID).Returns("Pid");
+            envMock.Setup(env => env.PodName).Returns("PName");
+            envMock.Setup(env => env.PodLabels).Returns("PLabels");
+            // The following properties are optional.
+            envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
+            envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
+            envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
+            envMock.Setup(env => env.DeploymentName).Returns<string>(null);
+            envMock.Setup(env => env.NodeUid).Returns("Nid");
+            envMock.Setup(env => env.NodeName).Returns("NName");
 
-        //     var loggerMock = new Mock<ILogger<KubernetesTelemetryInitializer>>();
+            var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
 
-        //     KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-        //         envFactoryMock.Object,
-        //         GetOptions(TimeSpan.FromSeconds(1)),
-        //         SDKVersionUtils.Instance,
-        //         loggerMock.Object);
-        //     ITelemetry telemetry = new TraceTelemetry();
-        //     target.Initialize(telemetry);
-        //     loggerMock.Verify(l => l.Log(LogLevel.Error, 0, It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Never());
-        // }
 
-        // [Fact]
-        // public void InitializeWithEmptyForRequiredPropertyDoesLogError()
-        // {
-        //     var envMock = new Mock<IK8sEnvironment>();
-        //     envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
+                envFactoryMock.Object,
+                GetOptions(TimeSpan.FromSeconds(1)),
+                SDKVersionUtils.Instance);
+            ITelemetry telemetry = new TraceTelemetry();
+            target.Initialize(telemetry);
 
-        //     envMock.Setup(env => env.ContainerID).Returns("Cid");
-        //     envMock.Setup(env => env.ContainerName).Returns("CName");
-        //     envMock.Setup(env => env.PodID).Returns("Pid");
-        //     envMock.Setup(env => env.PodName).Returns("PName");
-        //     envMock.Setup(env => env.PodLabels).Returns("PLabels");
-        //     envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
-        //     envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
-        //     envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
-        //     envMock.Setup(env => env.DeploymentName).Returns<string>(null);
-        //     // These 2 properties are required.
-        //     envMock.Setup(env => env.NodeUid).Returns<string>(null);
-        //     envMock.Setup(env => env.NodeName).Returns<string>(null);
+            Assert.Equal(0, listener.GetCount(InspectLevel.Error));
+        }
 
-        //     var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        //     envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+        [Fact]
+        public void InitializeWithEmptyForRequiredPropertyDoesLogError()
+        {
+            var listener = new TestInspectListener();
+            Inspect.Instance.Observer.SubscribeWithAdapter(listener);
 
-        //     var loggerMock = new Mock<ILogger<KubernetesTelemetryInitializer>>();
+            var envMock = new Mock<IK8sEnvironment>();
+            envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
 
-        //     KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-        //         envFactoryMock.Object,
-        //         GetOptions(TimeSpan.FromSeconds(1)),
-        //         SDKVersionUtils.Instance,
-        //         loggerMock.Object);
-        //     ITelemetry telemetry = new TraceTelemetry();
-        //     target.Initialize(telemetry);
-        //     loggerMock.Verify(l => l.Log(LogLevel.Error, 0, It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Exactly(2));
-        // }
+            envMock.Setup(env => env.ContainerID).Returns("Cid");
+            envMock.Setup(env => env.ContainerName).Returns("CName");
+            envMock.Setup(env => env.PodID).Returns("Pid");
+            envMock.Setup(env => env.PodName).Returns("PName");
+            envMock.Setup(env => env.PodLabels).Returns("PLabels");
+            envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
+            envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
+            envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
+            envMock.Setup(env => env.DeploymentName).Returns<string>(null);
+            // These 2 properties are required.
+            envMock.Setup(env => env.NodeUid).Returns<string>(null);
+            envMock.Setup(env => env.NodeName).Returns<string>(null);
+
+            var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+
+
+            KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
+                envFactoryMock.Object,
+                GetOptions(TimeSpan.FromSeconds(1)),
+                SDKVersionUtils.Instance);
+            ITelemetry telemetry = new TraceTelemetry();
+            target.Initialize(telemetry);
+
+            Assert.Equal(2, listener.GetCount(InspectLevel.Error));
+        }
 
         [Fact(DisplayName = "K8sTelemetryInitializer sets custom dimensions")]
         public void InitializeSetsCustomDimensions()

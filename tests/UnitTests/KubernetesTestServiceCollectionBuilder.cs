@@ -1,8 +1,7 @@
-﻿using Microsoft.ApplicationInsights.Kubernetes;
-using Microsoft.ApplicationInsights.Kubernetes.Debugging;
+﻿using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.ApplicationInsights.Netcore.Kubernetes
+namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal class KubernetesTestServiceCollectionBuilder : KubernetesServiceCollectionBuilder
     {

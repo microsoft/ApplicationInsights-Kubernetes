@@ -140,7 +140,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Injects the KubernetesTelemetryInitializer to the service collection.
         /// </summary>
-        private static void InjectKubernetesTelemetryInitializer(IServiceCollection serviceCollection,
+        internal static void InjectKubernetesTelemetryInitializer(IServiceCollection serviceCollection,
             Func<bool> detectKubernetes,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
             Action<AppInsightsForKubernetesOptions> applyOptions)
