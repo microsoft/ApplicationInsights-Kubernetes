@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
         private readonly Func<bool> _isRunningInKubernetes;
-        private readonly Inspect _diagnosticSource = Inspect.Instance;
+        private readonly Logger _diagnosticSource = Logger.Instance;
 
         /// <summary>
         /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.

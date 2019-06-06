@@ -85,7 +85,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void InitializeWithEmptyForOptionalPropertyDoesNotLogError()
         {
             var listener = new TestInspectListener();
-            Inspect.Instance.Observer.SubscribeWithAdapter(listener);
+            Logger.Instance.Observer.SubscribeWithAdapter(listener);
 
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
@@ -114,14 +114,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
-            Assert.Equal(0, listener.GetCount(InspectLevel.Error));
+            Assert.Equal(0, listener.GetCount(DiagnosticLogLevel.Error));
         }
 
         [Fact]
         public void InitializeWithEmptyForRequiredPropertyDoesLogError()
         {
             var listener = new TestInspectListener();
-            Inspect.Instance.Observer.SubscribeWithAdapter(listener);
+            Logger.Instance.Observer.SubscribeWithAdapter(listener);
 
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
@@ -150,7 +150,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
-            Assert.Equal(2, listener.GetCount(InspectLevel.Error));
+            Assert.Equal(2, listener.GetCount(DiagnosticLogLevel.Error));
         }
 
         [Fact(DisplayName = "K8sTelemetryInitializer sets custom dimensions")]

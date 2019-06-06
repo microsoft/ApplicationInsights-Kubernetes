@@ -13,7 +13,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal class K8sEnvironmentFactory : IK8sEnvironmentFactory
     {
-        private readonly Inspect _logger = Inspect.Instance;
+        private readonly Logger _logger = Logger.Instance;
         private readonly IKubeHttpClientSettingsProvider _httpClientSettings;
         private readonly KubeHttpClientFactory _httpClientFactory;
         private readonly K8sQueryClientFactory _k8sQueryClientFactory;

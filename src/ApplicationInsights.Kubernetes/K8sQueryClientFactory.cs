@@ -4,7 +4,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal class K8sQueryClientFactory
     {
-        private readonly Inspect _logger = Inspect.Instance;
+        private readonly Logger _logger = Logger.Instance;
 
         public K8sQueryClient Create(IKubeHttpClient httpClient)
         {

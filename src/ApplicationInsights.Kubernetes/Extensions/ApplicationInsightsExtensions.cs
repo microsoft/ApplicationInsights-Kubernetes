@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static partial class ApplicationInsightsExtensions
     {
         private const string ConfigurationSectionName = "AppInsightsForKubernetes";
-        private static readonly Inspect _diagnosticSource = Inspect.Instance;
+        private static readonly Logger _diagnosticSource = Logger.Instance;
 
         /// <summary>
         /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection system.

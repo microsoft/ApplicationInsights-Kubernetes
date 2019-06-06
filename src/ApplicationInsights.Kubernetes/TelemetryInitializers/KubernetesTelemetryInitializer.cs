@@ -238,6 +238,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         internal bool _isK8sQueryTimeout = false;
         private bool _isK8sQueryTimeoutReported = false;
-        private static readonly Inspect _logger = Inspect.Instance;
+        private static readonly Logger _logger = Logger.Instance;
     }
 }

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
@@ -6,9 +7,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     /// <summary>
     /// Diagnostic Source of Application Insights for Kubernetes.
     /// </summary>
-    public sealed class Inspect
+    public sealed class Logger
     {
-        private DiagnosticSource _innerSource { get; }
+        private readonly DiagnosticSource _innerSource;
 
         /// <summary>
         /// Diagnostic source listener subscribe point.
@@ -21,7 +22,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// </summary>
         public const string DiagnosticSourceName = "ApplicationInsightsKubernetesDiagnosticSource";
 
-        private Inspect()
+        private Logger()
         {
             _innerSource = new DiagnosticListener(DiagnosticSourceName);
         }
@@ -30,14 +31,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// Gets the singleton instance of Application Insights for Kubernetes.
         /// </summary>
         /// <returns></returns>
-        public static Inspect Instance { get; } = new Inspect();
+        public static Logger Instance { get; } = new Logger();
 
         /// <summary>
         /// Logs the critical message.
         /// </summary>
         public void LogCritical(string message, params object[] args)
         {
-            Write(InspectLevel.Critical, message, args);
+            Write(DiagnosticLogLevel.Critical, message, args);
         }
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// </summary>
         public void LogError(string message, params object[] args)
         {
-            Write(InspectLevel.Error, message, args);
+            Write(DiagnosticLogLevel.Error, message, args);
         }
 
         /// <summary>
@@ -53,7 +54,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// </summary>
         public void LogWarning(string message, params object[] args)
         {
-            Write(InspectLevel.Warning, message, args);
+            Write(DiagnosticLogLevel.Warning, message, args);
         }
 
         /// <summary>
@@ -63,7 +64,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <param name="args"></param>
         public void LogInformation(string message, params object[] args)
         {
-            Write(InspectLevel.Information, message, args);
+            Write(DiagnosticLogLevel.Information, message, args);
         }
 
         /// <summary>
@@ -73,7 +74,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <param name="args"></param>
         public void LogDebug(string message, params object[] args)
         {
-            Write(InspectLevel.Debug, message, args);
+            Write(DiagnosticLogLevel.Debug, message, args);
         }
 
         /// <summary>
@@ -83,10 +84,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <param name="args"></param>
         public void LogTrace(string message, params object[] args)
         {
-            Write(InspectLevel.Trace, message, args);
+            Write(DiagnosticLogLevel.Trace, message, args);
         }
 
-        private void Write(InspectLevel level, string message, params object[] args)
+        private void Write(DiagnosticLogLevel level, string message, params object[] args)
         {
             if (_innerSource.IsEnabled(level.ToString()))
             {

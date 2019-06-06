@@ -18,7 +18,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     {
         internal bool disposed = false;
         private IKubeHttpClient _kubeHttpClient;
-        private readonly Inspect _logger = Inspect.Instance;
+        private readonly Logger _logger = Logger.Instance;
 
         internal IKubeHttpClient KubeHttpClient
         {
