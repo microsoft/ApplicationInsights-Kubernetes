@@ -6,9 +6,9 @@ This repository has code for Application Insights for Kubernetes, which works on
 
 ## Continuous Integration Status
 
-|Rolling Build                    | Nightly Build                |
-|---------------------------------|:-----------------------------|
-|![Rolling-Build Status](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5974/badge) | ![Nightly-Build Status](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5976/badge) |
+| Rolling Build                                                                                                                           | Nightly Build                                                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Rolling-Build Status](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5974/badge) | ![Nightly-Build Status](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5976/badge) |
 
 ## Get Started
 
@@ -46,7 +46,7 @@ These are the basic steps to instrument an ASP.NET Core application to enable Ap
 
 ### Walk-through
 
-We support **ASP.NET Core** application as well as **.NET Core** application.
+Both **ASP.NET Core** and **.NET Core** applications are supported.
 
 * For **ASP.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walk-through.
 
@@ -88,20 +88,20 @@ Customize configurations are supported for `v1.0.2+`. There are several ways to 
 
     All the related configurations have to be put in a section named `AppInsightsForKubernetes`. The supported keys/values are listed below:
 
-    | Key                   | Value/Types | Default Value | Description                                                                                            |
-    |-----------------------|-------------|---------------|--------------------------------------------------------------------------------------------------------|
-    | InitializationTimeout | TimeSpan    | 00:02:00      |  Maximum time to wait for spinning up the container. Accepted format: [d.]hh:mm:ss[.fffffff]. |
+    | Key                   | Value/Types | Default Value | Description                                                                                  |
+    | --------------------- | ----------- | ------------- | -------------------------------------------------------------------------------------------- |
+    | InitializationTimeout | TimeSpan    | 00:02:00      | Maximum time to wait for spinning up the container. Accepted format: [d.]hh:mm:ss[.fffffff]. |
 
 The configuration uses with the conventions in ASP.NET Core. Refer [Configuration in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-2.1) for more information.
 
-### Verify the cluster configuration
+### Verify the cluster configuration (Linux Container only)
 
 Use the [troubleshooting image](https://github.com/Microsoft/ApplicationInsights-Kubernetes/tree/develop/troubleshooting) to verify the cluster is properly configured.
 
 ### Learn more
 
 * To build a container for Kubernetes that have Application Insights baked in for the existing applications, please refer the example of [Zero Code light up](https://github.com/Microsoft/ApplicationInsights-Kubernetes/tree/develop/examples/ZeroUserCodeLightup).
-* To enable Application Insights for Kubernetes by environment variable instead of code, please refer [Hosting startup for ApplicationInsights.Kubernetes](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Hosting-startup-for-ApplicationInsights.Kubernetes).
+* To enable diagnostic logs when Application Insights for Kubernetes doesn't work as expected, reference [How to enable self diagnostics for ApplicationInsights.Kubernetes](docs/SelfDiagnostics.MD).
 * Still want more? Read the [Wikis](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki).
 
 ### Next step
