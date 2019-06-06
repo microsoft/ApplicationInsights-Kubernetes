@@ -39,19 +39,6 @@
                 "True",
             ],
             "problemMatcher": "$msCompile",
-        },
-        {
-            "label": "Run Unit Tests",
-            "command": "dotnet",
-            "type": "process",
-            "group": "test",
-            "options": {
-                "cwd": "${workspaceFolder}/../tests/UnitTests"
-            },
-            "args": [
-                "test"
-            ],
-            "problemMatcher": "$msCompile"
         }
     ]
 }
