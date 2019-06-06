@@ -10,6 +10,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     {
         private DiagnosticLogLevel _minimumLevel = DiagnosticLogLevel.Warning;
         private LogListener() { }
+        static LogListener() { }
         /// <summary>
         /// Gets the singleton instance of Application Insights for Kubernetes diagnostic source listener
         /// </summary>

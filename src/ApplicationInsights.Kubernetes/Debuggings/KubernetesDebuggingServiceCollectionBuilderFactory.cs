@@ -8,6 +8,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     public sealed class KubernetesDebuggingServiceCollectionBuilderFactory
     {
         private KubernetesDebuggingServiceCollectionBuilderFactory() { }
+        static KubernetesDebuggingServiceCollectionBuilderFactory() { }
 
         /// <summary>
         /// Singleton instance of the KubernetesDebuggingServiceCollectionBuilderFactory.

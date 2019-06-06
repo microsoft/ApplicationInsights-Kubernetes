@@ -27,6 +27,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
             _innerSource = new DiagnosticListener(DiagnosticSourceName);
         }
 
+        // Explict static constructor to tell C# compiler not to mark type as beforefieldinit
+        static Logger()
+        {
+        }
+
         /// <summary>
         /// Gets the singleton instance of Application Insights for Kubernetes.
         /// </summary>
