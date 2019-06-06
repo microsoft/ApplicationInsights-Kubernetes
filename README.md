@@ -50,7 +50,7 @@ Both **ASP.NET Core** and **.NET Core** applications are supported.
 
 * For **ASP.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walk-through.
 
-* For **.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-.NET-Core-Applications) for a simple walk-through.
+* For **.NET Core** Application: Refer [Getting Started](examples/BasicConsoleAppILogger/README.md) for a simple walk-through.
 
 * Follow [this example](examples/BasicUsage_clr21_RBAC) for Role-based access control (RBAC) enabled Kubernetes clusters.
 
