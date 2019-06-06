@@ -10,6 +10,24 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public class KubernetesEnablementTest
     {
+        [Fact(DisplayName = "The required services are properly injected")]
+        public void ServiceInjected()
+        {
+            IServiceCollection services = new ServiceCollection();
+            ApplicationInsightsExtensions.InjectKubernetesTelemetryInitializer(services, () => true, new KubernetesTestServiceCollectionBuilder(), null);
+            Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
+            
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            ITelemetryInitializer targetTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>().FirstOrDefault(ti => ti is KubernetesTelemetryInitializer);
+            Assert.NotNull(targetTelemetryInitializer);
+
+            // K8s services	
+            serviceProvider.GetRequiredService<IKubeHttpClientSettingsProvider>();
+            serviceProvider.GetRequiredService<KubeHttpClientFactory>();
+            serviceProvider.GetRequiredService<K8sQueryClientFactory>();
+            serviceProvider.GetRequiredService<IK8sEnvironmentFactory>();
+        }
+
         [Fact(DisplayName = "Default timeout for waiting container to spin us is 2 minutes")]
         public void EnableAppInsightsForKubernetesWithDefaultTimeOut()
         {
