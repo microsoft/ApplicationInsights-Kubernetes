@@ -1,5 +1,11 @@
 # Enable Application Insights for Kubernetes in .NET Core Console Application
 
+## Deprecated
+
+This example is deprecated and will not be updated. Please reference [Enable Application Insights for Kubernetes in .NET Core Console Application](../BasicConsoleAppILogger/README.md) for the latest instructions.
+
+## Description
+
 When running a Console Application inside a Kubernetes managed container, and if you have chosen Application Insights as your telemetry solution, you might want to enrich the telemetry with Kubernetes related information. This is an example of how to do it.
 
 _Note: This is an example that does not follow all best practices, including security-related best practices. E.g. Application Insights instrumentation key is not adequately protected (it should be deployed as a secret)._
