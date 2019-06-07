@@ -116,7 +116,7 @@ Profile your application for performance improvement using [Application Insights
 
 Please file bug, discussion or any other interesting topics in [issues](https://github.com/Microsoft/ApplicationInsights-Kubernetes/issues) on GitHub.
 
-### Trouble Shooting
+### Troubleshooting
 
 When Microsoft.ApplicationInsights.Kubernetes doesn't work properly, you can turn on self-diagnostics to see the traces in Kubernetes' logs. Refer to [How to enable self diagnostics for ApplicationInsights.Kubernetes](./docs/SelfDiagnostics.md) for instructions.
 
