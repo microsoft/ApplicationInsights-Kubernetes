@@ -14,7 +14,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void ServiceInjected()
         {
             IServiceCollection services = new ServiceCollection();
-            ApplicationInsightsExtensions.InjectKubernetesTelemetryInitializer(services, () => true, new KubernetesTestServiceCollectionBuilder(), null);
+            ApplicationInsightsExtensions.ConfigureKubernetesTelemetryInitializer(services, () => true, new KubernetesTestServiceCollectionBuilder(), null);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
             
             IServiceProvider serviceProvider = services.BuildServiceProvider();
@@ -82,7 +82,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }).Build();
             services.AddSingleton(config);
 
-            ApplicationInsightsExtensions.InjectKubernetesTelemetryInitializer(services, () => true, new KubernetesTestServiceCollectionBuilder(), null);
+            ApplicationInsightsExtensions.ConfigureKubernetesTelemetryInitializer(services, () => true, new KubernetesTestServiceCollectionBuilder(), null);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
@@ -98,7 +98,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
         }
 
-        [Fact(DisplayName = "Options by code takes precedance of configuration.")]
+        [Fact(DisplayName = "Options by code takes precedence of configuration.")]
         public void EnableAppInsightsForKubernetesWithTimeOutSetThroughOptionsOverwritingConfiugure()
         {
             IServiceCollection services = new ServiceCollection();
@@ -109,7 +109,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }).Build();
             services.AddSingleton(config);
 
-            ApplicationInsightsExtensions.InjectKubernetesTelemetryInitializer(services, () => true, new KubernetesTestServiceCollectionBuilder(),
+            ApplicationInsightsExtensions.ConfigureKubernetesTelemetryInitializer(services, () => true, new KubernetesTestServiceCollectionBuilder(),
                 option =>
                 {
                     option.InitializationTimeout = TimeSpan.FromSeconds(30);

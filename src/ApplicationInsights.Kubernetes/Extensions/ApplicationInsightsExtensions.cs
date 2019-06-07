@@ -61,13 +61,11 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return services.Configure<TelemetryConfiguration>((config) =>
             {
-                KubernetesTelemetryInitializer k8sTelemetryInitializer;
                 if (!KubernetesTelemetryInitializerExists(services))
                 {
-                    InjectKubernetesTelemetryInitializer(services, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
+                    ConfigureKubernetesTelemetryInitializer(services, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
                 }
-                k8sTelemetryInitializer = GetKubernetesTelemetryInitializer(services);
-                config.AddKubernetesTelemetryInitializer(k8sTelemetryInitializer);
+                config.AddKubernetesTelemetryInitializer(services);
             });
         }
 
@@ -85,20 +83,22 @@ namespace Microsoft.Extensions.DependencyInjection
             Func<bool> detectKubernetes = null)
         {
             IServiceCollection standaloneServiceCollection = new ServiceCollection();
-            InjectKubernetesTelemetryInitializer(standaloneServiceCollection, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
-            telemetryConfiguration.AddKubernetesTelemetryInitializer(GetKubernetesTelemetryInitializer(standaloneServiceCollection));
+            ConfigureKubernetesTelemetryInitializer(standaloneServiceCollection, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
+            telemetryConfiguration.AddKubernetesTelemetryInitializer(standaloneServiceCollection);
         }
 
         /// <summary>
-        /// Adds a KubernetesTelemetry into a TelemetryConfiguration instance.
+        /// Gets the KubernetesTelemetryInitializer from the service collection and adds it into a TelemetryConfiguration instance.
         /// </summary>
-        private static void AddKubernetesTelemetryInitializer(
-            this TelemetryConfiguration telemetryConfiguration,
-            KubernetesTelemetryInitializer k8sTelemetryInitializer)
+        private static void AddKubernetesTelemetryInitializer(this TelemetryConfiguration telemetryConfiguration, IServiceCollection serviceCollection)
         {
-            if (k8sTelemetryInitializer != null)
+            KubernetesTelemetryInitializer kubernetesTelemetryInitializer = null;
+            if (KubernetesTelemetryInitializerExists(serviceCollection))
             {
-                telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
+                IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+                kubernetesTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>()
+                    .FirstOrDefault(ti => ti.GetType() == typeof(KubernetesTelemetryInitializer)) as KubernetesTelemetryInitializer;
+                telemetryConfiguration.TelemetryInitializers.Add(kubernetesTelemetryInitializer);
                 _diagnosticSource.LogTrace("KubernetesTelemetryInitializer has been injected into telemetry configuration #{0}.", telemetryConfiguration.GetHashCode());
                 _diagnosticSource.LogInformation("KubernetesTelemetryInitializer is injected.");
             }
@@ -118,29 +118,9 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Gets the KubernetesTelemetryInitializer from a service collection when it exists.
+        /// Configure the KubernetesTelemetryInitializer and its dependencies.
         /// </summary>
-        /// <param name="serviceCollection">The service collection.</param>
-        /// <returns>Returns the instance of the KubernetesTelemetryInitializer when it exists. Null when it doesn't.</returns>
-        private static KubernetesTelemetryInitializer GetKubernetesTelemetryInitializer(IServiceCollection serviceCollection)
-        {
-            if (KubernetesTelemetryInitializerExists(serviceCollection))
-            {
-                IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-                return serviceProvider.GetServices<ITelemetryInitializer>()
-                    .FirstOrDefault(ti => ti.GetType() == typeof(KubernetesTelemetryInitializer)) as KubernetesTelemetryInitializer;
-            }
-            else
-            {
-                _diagnosticSource.LogTrace("KubernetesTelemetryInitializer doesn't exist in the service collection.");
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Injects the KubernetesTelemetryInitializer to the service collection.
-        /// </summary>
-        internal static void InjectKubernetesTelemetryInitializer(IServiceCollection serviceCollection,
+        internal static void ConfigureKubernetesTelemetryInitializer(IServiceCollection serviceCollection,
             Func<bool> detectKubernetes,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
             Action<AppInsightsForKubernetesOptions> applyOptions)
