@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static partial class ApplicationInsightsExtensions
     {
         private const string ConfigurationSectionName = "AppInsightsForKubernetes";
-        private static readonly Logger _diagnosticSource = Logger.Instance;
+        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
         /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection system.
@@ -99,12 +99,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 kubernetesTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>()
                     .FirstOrDefault(ti => ti.GetType() == typeof(KubernetesTelemetryInitializer)) as KubernetesTelemetryInitializer;
                 telemetryConfiguration.TelemetryInitializers.Add(kubernetesTelemetryInitializer);
-                _diagnosticSource.LogTrace("KubernetesTelemetryInitializer has been injected into telemetry configuration #{0}.", telemetryConfiguration.GetHashCode());
-                _diagnosticSource.LogInformation("KubernetesTelemetryInitializer is injected.");
+                _logger.LogTrace("KubernetesTelemetryInitializer has been injected into telemetry configuration #{0}.", telemetryConfiguration.GetHashCode());
+                _logger.LogInformation("KubernetesTelemetryInitializer is injected.");
             }
             else
             {
-                _diagnosticSource.LogError("No KubernetesTelemetryInitializer to append to TelemetryConfiguration.");
+                _logger.LogError("No KubernetesTelemetryInitializer to append to TelemetryConfiguration.");
             }
         }
 

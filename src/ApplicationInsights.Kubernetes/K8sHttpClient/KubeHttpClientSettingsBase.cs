@@ -10,7 +10,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal abstract class KubeHttpClientSettingsBase : IKubeHttpClientSettingsProvider
     {
-        protected readonly Logger _logger = Logger.Instance;
+        protected readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         public KubeHttpClientSettingsBase(
             string kubernetesServiceHost,

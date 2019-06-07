@@ -84,8 +84,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact]
         public void InitializeWithEmptyForOptionalPropertyDoesNotLogError()
         {
-            var listener = new TestInspectListener();
-            Logger.Instance.Observer.SubscribeWithAdapter(listener);
+            var listener = new TestDiagnosticSourceObserver();
+            ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(listener);
 
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
@@ -120,8 +120,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact]
         public void InitializeWithEmptyForRequiredPropertyDoesLogError()
         {
-            var listener = new TestInspectListener();
-            Logger.Instance.Observer.SubscribeWithAdapter(listener);
+            var listener = new TestDiagnosticSourceObserver();
+            ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(listener);
 
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");

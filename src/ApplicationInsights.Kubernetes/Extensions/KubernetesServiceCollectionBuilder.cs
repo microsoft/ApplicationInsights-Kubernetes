@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
         private readonly Func<bool> _isRunningInKubernetes;
-        private readonly Logger _diagnosticSource = Logger.Instance;
+        private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
         /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.
@@ -41,12 +41,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 InjectChangableServices(serviceCollection);
 
                 serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
-                _diagnosticSource.LogDebug("Application Insights Kubernetes injected the service successfully.");
+                _logger.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 return serviceCollection;
             }
             else
             {
-                _diagnosticSource.LogWarning("Application is not running inside a Kubernetes cluster.");
+                _logger.LogWarning("Application is not running inside a Kubernetes cluster.");
                 return serviceCollection;
             }
         }
@@ -74,7 +74,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else
             {
-                _diagnosticSource.LogError("Unsupported OS.");
+                _logger.LogError("Unsupported OS.");
             }
             serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
         }

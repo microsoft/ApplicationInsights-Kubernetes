@@ -1,28 +1,19 @@
-using System;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.DiagnosticAdapter;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
+namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    /// <summary>
-    /// The default listener of Application Insights for Kubernetes.
-    /// </summary>
-    public sealed class LogListener
+    internal sealed class TestDiagnosticSourceObserver
     {
-        private DiagnosticLogLevel _minimumLevel = DiagnosticLogLevel.Warning;
-        private LogListener() { }
-        static LogListener() { }
-        /// <summary>
-        /// Gets the singleton instance of Application Insights for Kubernetes diagnostic source listener
-        /// </summary>
-        /// <returns></returns>
-        public static LogListener Instance { get; } = new LogListener();
+        public int GetCount(DiagnosticLogLevel level)
+        {
+            return Output.Where(o => o.Item1 == level).Count();
+        }
 
-        /// <summary>
-        /// Sets the minimum level of the logs to show.
-        /// </summary>
-        public void SetMinimumLevel(DiagnosticLogLevel newLevel) => _minimumLevel = newLevel;
+        public List<(DiagnosticLogLevel, string)> Output { get; } = new List<(DiagnosticLogLevel, string)>();
 
-#pragma warning disable CA1822
         /// <summary>
         /// Invokes the message of critical.
         /// </summary>
@@ -83,10 +74,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 
         private void WriteLine(DiagnosticLogLevel level, string content)
         {
-            if (level >= _minimumLevel)
-            {
-                Console.WriteLine($"[{level}] {content}");
-            }
+            Output.Add((level, content));
         }
     }
 }

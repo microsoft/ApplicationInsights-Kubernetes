@@ -7,28 +7,27 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
     /// <summary>
     /// Diagnostic Source of Application Insights for Kubernetes.
     /// </summary>
-    public sealed class Logger
+    public sealed class ApplicationInsightsKubernetesDiagnosticSource
     {
         private readonly DiagnosticSource _innerSource;
 
         /// <summary>
         /// Diagnostic source listener subscribe point.
         /// </summary>
-        /// <returns></returns>
-        public DiagnosticListener Observer => (DiagnosticListener)this._innerSource;
+        public DiagnosticListener Observable => (DiagnosticListener)this._innerSource;
 
         /// <summary>
         /// Gets the name of the diagnostic source.
         /// </summary>
         public const string DiagnosticSourceName = "ApplicationInsightsKubernetesDiagnosticSource";
 
-        private Logger()
+        private ApplicationInsightsKubernetesDiagnosticSource()
         {
             _innerSource = new DiagnosticListener(DiagnosticSourceName);
         }
 
         // Explict static constructor to tell C# compiler not to mark type as beforefieldinit
-        static Logger()
+        static ApplicationInsightsKubernetesDiagnosticSource()
         {
         }
 
@@ -36,7 +35,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// Gets the singleton instance of Application Insights for Kubernetes.
         /// </summary>
         /// <returns></returns>
-        public static Logger Instance { get; } = new Logger();
+        public static ApplicationInsightsKubernetesDiagnosticSource Instance { get; } = new ApplicationInsightsKubernetesDiagnosticSource();
 
         /// <summary>
         /// Logs the critical message.
