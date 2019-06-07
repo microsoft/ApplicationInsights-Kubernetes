@@ -1,0 +1,28 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Unit tests",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/UnitTests/UnitTests.csproj"
+            ],
+            "problemMatcher": "$tsc"
+        },
+        {
+            "label": "Run Unit Tests",
+            "command": "dotnet",
+            "type": "process",
+            "group": "test",
+            "options": {
+                "cwd": "${workspaceFolder}/UnitTests"
+            },
+            "args": [
+                "test"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

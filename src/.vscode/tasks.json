@@ -3,14 +3,14 @@
     "tasks": [
         {
             "label": "Build Debug",
-            "command": "${workspaceFolder}/build/Build.cmd",
+            "command": "${workspaceFolder}/../build/Build.cmd",
             "type": "shell",
             "group": "build",
             "problemMatcher": "$msCompile"
         },
         {
             "label": "Build Release",
-            "command": "${workspaceFolder}/build/Build.cmd",
+            "command": "${workspaceFolder}/../build/Build.cmd",
             "type": "shell",
             "group": "build",
             "args": [
@@ -20,7 +20,7 @@
         },
         {
             "label": "ReBuild Debug",
-            "command": "${workspaceFolder}/build/Build.cmd",
+            "command": "${workspaceFolder}/../build/Build.cmd",
             "type": "shell",
             "group": "build",
             "args": [
@@ -31,7 +31,7 @@
         },
         {
             "label": "ReBuild Release",
-            "command": "${workspaceFolder}/build/Build.cmd",
+            "command": "${workspaceFolder}/../build/Build.cmd",
             "type": "shell",
             "group": "build",
             "args": [
@@ -39,17 +39,6 @@
                 "True",
             ],
             "problemMatcher": "$msCompile",
-        },
-        {
-            "label": "Run Unit Tests",
-            "command": "dotnet",
-            "type": "process",
-            "group": "test",
-            "args": [
-                "test",
-                "${workspaceFolder}/tests/UnitTests"
-            ],
-            "problemMatcher": "$msCompile"
         }
     ]
 }

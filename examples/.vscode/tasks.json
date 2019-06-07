@@ -1,0 +1,70 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Example - BasicConsoleApp",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "args": [
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/BasicConsoleApp/src/"
+            }
+        },
+        {
+            "label": "Build Example - BasicUsage_clr21_RBAC",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "args": [
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/BasicUsage_clr21_RBAC/app/"
+            }
+        },
+        {
+            "label": "Build Example - MultipleIKeys",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "args": [
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/MultipleIKeys/"
+            }
+        },
+        {
+            "label": "Build Example - ZeroUserCodeLightup",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "args": [
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/ZeroUserCodeLightup/"
+            }
+        },
+        {
+            "label": "Build Example - WindowsContainer",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": "$msCompile",
+            "args": [
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/WindowsContainer/"
+            }
+        },
+    ]
+}

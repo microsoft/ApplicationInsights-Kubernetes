@@ -5,8 +5,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Utilities
 {
     internal sealed class SDKVersionUtils
     {
-        #region Signleton
+        #region Singleton
         private SDKVersionUtils() { }
+        static SDKVersionUtils() { }
         private static readonly SDKVersionUtils _instance = new SDKVersionUtils();
         public static SDKVersionUtils Instance => _instance;
         #endregion
@@ -32,7 +33,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Utilities
         }
 
         private const string SdkName = "ai-k8s";
-        private string _sdkVersion; 
+        private string _sdkVersion;
         #endregion
     }
 }

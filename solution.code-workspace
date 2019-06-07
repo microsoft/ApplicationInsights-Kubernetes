@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			// Source code for Application Insights for Kubernetes
+			"name": "Product",
+			"path": "./src",
+		},
+		{
+			// Enables F5 to debug the code
+			"name": "Debugging",
+			"path": "./dev",
+		},
+		{
+			// Tests
+			"name": "Tests",
+			"path": "./tests",
+		},
+		{
+			// Examples
+			"name": "Examples",
+			"path": "./examples",
+		},
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.classpath": true,
+			"**/.project": true,
+			"**/.settings": true,
+			"**/.factorypath": true
+		},
+	}
+}
