@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "Build F5 WebApi",
-            "program": "${workspaceFolder}/F5WebApi/bin/Debug/netcoreapp3.0/F5WebApi.dll",
+            "program": "${workspaceFolder}/F5WebApi/bin/Debug/netcoreapp2.2/F5WebApi.dll",
             "args": [],
             "cwd": "${workspaceFolder}/F5WebApi",
             "stopAtEntry": false,
