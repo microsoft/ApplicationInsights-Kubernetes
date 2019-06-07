@@ -29,20 +29,22 @@ These are the basic steps to instrument an ASP.NET Core application to enable Ap
     dotnet add package Microsoft.ApplicationInsights.Kubernetes
     ```
 
-2. Enable **Application Insights** and **Application Insights for Kubernetes Enricher** in `Startup.cs`:
+1. Enable **Application Insights** and **Application Insights for Kubernetes Enricher** in `Startup.cs`:
 
     ```csharp
     public void ConfigureServices(IServiceCollection services)
     {
         ...
-        services.AddApplicationInsightsTelemetry();
+        services.AddApplicationInsightsTelemetry("----Your Application Insights Instrumentation Key ----");
         services.AddApplicationInsightsKubernetesEnricher();
         services.AddMvc();
         ...
     }
     ```
 
-3. Build and run the app in containers managed by Kubernetes.
+1. Build the application in containers, then deploy the container with Kubernetes.
+
+**Notes:** Those steps are not considered the best practice to set the instrumentation key for application insights. Refer to [Enable Application Insights server-side telemetry](https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core#enable-application-insights-server-side-telemetry-without-visual-studio) for various options. Also, consider deploy Kubernetes Secrets to secure it.
 
 ### Walk-through
 
