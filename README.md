@@ -48,17 +48,17 @@ These are the basic steps to instrument an ASP.NET Core application to enable Ap
 
 Both **ASP.NET Core** and **.NET Core** applications are supported.
 
-* For **ASP.NET Core** Application: Refer [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walk-through.
+* For **ASP.NET Core** Application: Refer to [Getting Started](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/Getting-Started-for-ASP.NET-Core-Applications) for a simple walk-through.
 
-* For **.NET Core** Application: Refer [Getting Started](examples/BasicConsoleAppILogger/README.md) for a simple walk-through.
+* For **.NET Core** Application: Refer to [Getting Started](examples/BasicConsoleAppILogger/README.md) for a simple walk-through.
 
-* Follow [this example](examples/BasicUsage_clr21_RBAC) for Role-based access control (RBAC) enabled Kubernetes clusters.
+* Follow [this example](examples/BasicUsage_clr21_RBAC) for **Role-based access control (RBAC)** enabled Kubernetes clusters.
 
 ### Configuration Details
 
-Customize configurations are supported for `v1.0.2+`. There are several ways to customize the settings. For example:
+Customize configurations are supported starting with version 1.0.2 of the ApplicationInsights.Kubernetes package. There are several ways to customize the settings. For example:
 
-1. By the code:
+1. Using code:
 
     ```csharp
     services.AddApplicationInsightsKubernetesEnricher(option=> {
@@ -66,7 +66,7 @@ Customize configurations are supported for `v1.0.2+`. There are several ways to 
     });
     ```
 
-2. By `appsettings.json`:
+2. Using `appsettings.json`:
 
     ```jsonc
     {
@@ -80,7 +80,7 @@ Customize configurations are supported for `v1.0.2+`. There are several ways to 
     }
     ```
 
-3. By environment variables:
+3. Using environment variables:
 
     ```shell
     AppInsightsForKubernetes__InitializationTimeout=3.1:12:15.34
@@ -92,7 +92,7 @@ Customize configurations are supported for `v1.0.2+`. There are several ways to 
     | --------------------- | ----------- | ------------- | -------------------------------------------------------------------------------------------- |
     | InitializationTimeout | TimeSpan    | 00:02:00      | Maximum time to wait for spinning up the container. Accepted format: [d.]hh:mm:ss[.fffffff]. |
 
-The configuration uses with the conventions in ASP.NET Core. Refer [Configuration in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-2.1) for more information.
+The configuration uses the ASP.NET Core conventions. Refer to [Configuration in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-2.1) for more information.
 
 ### Verify the cluster configuration (Linux Container only)
 
@@ -112,11 +112,11 @@ Profile your application for performance improvement using [Application Insights
 
 ### Report issues
 
-Please file bug, discussion or any other interesting topics in [issues](https://github.com/Microsoft/ApplicationInsights-Kubernetes/issues) on github.
+Please file bug, discussion or any other interesting topics in [issues](https://github.com/Microsoft/ApplicationInsights-Kubernetes/issues) on GitHub.
 
 ### Trouble Shooting
 
-When Microsoft.ApplicationInsights.Kubernetes doesn't work properly, you can turn on self-diagnostics to see the traces in Kubernetes' logs. Refer [this wiki page](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki/%5BAdvanced%5D-How-to-enable-self-diagnostics-for-ApplicationInsights.Kubernetes) for instructions to turn on trace.
+When Microsoft.ApplicationInsights.Kubernetes doesn't work properly, you can turn on self-diagnostics to see the traces in Kubernetes' logs. Refer to [How to enable self diagnostics for ApplicationInsights.Kubernetes](./docs/SelfDiagnostics.md) for instructions.
 
 ### Developing
 

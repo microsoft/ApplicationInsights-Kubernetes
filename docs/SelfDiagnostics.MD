@@ -2,19 +2,22 @@
 
 ## Enable self-diagnostics
 
-We understand ApplicationInsights.Kubernetes is far from perfect. Enabling self-diagnostics will help find [issues](https://github.com/microsoft/ApplicationInsights-Kubernetes/issues) easier. Please feel free to open issues and we will be glad to look into them.
+Enabling self-diagnostics helps troubleshoot issues and determine whether the problem is with service code/configuration, or with the `ApplicationInsights.Kubernetes` package itself.
 
-Application Insights for Kubernetes is instrumented with DiagnosticsSource. To see the logs, create a diagnostic source listener that listens to `Microsoft.ApplicationInsights.Kubernetes.Debugging.Inspect.Observer`. The observer(DiagnosticSource) will emits logs in different levels.
+If problem with ApplicationInsights.Kubernetes package is suspected, please open an [issues](https://github.com/microsoft/ApplicationInsights-Kubernetes/issues) and we will look into it.
 
-To make diagnostic easier, a default listener that outputs logs into the console is provided and and be enabled like it below before `AddApplicationInsightsKubernetesEnricher` is called:
+Application Insights for Kubernetes is instrumented with DiagnosticsSource. To see the logs, create a diagnostic source observer that subscribe to `Microsoft.ApplicationInsights.Kubernetes.Debugging.ApplicationInsightsKubernetesDiagnosticSource.Observable`. The observable(DiagnosticSource) will emits logs in different levels.
+
+To make diagnostic easier, a default observer that outputs logs into the console is provided and and could be enabled like it below before `AddApplicationInsightsKubernetesEnricher` is called:
 
 ```csharp
-var listener = InspectListener.Instance;
-listener.SetMinimumLevel(InspectLevel.Trace);
-Inspect.Instance.Observer.SubscribeWithAdapter(listener);
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
+...
+var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
+ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
 ```
 
-When the listener above is enabled, you will see diagnostic logs like this:
+When the observer above is enabled, you will see diagnostic logs like this in the console:
 
 ```shell
 ...
@@ -33,7 +36,7 @@ Or you can fetch the log by calling kubectl logs <PodName> [ContainerName]. For 
 kubectl logs x-u-service-20450933-b61w2 x-webapi
 ```
 
-A similar log shall be output to the terminal.
+A similar log will be output to the terminal.
 
 ## Logging Levels
 
@@ -46,19 +49,19 @@ There are 5 levels of the events, each is assigned with a number like:
 * Debug - 1
 * Trace - 0
 
-When minimum level is set by the listener, issues that has a number greater or equal to it will be print. For example, if the minimum level is set to `Error`:
+When minimum level is set at the creation of the observer, issues that has a number greater or equal to it will be printed. For example, if the minimum level is set to `Error`(4) like this:
 
 ```csharp
-listener.SetMinimumLevel(InspectLevel.Error);
+var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Error); // Set the minimum level to Error 4.
 ```
 
 Logs with the level of critical or error will be printed to the console.
 
 ## About the Diagnostic Source
 
-To find out more details about the [DiagnosticSource], reference [DiagnosticSource Users Guide](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/DiagnosticSourceUsersGuide.md#diagnosticsource-users-guide).
+To find out more about the [DiagnosticSource], refer to [DiagnosticSource Users Guide](https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/DiagnosticSourceUsersGuide.md#diagnosticsource-users-guide).
 
-If you want to write another diagnostic source listener, here's the basic information:
+If you want to write another diagnostic source observer, here's the basic information:
 
 The DiagnosticSource used in Application Insights is named `ApplicationInsightsKubernetesDiagnosticSource`.
 
