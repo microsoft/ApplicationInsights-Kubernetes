@@ -1,18 +1,18 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Internal;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    public class KubernetesTelemtryInitializerTests
+    public class KubernetesTelemetryInitializerTests
     {
         [Fact(DisplayName = "K8sEnvFactory can't be null in K8sTelemetryInitializer")]
         public void ConstructorSetsNullGetsNull()
@@ -22,8 +22,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                     null,
                     GetOptions(TimeSpan.FromSeconds(1)),
-                    SDKVersionUtils.Instance,
-                    GetLogger());
+                    SDKVersionUtils.Instance);
             });
 
             Assert.Equal("Value cannot be null.\r\nParameter name: k8sEnvFactory", ex.Message);
@@ -39,8 +38,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 factoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance,
-                GetLogger());
+                SDKVersionUtils.Instance);
 
             Assert.NotNull(target._k8sEnvironment);
             Assert.Equal(factoryMock.Object, target._k8sEnvFactory);
@@ -57,8 +55,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance,
-                GetLogger());
+                SDKVersionUtils.Instance);
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
@@ -76,7 +73,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance, GetLogger());
+                SDKVersionUtils.Instance);
             ITelemetry telemetry = new TraceTelemetry();
             telemetry.Context.Cloud.RoleName = "Existing RoleName";
             target.Initialize(telemetry);
@@ -87,6 +84,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact]
         public void InitializeWithEmptyForOptionalPropertyDoesNotLogError()
         {
+            var listener = new TestDiagnosticSourceObserver();
+            ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(listener);
+
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
 
@@ -106,21 +106,23 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
 
-            var loggerMock = new Mock<ILogger<KubernetesTelemetryInitializer>>();
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance,
-                loggerMock.Object);
+                SDKVersionUtils.Instance);
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
-            loggerMock.Verify(l => l.Log(LogLevel.Error, 0, It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Never());
+
+            Assert.Equal(0, listener.GetCount(DiagnosticLogLevel.Error));
         }
 
         [Fact]
         public void InitializeWithEmptyForRequiredPropertyDoesLogError()
         {
+            var listener = new TestDiagnosticSourceObserver();
+            ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(listener);
+
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
 
@@ -140,16 +142,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
 
-            var loggerMock = new Mock<ILogger<KubernetesTelemetryInitializer>>();
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance,
-                loggerMock.Object);
+                SDKVersionUtils.Instance);
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
-            loggerMock.Verify(l => l.Log(LogLevel.Error, 0, It.IsAny<FormattedLogValues>(), It.IsAny<Exception>(), It.IsAny<Func<object, Exception, string>>()), Times.Exactly(2));
+
+            Assert.Equal(2, listener.GetCount(DiagnosticLogLevel.Error));
         }
 
         [Fact(DisplayName = "K8sTelemetryInitializer sets custom dimensions")]
@@ -176,28 +177,29 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance,
-                GetLogger());
+                SDKVersionUtils.Instance);
             ITelemetry telemetry = new TraceTelemetry();
             target.Initialize(telemetry);
 
-            Assert.Equal("Cid", telemetry.Context.Properties["Kubernetes.Container.ID"]);
-            Assert.Equal("CName", telemetry.Context.Properties["Kubernetes.Container.Name"]);
+            ISupportProperties telemetryWithProperties = telemetry as ISupportProperties;
 
-            Assert.Equal("Pid", telemetry.Context.Properties["Kubernetes.Pod.ID"]);
-            Assert.Equal("PName", telemetry.Context.Properties["Kubernetes.Pod.Name"]);
-            Assert.Equal("PLabels", telemetry.Context.Properties["Kubernetes.Pod.Labels"]);
+            Assert.Equal("Cid", telemetryWithProperties.Properties["Kubernetes.Container.ID"]);
+            Assert.Equal("CName", telemetryWithProperties.Properties["Kubernetes.Container.Name"]);
 
-            Assert.Equal("RName", telemetry.Context.Properties["Kubernetes.ReplicaSet.Name"]);
+            Assert.Equal("Pid", telemetryWithProperties.Properties["Kubernetes.Pod.ID"]);
+            Assert.Equal("PName", telemetryWithProperties.Properties["Kubernetes.Pod.Name"]);
+            Assert.Equal("PLabels", telemetryWithProperties.Properties["Kubernetes.Pod.Labels"]);
 
-            Assert.Equal("DName", telemetry.Context.Properties["Kubernetes.Deployment.Name"]);
+            Assert.Equal("RName", telemetryWithProperties.Properties["Kubernetes.ReplicaSet.Name"]);
 
-            Assert.Equal("Nid", telemetry.Context.Properties["Kubernetes.Node.ID"]);
-            Assert.Equal("NName", telemetry.Context.Properties["Kubernetes.Node.Name"]);
+            Assert.Equal("DName", telemetryWithProperties.Properties["Kubernetes.Deployment.Name"]);
+
+            Assert.Equal("Nid", telemetryWithProperties.Properties["Kubernetes.Node.ID"]);
+            Assert.Equal("NName", telemetryWithProperties.Properties["Kubernetes.Node.Name"]);
 
 #if !NETSTANDARD1_3 && !NETSTANDARD1_6
-            Assert.NotNull(telemetry.Context.Properties["Process.CPU(%)"]);
-            Assert.NotNull(telemetry.Context.Properties["Process.Memory"]);
+            Assert.NotNull(telemetryWithProperties.Properties["Process.CPU(%)"]);
+            Assert.NotNull(telemetryWithProperties.Properties["Process.Memory"]);
 #endif
         }
 
@@ -214,13 +216,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance,
-                GetLogger());
+                SDKVersionUtils.Instance);
             ITelemetry telemetry = new TraceTelemetry();
-            telemetry.Context.Properties["K8s.Container.ID"] = "Existing Cid";
+            ISupportProperties telemetryWithProperties = telemetry as ISupportProperties;
+            telemetryWithProperties.Properties["K8s.Container.ID"] = "Existing Cid";
             target.Initialize(telemetry);
 
-            Assert.Equal("Existing Cid", telemetry.Context.Properties["K8s.Container.ID"]);
+            Assert.Equal("Existing Cid", telemetryWithProperties.Properties["K8s.Container.ID"]);
         }
 
         [Fact(DisplayName = "When timeout happens on fetching the Kubernetes properties, initializer fails gracefully")]
@@ -233,14 +235,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance,
-                GetLogger());
+                SDKVersionUtils.Instance);
 
             ITelemetry telemetry = new TraceTelemetry();
-            telemetry.Context.Properties["K8s.Container.ID"] = "No Crash";
+            ISupportProperties telemetryWithProperties = telemetry as ISupportProperties;
+
+            telemetryWithProperties.Properties["K8s.Container.ID"] = "No Crash";
             target.Initialize(telemetry);
 
-            Assert.Equal("No Crash", telemetry.Context.Properties["K8s.Container.ID"]);
+            Assert.Equal("No Crash", telemetryWithProperties.Properties["K8s.Container.ID"]);
         }
 
         [Fact(DisplayName = "Query Kubernetes Environment will timeout.")]
@@ -253,8 +256,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
-                SDKVersionUtils.Instance,
-                GetLogger());
+                SDKVersionUtils.Instance);
             Assert.False(target._isK8sQueryTimeout);
             await Task.Delay(TimeSpan.FromSeconds(1));
             Assert.True(target._isK8sQueryTimeout);
@@ -270,30 +272,17 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(30)),
-                SDKVersionUtils.Instance,
-                GetLogger());
+                SDKVersionUtils.Instance);
 
-            // K8s Enviornment is still null.
+            // K8s Environment is still null.
             Assert.Null(target._k8sEnvironment);
             // And is not yet timed out.
             Assert.False(target._isK8sQueryTimeout);
         }
 
-        private ILogger<KubernetesTelemetryInitializer> GetLogger()
-        {
-            return GetLogger<KubernetesTelemetryInitializer>(GetTestServiceProvider());
-        }
-
-        private ILogger<T> GetLogger<T>(IServiceProvider serviceProvider)
-            where T : class
-        {
-            return serviceProvider.GetService<ILogger<T>>();
-        }
-
         private IServiceProvider GetTestServiceProvider()
         {
             IServiceCollection serviceCollection = new ServiceCollection();
-            serviceCollection.AddLogging();
             return serviceCollection.BuildServiceProvider();
         }
 

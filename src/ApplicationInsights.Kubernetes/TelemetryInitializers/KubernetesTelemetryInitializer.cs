@@ -2,11 +2,12 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
@@ -17,7 +18,6 @@ using System.Globalization;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-
     /// <summary>
     /// Telemetry Initializer for K8s Environment
     /// </summary>
@@ -36,48 +36,69 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
             IOptions<AppInsightsForKubernetesOptions> options,
-            SDKVersionUtils sdkVersionUtils,
-            ILogger<KubernetesTelemetryInitializer> logger)
+            SDKVersionUtils sdkVersionUtils)
         {
             _k8sEnvironment = null;
-            _logger = logger;
 
             // Options can't be null.
             Debug.Assert(options != null, "Options can't be null.");
             _options = Arguments.IsNotNull(options?.Value, nameof(options));
 
-            _logger.LogDebug($@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
-{JsonConvert.SerializeObject(_options)}");
+            _logger.LogDebug(@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
+{0}", JsonConvert.SerializeObject(_options));
 
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
             _timeoutAt = DateTime.Now.Add(_options.InitializationTimeout);
             _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
 
-            var _forget = SetK8sEnvironment();
+            _ = SetK8sEnvironment();
         }
 
         public void Initialize(ITelemetry telemetry)
         {
-            if (_k8sEnvironment != null)
+            IK8sEnvironment k8sEnv = _k8sEnvironment;
+            if (k8sEnv != null)
             {
-#if NETSTANDARD2_0
-                Stopwatch cpuWatch = Stopwatch.StartNew();
-                TimeSpan startCPUTime = Process.GetCurrentProcess().TotalProcessorTime;
-#endif
-                // Setting the container name to role name
-                if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
+                _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is invoked.", k8sEnv.PodName);
+                try
                 {
-                    telemetry.Context.Cloud.RoleName = this._k8sEnvironment.ContainerName;
-                }
 
 #if NETSTANDARD2_0
-                SetCustomDimensions(telemetry, cpuWatch, startCPUTime);
-#else
-                SetCustomDimensions(telemetry);
+                    Stopwatch cpuWatch = Stopwatch.StartNew();
+                    TimeSpan startCPUTime = Process.GetCurrentProcess().TotalProcessorTime;
 #endif
+                    // Setting the container name to role name
+                    if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
+                    {
+                        telemetry.Context.Cloud.RoleName = k8sEnv.ContainerName;
+                    }
+
+                    if (telemetry is ISupportProperties propertySetter)
+                    {
+
+#if NETSTANDARD2_0
+                        SetCustomDimensions(propertySetter, cpuWatch, startCPUTime);
+#else
+                        SetCustomDimensions(propertySetter);
+#endif
+                    }
+                    else
+                    {
+                        _logger.LogTrace("This telemetry object doesn't implement ISupportProperties.");
+                    }
+                    _logger.LogTrace("Finish telemetry initializer.");
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.ToString());
+                }
+#pragma warning restore CA1031 // Do not catch general exception types
             }
             else
             {
+                _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is used but the content has not ready yet.");
+
                 if (_isK8sQueryTimeout)
                 {
                     if (!_isK8sQueryTimeoutReported)
@@ -100,19 +121,19 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             if (createK8sEnvTask.IsCompleted)
             {
+                _logger.LogDebug("Application Insights for Kubernetes environment initialized.");
                 _k8sEnvironment = createK8sEnvTask.Result;
             }
             else
             {
                 _isK8sQueryTimeout = true;
                 _k8sEnvironment = null;
+                _logger.LogError("Application Insights for Kubernetes environment initialization timed out.");
             }
         }
 
-        private void SetCustomDimensions(ITelemetry telemetry)
+        private void SetCustomDimensions(ISupportProperties telemetry)
         {
-            // Adding pod name into custom dimension
-
             // Container
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.ID"), this._k8sEnvironment.ContainerID);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.Name"), this._k8sEnvironment.ContainerName);
@@ -129,13 +150,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             // Deployment
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this._k8sEnvironment.DeploymentName, isValueOptional: true);
 
-            // Ndoe
+            // Node
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this._k8sEnvironment.NodeUid);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this._k8sEnvironment.NodeName);
         }
 
 #if NETSTANDARD2_0
-        private void SetCustomDimensions(ITelemetry telemetry, Stopwatch cpuWatch, TimeSpan startCPUTime)
+        private void SetCustomDimensions(ISupportProperties telemetry, Stopwatch cpuWatch, TimeSpan startCPUTime)
         {
             SetCustomDimensions(telemetry);
 
@@ -149,7 +170,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 int processorCount = Environment.ProcessorCount;
                 Debug.Assert(processorCount > 0, $"How could process count be {processorCount}?");
-                // A very simple but not that accruate evaluation of how much CPU the process is take out of a core.
+                // A very simple but not that accurate evaluation of how much CPU the process is take out of a core.
                 double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds);
                 cpuString = CPUPercentage.ToString("P2", CultureInfo.InvariantCulture);
             }
@@ -161,11 +182,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 #endif
 
-        private void SetCustomDimension(ITelemetry telemetry, string key, string value, bool isValueOptional = false)
+        private static void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)
         {
             if (telemetry == null)
             {
-                _logger.LogError("telemetry object is null in telememtry initializer.");
+                _logger.LogError("telemetry object is null in telemetry initializer.");
                 return;
             }
 
@@ -179,35 +200,34 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 if (isValueOptional)
                 {
-                    _logger.LogTrace(Invariant($"Value is null or empty for key: {key}"));
+                    _logger.LogTrace("Value is null or empty for key: {0}", key);
                 }
                 else
                 {
-                    _logger.LogError(Invariant($"Value is required to set custom dimension. Key: {key}"));
+                    _logger.LogError("Value is required to set custom dimension. Key: {0}", key);
                 }
                 return;
             }
 
-            if (!telemetry.Context.Properties.ContainsKey(key))
+            if (!telemetry.Properties.ContainsKey(key))
             {
-                telemetry.Context.Properties.Add(key, value);
+                telemetry.Properties.Add(key, value);
             }
             else
             {
-                string existingValue = telemetry.Context.Properties[key];
+                string existingValue = telemetry.Properties[key];
                 if (string.Equals(existingValue, value, System.StringComparison.OrdinalIgnoreCase))
                 {
-                    _logger.LogTrace(Invariant($"The telemetry already contains the property of {key} with the same value of {existingValue}."));
+                    _logger.LogTrace("The telemetry already contains the property of {0} with the same value of {1}.", key, existingValue);
                 }
                 else
                 {
-                    telemetry.Context.Properties[key] = value;
-                    _logger.LogDebug(Invariant($"The telemetry already contains the property of {key} with value {existingValue}. The new value is: {value}"));
+                    telemetry.Properties[key] = value;
+                    _logger.LogDebug("The telemetry already contains the property of {0} with value {1}. The new value is: {2}", key, existingValue, value);
                 }
             }
         }
 
-        private readonly ILogger _logger;
         private readonly SDKVersionUtils _sdkVersionUtils;
         private readonly DateTime _timeoutAt;
 
@@ -218,5 +238,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         internal bool _isK8sQueryTimeout = false;
         private bool _isK8sQueryTimeoutReported = false;
+        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     }
 }

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Entities;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
@@ -18,7 +18,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     {
         internal bool disposed = false;
         private IKubeHttpClient _kubeHttpClient;
-        private readonly ILogger _logger;
+        private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         internal IKubeHttpClient KubeHttpClient
         {
@@ -29,9 +29,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
         }
 
-        public K8sQueryClient(IKubeHttpClient kubeHttpClient, ILogger<K8sQueryClient> logger)
+        public K8sQueryClient(IKubeHttpClient kubeHttpClient)
         {
-            this._logger = Arguments.IsNotNull(logger, nameof(logger));
             this._kubeHttpClient = Arguments.IsNotNull(kubeHttpClient, nameof(kubeHttpClient));
         }
 
@@ -78,7 +77,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
             else
             {
-                _logger.LogError("Neight container id or %APPINSIGHTS_KUBERNETES_POD_NAME% could be fetched.");
+                _logger.LogError("Neither container id nor %APPINSIGHTS_KUBERNETES_POD_NAME% could be fetched.");
             }
             return targetPod;
         }
@@ -133,7 +132,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             Uri requestUri = GetQueryUri(relativeUrl);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            _logger.LogTrace($"Default Header: {KubeHttpClient.DefaultRequestHeaders}");
+            _logger.LogTrace("Default Header: {0}", KubeHttpClient.DefaultRequestHeaders);
 
             HttpResponseMessage response = await KubeHttpClient.SendAsync(request).ConfigureAwait(false);
             if (response.IsSuccessStatusCode)
@@ -145,7 +144,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
             else
             {
-                _logger.LogDebug($"Query Failed. Request Message: {response.RequestMessage}. Status Code: {response.StatusCode}. Phase: {response.ReasonPhrase}");
+                _logger.LogDebug("Query Failed. Request Message: {0}. Status Code: {1}. Phase: {2}", response.RequestMessage, response.StatusCode, response.ReasonPhrase);
                 return null;
             }
         }

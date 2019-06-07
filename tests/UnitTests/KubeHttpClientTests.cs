@@ -2,7 +2,6 @@
 using System.Net.Http;
 using Moq;
 using Xunit;
-using static Microsoft.ApplicationInsights.Netcore.Kubernetes.TestUtils;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
@@ -13,7 +12,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             var settingsMock = new Mock<IKubeHttpClientSettingsProvider>();
             settingsMock.Setup(p => p.CreateMessageHandler()).Returns(new HttpClientHandler());
-            KubeHttpClient client = new KubeHttpClient(settingsMock.Object, GetLogger<KubeHttpClient>());
+            KubeHttpClient client = new KubeHttpClient(settingsMock.Object);
 
             Assert.NotNull(client.Settings);
             Assert.Equal(settingsMock.Object, client.Settings);
@@ -27,7 +26,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             Exception ex = Assert.Throws<ArgumentNullException>(() =>
             {
-                KubeHttpClient client = new KubeHttpClient(settingsMock.Object, GetLogger<KubeHttpClient>());
+                KubeHttpClient client = new KubeHttpClient(settingsMock.Object);
             });
 
             Assert.Equal("Value cannot be null.\r\nParameter name: handler", ex.Message);
@@ -42,7 +41,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Uri targetBaseUri = new Uri("https://k8stest/");
             settingsMock.Setup(p => p.ServiceBaseAddress).Returns(targetBaseUri);
 
-            KubeHttpClient client = new KubeHttpClient(settingsMock.Object, GetLogger<KubeHttpClient>());
+            KubeHttpClient client = new KubeHttpClient(settingsMock.Object);
 
             Assert.NotNull(client.BaseAddress);
             Assert.Equal(targetBaseUri, client.BaseAddress);

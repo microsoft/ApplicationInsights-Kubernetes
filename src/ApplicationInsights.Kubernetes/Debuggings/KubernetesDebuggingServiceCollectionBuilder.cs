@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
@@ -11,8 +10,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <summary>
         /// Constructor for <see cref="KubernetesDebuggingServiceCollectionBuilder"/>.
         /// </summary>
-        /// <param name="logger">The logger.</param>
-        public KubernetesDebuggingServiceCollectionBuilder(ILogger<KubernetesDebuggingServiceCollectionBuilder> logger) : base(() => true, logger) { }
+        public KubernetesDebuggingServiceCollectionBuilder() : base(() => true) { }
 
         /// <summary>
         /// Injects the Application Insights for Kubernetes debugging services.

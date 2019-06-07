@@ -1,22 +1,19 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal class KubeHttpClientFactory
     {
-        private readonly ILogger _logger;
-        private readonly ILogger<KubeHttpClient> _httpClientLogger;
+        private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
-        public KubeHttpClientFactory(ILogger<KubeHttpClientFactory> logger, ILogger<KubeHttpClient> httpClientLogger)
+        public KubeHttpClientFactory()
         {
-            _logger = Arguments.IsNotNull(logger, nameof(logger));
-            _httpClientLogger = Arguments.IsNotNull(httpClientLogger, nameof(httpClientLogger));
         }
 
         public IKubeHttpClient Create(IKubeHttpClientSettingsProvider settingsProvider)
         {
-            _logger.LogTrace($"Creating {nameof(KubeHttpClient)}");
-            return new KubeHttpClient(settingsProvider, _httpClientLogger);
+            _logger.LogTrace("Creating {0}", nameof(KubeHttpClient));
+            return new KubeHttpClient(settingsProvider);
         }
     }
 }

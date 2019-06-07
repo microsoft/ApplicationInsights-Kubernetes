@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
     <!-- <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /> -->
     <!--Build-->
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -15,8 +15,8 @@
         <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)PublicKey.snk</AssemblyOriginatorKeyFile>
         <!--Package-->
         <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
-        <Version Condition=" '$(Version)' == '' ">1.0.3-private-$(VersionSuffix)</Version>
-        <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' " >1.0.3.0</AssemblyVersion>
+        <Version Condition=" '$(Version)' == '' ">1.1.0-private-$(VersionSuffix)</Version>
+        <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' " >1.1.0.0</AssemblyVersion>
         <Authors>Microsoft</Authors>
         <Company>Microsoft</Company>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
