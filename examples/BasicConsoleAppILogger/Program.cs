@@ -15,6 +15,14 @@ namespace BasicConsoleAppILogger
             // Create the DI container.
             IServiceCollection services = new ServiceCollection();
 
+            // Add application insights for Kubernetes. Making sure this is called before services.Configure<TelemetryConfiguration>().
+            services.AddApplicationInsightsKubernetesEnricher();
+
+            // Uncomment the following lines for debugging AI.K8s.
+            // Refer to https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/develop/docs/SelfDiagnostics.MD for details.
+            // var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
+            // ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
+
             // Channel is explicitly configured to do flush on it later.
             var channel = new InMemoryChannel();
             services.Configure<TelemetryConfiguration>(
@@ -31,10 +39,10 @@ namespace BasicConsoleAppILogger
                 // Application Insights for all categories.
                 builder.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>("", LogLevel.Trace);
                 builder.AddApplicationInsights("---Your AI instrumentation key---");
-            });
 
-            // Add application insights for Kubernetes.
-            services.AddApplicationInsightsKubernetesEnricher();
+                // Optional: Show the logs in console at the same time
+                builder.AddConsole();
+            });
 
             // Build ServiceProvider.
             IServiceProvider serviceProvider = services.BuildServiceProvider();
