@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -15,13 +17,13 @@ namespace BasicConsoleAppILogger
             // Create the DI container.
             IServiceCollection services = new ServiceCollection();
 
-            // Add application insights for Kubernetes. Making sure this is called before services.Configure<TelemetryConfiguration>().
-            services.AddApplicationInsightsKubernetesEnricher();
-
             // Uncomment the following lines for debugging AI.K8s.
             // Refer to https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/develop/docs/SelfDiagnostics.MD for details.
             // var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
             // ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
+
+            // Add application insights for Kubernetes. Making sure this is called before services.Configure<TelemetryConfiguration>().
+            services.AddApplicationInsightsKubernetesEnricher();
 
             // Channel is explicitly configured to do flush on it later.
             var channel = new InMemoryChannel();
@@ -48,16 +50,19 @@ namespace BasicConsoleAppILogger
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             ILogger<Program> logger = serviceProvider.GetRequiredService<ILogger<Program>>();
 
-            // Begin a new scope. This is optional.
-            using (logger.BeginScope(new Dictionary<string, object> { { "Method", nameof(Main) } }))
+            while (true)
             {
-                logger.LogInformation("Logger is working"); // this will be captured by Application Insights.
-            }
+                // Begin a new scope. This is optional.
+                using (logger.BeginScope(new Dictionary<string, object> { { "Method", nameof(Main) } }))
+                {
+                    logger.LogInformation("Logger is working"); // this will be captured by Application Insights.
+                }
 
-            // Explicitly call Flush() followed by sleep is required in Console Apps.
-            // This is to ensure that even if application terminates, telemetry is sent to the back-end.
-            channel.Flush();
-            Thread.Sleep(1000);
+                // Explicitly call Flush() followed by sleep is required in Console Apps.
+                // This is to ensure that even if application terminates, telemetry is sent to the back-end.
+                channel.Flush();
+                Thread.Sleep(10000);
+            }
         }
     }
 }
