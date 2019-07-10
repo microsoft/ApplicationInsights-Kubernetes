@@ -18,6 +18,10 @@ The following code shows a sample console application that's configured to send 
 
 * Replace the code in [Program.cs](Program.cs).
 
+* To build a docker image, refer to [Dockerfile](./Dockerfile).
+
+* To deploy the docker image to a Kubernetes cluster, refer to [k8s.yaml](./k8s.yaml).
+
 ## References
 
 * [ApplicationInsightsLoggerProvider](https://docs.microsoft.com/en-us/azure/azure-monitor/app/ilogger).
