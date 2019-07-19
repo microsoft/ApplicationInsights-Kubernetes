@@ -140,12 +140,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 _logger.LogDebug("Query succeeded.");
                 string resultString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 K8sEntityList<TEntity> resultList = JsonConvert.DeserializeObject<K8sEntityList<TEntity>>(resultString);
-                return resultList.Items;
+                return resultList.Items ?? Enumerable.Empty<TEntity>();
             }
             else
             {
                 _logger.LogDebug("Query Failed. Request Message: {0}. Status Code: {1}. Phase: {2}", response.RequestMessage, response.StatusCode, response.ReasonPhrase);
-                return null;
+                return Enumerable.Empty<TEntity>();
             }
         }
 
