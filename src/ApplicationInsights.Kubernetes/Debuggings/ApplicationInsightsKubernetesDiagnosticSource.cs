@@ -1,5 +1,5 @@
+using System;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.Globalization;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
@@ -95,9 +95,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         {
             if (_innerSource.IsEnabled(level.ToString()))
             {
+                string timedFormat = "[" + DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture) + "] {0}";
                 _innerSource.Write(level.ToString(), new
                 {
-                    content = string.Format(CultureInfo.InvariantCulture, message, args),
+                    content = string.Format(CultureInfo.InvariantCulture, timedFormat, message, args),
                 });
             }
         }
