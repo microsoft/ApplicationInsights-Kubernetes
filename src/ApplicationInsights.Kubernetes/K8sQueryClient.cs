@@ -55,12 +55,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             EnsureNotDisposed();
 
-            IEnumerable<K8sPod> allPods = await GetPodsAsync().ConfigureAwait(false);
-            if (allPods == null)
-            {
-                return null;
-            }
-
+            var allPods = await GetPodsAsync().ConfigureAwait(false);
             K8sPod targetPod = null;
             string podName = Environment.GetEnvironmentVariable(@"APPINSIGHTS_KUBERNETES_POD_NAME");
             string myContainerId = KubeHttpClient.Settings.ContainerId;
