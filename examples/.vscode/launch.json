@@ -5,14 +5,14 @@
    "version": "0.2.0",
    "configurations": [
         {
-            "name": ".NET Core Launch (console)",
+            "name": ".NET Core Launch - .NET Generic Host",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "Build Example - .NET Generic Host",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/BasicConsoleAppILogger/bin/Debug/netcoreapp2.2/BasicConsoleAppILogger.dll",
+            "program": "${workspaceFolder}/GenericHost/src/bin/Debug/netcoreapp2.2/AIK8sGenericHost.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/BasicConsoleAppILogger",
+            "cwd": "${workspaceFolder}/GenericHost/src",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
             "console": "internalConsole",
             "stopAtEntry": false
