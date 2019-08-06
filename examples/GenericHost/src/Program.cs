@@ -4,15 +4,12 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 namespace AIK8sGenericHost
 {
     class Program
     {
         public static async Task Main(string[] args)
         {
-
-
             // Channel is explicitly configured to do flush on it later.
             var channel = new InMemoryChannel();
             var host = new HostBuilder()
