@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ai-k8s-generic-host
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: consoleapp
+    spec:
+      containers:
+      - name: ai-k8s-generic-host-container
+        image: dockeraccount/aik8sgenerichost:latest

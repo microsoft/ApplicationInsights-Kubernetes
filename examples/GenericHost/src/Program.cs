@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,6 +15,7 @@ namespace AIK8sGenericHost
         {
             // Channel is explicitly configured to do flush on it later.
             var channel = new InMemoryChannel();
+
             var host = new HostBuilder()
                 .ConfigureServices((context, services) =>
                 {
@@ -37,13 +41,22 @@ namespace AIK8sGenericHost
                             // Application Insights for all categories.
                             builder.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>
                                                             ("", LogLevel.Trace);
-                            builder.AddApplicationInsights("--YourAIKeyHere--");
+                            builder.AddApplicationInsights("----Your instrumentation key----");
+                            builder.AddConsole();
                         });
 
                     // Register your services that implemented IHostedService interface. For example, SendAIEventService
                     services.AddHostedService<SendAIEventService>();
                 }).Build();
 
+            IApplicationLifetime lifetime = host.Services.GetRequiredService<IApplicationLifetime>();
+            lifetime.ApplicationStopping.Register(() =>
+            {
+                channel.Flush();
+                // Work around Application Insights issue:
+                // https://github.com/Microsoft/ApplicationInsights-dotnet/issues/407
+                System.Threading.Thread.Sleep(TimeSpan.FromSeconds(2));
+            });
             await host.RunAsync();
         }
     }
