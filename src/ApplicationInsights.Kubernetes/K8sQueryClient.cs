@@ -55,12 +55,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             EnsureNotDisposed();
 
-            IEnumerable<K8sPod> allPods = await GetPodsAsync().ConfigureAwait(false);
-            if (allPods == null)
-            {
-                return null;
-            }
-
+            var allPods = await GetPodsAsync().ConfigureAwait(false);
             K8sPod targetPod = null;
             string podName = Environment.GetEnvironmentVariable(@"APPINSIGHTS_KUBERNETES_POD_NAME");
             string myContainerId = KubeHttpClient.Settings.ContainerId;
@@ -140,12 +135,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 _logger.LogDebug("Query succeeded.");
                 string resultString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 K8sEntityList<TEntity> resultList = JsonConvert.DeserializeObject<K8sEntityList<TEntity>>(resultString);
-                return resultList.Items;
+                return resultList.Items ?? Enumerable.Empty<TEntity>();
             }
             else
             {
                 _logger.LogDebug("Query Failed. Request Message: {0}. Status Code: {1}. Phase: {2}", response.RequestMessage, response.StatusCode, response.ReasonPhrase);
-                return null;
+                return Enumerable.Empty<TEntity>();
             }
         }
 
