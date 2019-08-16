@@ -35,7 +35,7 @@
     </ItemGroup>
     <ItemGroup Condition="'$(IsCIBuild)' == 'true' AND '$(IsSignBuild)' == 'true'">
         <FilesToSign Include="$(OutputPath)\$(AssemblyName).dll">
-            <Authenticode>Microsoft</Authenticode>
+            <Authenticode>Microsoft400</Authenticode>
             <StrongName>StrongName</StrongName>
         </FilesToSign>
     </ItemGroup>
