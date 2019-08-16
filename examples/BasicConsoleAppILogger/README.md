@@ -16,6 +16,14 @@ The following code shows a sample console application that's configured to send 
     dotnet add package Microsoft.ApplicationInsights.Kubernetes
     ```
 
+* Optionally, if you prefer to output the log to the console simultaneously, add the following package as well:
+
+    ```shell
+    dotnet add package Microsoft.Extensions.Logging.Console
+    ```
+
+    The project file will be updated, similar to [BasicConsoleAppILogger.csproj](./BasicConsoleAppILogger.csproj).
+
 * Replace the code in [Program.cs](Program.cs).
 
 * To build a docker image, refer to [Dockerfile](./Dockerfile).
