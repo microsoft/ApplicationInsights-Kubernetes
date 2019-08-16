@@ -79,5 +79,18 @@
                 "cwd": "${workspaceFolder}/WindowsContainer/"
             }
         },
+        {
+            "label": "Build Example - .NET Generic Host",
+            "command": "dotnet",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher":"$msCompile",
+            "args": [
+                "build"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/GenericHost/src/"
+            }
+        }
     ]
 }
