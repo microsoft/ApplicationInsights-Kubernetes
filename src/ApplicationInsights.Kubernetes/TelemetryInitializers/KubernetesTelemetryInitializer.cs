@@ -142,7 +142,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.ID"), this._k8sEnvironment.PodID);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Name"), this._k8sEnvironment.PodName);
             SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this._k8sEnvironment.PodLabels);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Namespace"), this._k8sEnvironment.PodNamespace);
+            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Namespace"), this._k8sEnvironment.PodNamespace, isValueOptional: true);
 
             // Pod will have no replica name or deployment when deployed through other means. For example, as a daemonset.
             // Replica Set

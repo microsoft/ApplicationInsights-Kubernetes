@@ -95,11 +95,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.PodID).Returns("Pid");
             envMock.Setup(env => env.PodName).Returns("PName");
             envMock.Setup(env => env.PodLabels).Returns("PLabels");
+
             // The following properties are optional.
             envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
             envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
             envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
             envMock.Setup(env => env.DeploymentName).Returns<string>(null);
+            envMock.Setup(env => env.PodNamespace).Returns<string>(null);
             envMock.Setup(env => env.NodeUid).Returns("Nid");
             envMock.Setup(env => env.NodeName).Returns("NName");
 
@@ -135,6 +137,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
             envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
             envMock.Setup(env => env.DeploymentName).Returns<string>(null);
+            envMock.Setup(env => env.PodNamespace).Returns<string>(null);
             // These 2 properties are required.
             envMock.Setup(env => env.NodeUid).Returns<string>(null);
             envMock.Setup(env => env.NodeName).Returns<string>(null);
@@ -170,6 +173,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.DeploymentName).Returns("DName");
             envMock.Setup(env => env.NodeUid).Returns("Nid");
             envMock.Setup(env => env.NodeName).Returns("NName");
+            envMock.Setup(env => env.PodNamespace).Returns("PNS");
+
 
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
@@ -189,6 +194,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Equal("Pid", telemetryWithProperties.Properties["Kubernetes.Pod.ID"]);
             Assert.Equal("PName", telemetryWithProperties.Properties["Kubernetes.Pod.Name"]);
             Assert.Equal("PLabels", telemetryWithProperties.Properties["Kubernetes.Pod.Labels"]);
+            Assert.Equal("PNS", telemetryWithProperties.Properties["Kubernetes.Pod.Namespace"]);
 
             Assert.Equal("RName", telemetryWithProperties.Properties["Kubernetes.ReplicaSet.Name"]);
 
