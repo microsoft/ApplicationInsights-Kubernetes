@@ -1,6 +1,5 @@
 ﻿namespace Microsoft.ApplicationInsights.Kubernetes.Entities
 {
-    using System.Collections.Generic;
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
@@ -8,6 +7,9 @@
     {
         [JsonProperty("metadata")]
         public K8sPodMetadata Metadata { get; set; }
+
+        [JsonProperty("namespace")]
+        public string Namespace { get; set; }
 
         [JsonProperty("status")]
         public K8sPodStatus Status { get; set; }
