@@ -125,7 +125,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private void SetCustomDimensions(ISupportProperties telemetry)
         {
             // Container
-
             SetCustomDimension(telemetry, Container.ID, this._k8sEnvironment.ContainerID);
             SetCustomDimension(telemetry, Container.Name, this._k8sEnvironment.ContainerName);
 
