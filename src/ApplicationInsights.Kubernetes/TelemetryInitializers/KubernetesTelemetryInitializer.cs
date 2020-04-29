@@ -10,7 +10,7 @@ using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
+using static Microsoft.ApplicationInsights.Kubernetes.TelemetryProperty;
 
 #if !NETSTANDARD1_3 && !NETSTANDARD1_6
 using System.Globalization;
@@ -23,16 +23,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     /// </summary>
     internal class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
-        public const string Container = "Container";
-        public const string Deployment = "Deployment";
-        public const string K8s = "Kubernetes";
-        public const string Node = "Node";
-        public const string Pod = "Pod";
-        public const string ReplicaSet = "ReplicaSet";
-        public const string ProcessString = "Process";
-        public const string CPU = "CPU";
-        public const string Memory = "Memory";
-
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
             IOptions<AppInsightsForKubernetesOptions> options,
@@ -135,25 +125,26 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private void SetCustomDimensions(ISupportProperties telemetry)
         {
             // Container
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.ID"), this._k8sEnvironment.ContainerID);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Container}.Name"), this._k8sEnvironment.ContainerName);
+
+            SetCustomDimension(telemetry, Container.ID, this._k8sEnvironment.ContainerID);
+            SetCustomDimension(telemetry, Container.Name, this._k8sEnvironment.ContainerName);
 
             // Pod
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.ID"), this._k8sEnvironment.PodID);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Name"), this._k8sEnvironment.PodName);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Labels"), this._k8sEnvironment.PodLabels);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Pod}.Namespace"), this._k8sEnvironment.PodNamespace, isValueOptional: true);
+            SetCustomDimension(telemetry, Pod.ID, this._k8sEnvironment.PodID);
+            SetCustomDimension(telemetry, Pod.Name, this._k8sEnvironment.PodName);
+            SetCustomDimension(telemetry, Pod.Labels, this._k8sEnvironment.PodLabels);
+            SetCustomDimension(telemetry, Pod.Namespace, this._k8sEnvironment.PodNamespace, isValueOptional: true);
 
             // Pod will have no replica name or deployment when deployed through other means. For example, as a daemonset.
             // Replica Set
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{ReplicaSet}.Name"), this._k8sEnvironment.ReplicaSetName, isValueOptional: true);
+            SetCustomDimension(telemetry, ReplicaSet.Name, this._k8sEnvironment.ReplicaSetName, isValueOptional: true);
 
             // Deployment
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Deployment}.Name"), this._k8sEnvironment.DeploymentName, isValueOptional: true);
+            SetCustomDimension(telemetry, Deployment.Name, this._k8sEnvironment.DeploymentName, isValueOptional: true);
 
             // Node
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.ID"), this._k8sEnvironment.NodeUid);
-            SetCustomDimension(telemetry, Invariant($"{K8s}.{Node}.Name"), this._k8sEnvironment.NodeName);
+            SetCustomDimension(telemetry, Node.ID, this._k8sEnvironment.NodeUid);
+            SetCustomDimension(telemetry, Node.Name, this._k8sEnvironment.NodeName);
         }
 
 #if NETSTANDARD2_0
@@ -178,8 +169,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             long memoryInBytes = process.VirtualMemorySize64;
 
-            SetCustomDimension(telemetry, Invariant($"{ProcessString}.{CPU}(%)"), cpuString);
-            SetCustomDimension(telemetry, Invariant($"{ProcessString}.{Memory}"), memoryInBytes.GetReadableSize());
+            SetCustomDimension(telemetry, ProcessProperty.CPUPrecent , cpuString);
+            SetCustomDimension(telemetry, ProcessProperty.Memory, memoryInBytes.GetReadableSize());
         }
 #endif
 
