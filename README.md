@@ -118,7 +118,7 @@ Please file bug, discussion or any other interesting topics in [issues](https://
 
 ### Troubleshooting
 
-When Microsoft.ApplicationInsights.Kubernetes doesn't work properly, you can turn on self-diagnostics to see the traces in Kubernetes' logs. Refer to [How to enable self diagnostics for ApplicationInsights.Kubernetes](./docs/SelfDiagnostics.md) for instructions.
+When Microsoft.ApplicationInsights.Kubernetes doesn't work properly, you can turn on self-diagnostics to see the traces in Kubernetes' logs. Refer to [How to enable self diagnostics for ApplicationInsights.Kubernetes](./docs/SelfDiagnostics.MD) for instructions.
 
 ### Developing
 
