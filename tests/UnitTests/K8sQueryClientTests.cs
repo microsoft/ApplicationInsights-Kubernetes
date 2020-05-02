@@ -189,7 +189,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
 
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m =>
-                m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/extensions/v1beta1/namespaces/queryNamespace/replicasets"))), Times.Once);
+                m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/apps/v1/namespaces/queryNamespace/replicasets"))), Times.Once);
         }
 
         [Fact(DisplayName = "GetReplicasAsync should deserialize multiple replicas")]
@@ -242,7 +242,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 await target.GetDeploymentsAsync();
             }
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(
-                m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/extensions/v1beta1/namespaces/queryNamespace/deployments"))), Times.Once);
+                m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/apps/v1/namespaces/queryNamespace/deployments"))), Times.Once);
         }
 
         [Fact(DisplayName = "GetDeploymentsAsync should deserialize multiple deployments")]

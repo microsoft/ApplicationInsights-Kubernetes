@@ -8,9 +8,6 @@
         [JsonProperty("metadata")]
         public K8sPodMetadata Metadata { get; set; }
 
-        [JsonProperty("namespace")]
-        public string Namespace { get; set; }
-
         [JsonProperty("status")]
         public K8sPodStatus Status { get; set; }
 
