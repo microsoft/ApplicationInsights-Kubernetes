@@ -1,6 +1,5 @@
 ﻿namespace Microsoft.ApplicationInsights.Kubernetes.Entities
 {
-    using System.Collections.Generic;
     using Newtonsoft.Json;
 
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]

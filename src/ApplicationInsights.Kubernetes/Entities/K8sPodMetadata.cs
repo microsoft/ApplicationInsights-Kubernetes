@@ -8,5 +8,8 @@
     {
         [JsonProperty("ownerReferences")]
         public IEnumerable<OwnerReference> OwnerReferences { get; set; }
+
+        [JsonProperty("namespace")]
+        public string Namespace { get; set; }
     }
 }

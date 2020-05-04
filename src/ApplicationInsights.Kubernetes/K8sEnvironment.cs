@@ -54,6 +54,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
         }
 
+        /// <summary>
+        /// Gets the namespace for a pod
+        /// </summary>
+        public string PodNamespace => this.myPod?.Metadata?.Namespace;
+
         public string ReplicaSetUid => this.myReplicaSet?.Metadata?.Uid;
         public string ReplicaSetName => this.myReplicaSet?.Metadata?.Name;
 

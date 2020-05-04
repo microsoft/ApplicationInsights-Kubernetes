@@ -83,7 +83,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             EnsureNotDisposed();
 
-            string url = Invariant($"apis/extensions/v1beta1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/replicasets");
+            string url = Invariant($"apis/apps/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/replicasets");
             return GetAllItemsAsync<K8sReplicaSet>(url);
         }
         #endregion
@@ -93,7 +93,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             EnsureNotDisposed();
 
-            string url = Invariant($"apis/extensions/v1beta1/namespaces/{this.KubeHttpClient.Settings.QueryNamespace}/deployments");
+            string url = Invariant($"apis/apps/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/deployments");
             return GetAllItemsAsync<K8sDeployment>(url);
         }
         #endregion
