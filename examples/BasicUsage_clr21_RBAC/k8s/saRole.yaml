@@ -4,7 +4,7 @@ metadata:
   # "namespace" omitted since ClusterRoles are not namespaced
   name: appinsights-k8s-property-reader
 rules:
-- apiGroups: ["","extensions"]
+- apiGroups: ["","extensions", "apps"]
   resources: ["pods","nodes", "replicasets","deployments"]
   verbs: ["get", "watch", "list"]
 ---
