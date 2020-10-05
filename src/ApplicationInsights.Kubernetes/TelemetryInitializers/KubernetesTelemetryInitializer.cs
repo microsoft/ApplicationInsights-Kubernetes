@@ -74,7 +74,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
         }
 
-        protected virtual void InitializeTelemetry(ITelemetry telemetry, IK8sEnvironment k8sEnv)
+        private void InitializeTelemetry(ITelemetry telemetry, IK8sEnvironment k8sEnv)
         {
             // Setting the container name to role name
             if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
@@ -113,7 +113,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
         }
 
-        protected void SetCustomDimensions(ISupportProperties telemetry)
+        private void SetCustomDimensions(ISupportProperties telemetry)
         {
             // Container
             SetCustomDimension(telemetry, Container.ID, this._k8sEnvironment.ContainerID);
@@ -137,7 +137,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             SetCustomDimension(telemetry, Node.Name, this._k8sEnvironment.NodeName);
         }
 
-        protected static void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)
+        private static void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)
         {
             if (telemetry == null)
             {
