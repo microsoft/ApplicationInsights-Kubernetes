@@ -4,6 +4,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -18,8 +19,9 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.
         /// </summary>
-        /// <param name="isRunningInKubernetes"></param>
-        public KubernetesServiceCollectionBuilder(Func<bool> isRunningInKubernetes)
+        /// <param name="isRunningInKubernetes">A function that returns true when running inside Kubernetes.</param>
+        public KubernetesServiceCollectionBuilder(
+            Func<bool> isRunningInKubernetes)
         {
             _isRunningInKubernetes = isRunningInKubernetes ?? throw new ArgumentNullException(nameof(isRunningInKubernetes));
         }
@@ -40,7 +42,19 @@ namespace Microsoft.Extensions.DependencyInjection
                 InjectCommonServices(serviceCollection);
                 InjectChangableServices(serviceCollection);
 
+#if NETSTANDARD2_0
+                serviceCollection.AddSingleton<ITelemetryInitializer>(p =>
+                {
+                    var userConfig = p.GetRequiredService<IOptions<AppInsightsForKubernetesOptions>>();
+                    var envFactory = p.GetRequiredService<IK8sEnvironmentFactory>();
+                    var sdkVersionUtils = p.GetRequiredService<SDKVersionUtils>();
+                    return userConfig.Value.DisableCounters ?
+                        new KubernetesTelemetryInitializer(envFactory, userConfig, sdkVersionUtils) :
+                        new KubernetesTelemetryInitializerExt(envFactory, userConfig, sdkVersionUtils);
+                });
+#else
                 serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
+#endif
                 _logger.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 return serviceCollection;
             }

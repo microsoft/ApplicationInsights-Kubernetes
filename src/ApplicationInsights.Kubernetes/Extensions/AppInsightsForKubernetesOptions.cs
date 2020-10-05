@@ -12,8 +12,14 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Maximum time to wait for spinning up the container.
         /// </summary>
-        /// <value></value>
         [JsonProperty("InitializationTimeout")]
         public TimeSpan InitializationTimeout { get; set; } = TimeSpan.FromMinutes(2);
+
+        /// <summary>
+        /// Gets or sets to disable CPU and memory counters on telemetry.
+        /// Optional. Default to false.
+        /// </summary>
+        [JsonProperty("DisableCounters")]
+        public bool DisableCounters { get; set; }
     }
 }
