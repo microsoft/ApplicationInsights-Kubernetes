@@ -13,6 +13,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     {
         TimeSpan _lastCPUSample;
         Stopwatch _cpuWatch = new Stopwatch();
+        private static readonly int ProcessorCount = Environment.ProcessorCount <= 0 ? 1 : Environment.ProcessorCount;
 
         public void Initialize(ITelemetry telemetry)
         {
@@ -24,10 +25,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 {
                     if (_cpuWatch.ElapsedMilliseconds > 0)
                     {
-                        int processorCount = Environment.ProcessorCount;
-                        Debug.Assert(processorCount > 0, $"How could process count be {processorCount}?");
                         // A very simple but not that accurate evaluation of how much CPU the process is take out of a core.
-                        double cpuPercentage = (endCPUTime - _lastCPUSample).TotalMilliseconds / (_cpuWatch.ElapsedMilliseconds);
+                        double cpuPercentage = (endCPUTime - _lastCPUSample).TotalMilliseconds / (_cpuWatch.ElapsedMilliseconds) / ProcessorCount;
                         SetMetrics(metricsTelemetry, ProcessProperty.CPUPrecent, cpuPercentage);
                     }
                     else
