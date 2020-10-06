@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
 
 #if NETSTANDARD2_0
-                if (_options.Value == null || !_options.Value.DisableCounters)
+                if (_options.Value == null || !_options.Value.DisablePerformanceCounters)
                 {
                     serviceCollection.AddSingleton<ITelemetryInitializer, SimplePerformanceCounterTelemetryInitializer>();
                 }

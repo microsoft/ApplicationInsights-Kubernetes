@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Gets or sets to disable CPU and memory counters on telemetry.
         /// Optional. Default to false.
         /// </summary>
-        [JsonProperty("DisableCounters")]
-        public bool DisableCounters { get; set; }
+        [JsonProperty("DisablePerformanceCounters")]
+        public bool DisablePerformanceCounters { get; set; }
     }
 }
