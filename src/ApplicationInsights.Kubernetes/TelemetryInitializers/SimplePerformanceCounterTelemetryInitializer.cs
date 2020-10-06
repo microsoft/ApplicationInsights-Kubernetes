@@ -9,10 +9,16 @@ using static Microsoft.ApplicationInsights.Kubernetes.TelemetryProperty;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    internal class SimplePerformanceCounterTelemetryInitializer : ITelemetryInitializer
+    internal sealed class SimplePerformanceCounterTelemetryInitializer : ITelemetryInitializer
     {
-        TimeSpan _lastCPUSample;
-        Stopwatch _cpuWatch = new Stopwatch();
+        private TimeSpan _lastCPUSample;
+        private Stopwatch _cpuWatch = new Stopwatch();
+
+        // Cache current process for performance trade off. 
+        // Refer to https://stackoverflow.com/questions/28023490/should-one-call-dispose-for-process-getcurrentprocess
+        // for the reason that we can get away without calling dispose on it, thus not to implement the IDisposable interface.
+        private Process _currnetProcess;
+
         private static readonly int ProcessorCount = Environment.ProcessorCount <= 0 ? 1 : Environment.ProcessorCount;
 
         public void Initialize(ITelemetry telemetry)
@@ -58,10 +64,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private T GetFromCurrentProcess<T>(Func<Process, T> valueFactory)
         {
-            using (Process currentProcess = Process.GetCurrentProcess())
+            // In case of concurrent execution, there is a chance for _currentProcess to be checked null more than one time,
+            // Take the hit to assign it multiple times to avoid locks.
+            if (_currnetProcess == null)
             {
-                return valueFactory(currentProcess);
+                _currnetProcess = Process.GetCurrentProcess();
             }
+            return valueFactory(_currnetProcess);
         }
     }
 }
