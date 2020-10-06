@@ -193,6 +193,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         internal bool _isK8sQueryTimeout = false;
         private bool _isK8sQueryTimeoutReported = false;
-        protected static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     }
 }
