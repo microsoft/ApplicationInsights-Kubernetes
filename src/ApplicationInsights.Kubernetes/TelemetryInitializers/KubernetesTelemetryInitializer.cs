@@ -12,10 +12,6 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using static Microsoft.ApplicationInsights.Kubernetes.TelemetryProperty;
 
-#if !NETSTANDARD1_3 && !NETSTANDARD1_6
-using System.Globalization;
-#endif
-
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
     /// <summary>
@@ -52,31 +48,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is invoked.", k8sEnv.PodName);
                 try
                 {
-
-#if NETSTANDARD2_0
-                    Stopwatch cpuWatch = Stopwatch.StartNew();
-                    TimeSpan startCPUTime = Process.GetCurrentProcess().TotalProcessorTime;
-#endif
-                    // Setting the container name to role name
-                    if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
-                    {
-                        telemetry.Context.Cloud.RoleName = k8sEnv.ContainerName;
-                    }
-
-                    if (telemetry is ISupportProperties propertySetter)
-                    {
-
-#if NETSTANDARD2_0
-                        SetCustomDimensions(propertySetter, cpuWatch, startCPUTime);
-#else
-                        SetCustomDimensions(propertySetter);
-#endif
-                    }
-                    else
-                    {
-                        _logger.LogTrace("This telemetry object doesn't implement ISupportProperties.");
-                    }
-                    _logger.LogTrace("Finish telemetry initializer.");
+                    InitializeTelemetry(telemetry, k8sEnv);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -100,6 +72,25 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
 
             telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
+        }
+
+        private void InitializeTelemetry(ITelemetry telemetry, IK8sEnvironment k8sEnv)
+        {
+            // Setting the container name to role name
+            if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleName))
+            {
+                telemetry.Context.Cloud.RoleName = k8sEnv.ContainerName;
+            }
+
+            if (telemetry is ISupportProperties propertySetter)
+            {
+                SetCustomDimensions(propertySetter);
+            }
+            else
+            {
+                _logger.LogTrace("This telemetry object doesn't implement ISupportProperties.");
+            }
+            _logger.LogTrace("Finish telemetry initializer.");
         }
 
         private async Task SetK8sEnvironment()
@@ -145,33 +136,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             SetCustomDimension(telemetry, Node.ID, this._k8sEnvironment.NodeUid);
             SetCustomDimension(telemetry, Node.Name, this._k8sEnvironment.NodeName);
         }
-
-#if NETSTANDARD2_0
-        private void SetCustomDimensions(ISupportProperties telemetry, Stopwatch cpuWatch, TimeSpan startCPUTime)
-        {
-            SetCustomDimensions(telemetry);
-
-            // Add CPU/Memory metrics to telemetry.
-            Process process = Process.GetCurrentProcess();
-            TimeSpan endCPUTime = process.TotalProcessorTime;
-            cpuWatch.Stop();
-
-            string cpuString = "NaN";
-            if (cpuWatch.ElapsedMilliseconds > 0)
-            {
-                int processorCount = Environment.ProcessorCount;
-                Debug.Assert(processorCount > 0, $"How could process count be {processorCount}?");
-                // A very simple but not that accurate evaluation of how much CPU the process is take out of a core.
-                double CPUPercentage = (endCPUTime - startCPUTime).TotalMilliseconds / (double)(cpuWatch.ElapsedMilliseconds);
-                cpuString = CPUPercentage.ToString("P2", CultureInfo.InvariantCulture);
-            }
-
-            long memoryInBytes = process.VirtualMemorySize64;
-
-            SetCustomDimension(telemetry, ProcessProperty.CPUPrecent , cpuString);
-            SetCustomDimension(telemetry, ProcessProperty.Memory, memoryInBytes.GetReadableSize());
-        }
-#endif
 
         private static void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)
         {

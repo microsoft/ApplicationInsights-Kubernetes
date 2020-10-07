@@ -4,6 +4,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -13,15 +14,20 @@ namespace Microsoft.Extensions.DependencyInjection
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
         private readonly Func<bool> _isRunningInKubernetes;
+        private readonly IOptions<AppInsightsForKubernetesOptions> _options;
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
         /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.
         /// </summary>
-        /// <param name="isRunningInKubernetes"></param>
-        public KubernetesServiceCollectionBuilder(Func<bool> isRunningInKubernetes)
+        /// <param name="isRunningInKubernetes">A function that returns true when running inside Kubernetes.</param>
+        /// <param name="options"></param>
+        public KubernetesServiceCollectionBuilder(
+            Func<bool> isRunningInKubernetes,
+            IOptions<AppInsightsForKubernetesOptions> options)
         {
             _isRunningInKubernetes = isRunningInKubernetes ?? throw new ArgumentNullException(nameof(isRunningInKubernetes));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
         }
 
         /// <summary>
@@ -41,6 +47,18 @@ namespace Microsoft.Extensions.DependencyInjection
                 InjectChangableServices(serviceCollection);
 
                 serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
+
+#if NETSTANDARD2_0
+                if (_options.Value == null || !_options.Value.DisablePerformanceCounters)
+                {
+                    serviceCollection.AddSingleton<ITelemetryInitializer, SimplePerformanceCounterTelemetryInitializer>();
+                }
+                else
+                {
+                    _logger.LogDebug("{initializerName} is disabled by configuration.", nameof(SimplePerformanceCounterTelemetryInitializer));
+                }
+#endif
+
                 _logger.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 return serviceCollection;
             }
