@@ -93,6 +93,7 @@ Customize configurations are supported starting with version 1.0.2 of the Applic
     | Key                   | Value/Types | Default Value | Description                                                                                  |
     | --------------------- | ----------- | ------------- | -------------------------------------------------------------------------------------------- |
     | InitializationTimeout | TimeSpan    | 00:02:00      | Maximum time to wait for spinning up the container. Accepted format: [d.]hh:mm:ss[.fffffff]. |
+    | DisablePerformanceCounters | Boolean     | false         | Sets to true to avoid adding performance counter telemetry initializer.                      |
 
 The configuration uses the ASP.NET Core conventions. Refer to [Configuration in ASP.NET Core](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-2.1) for more information.
 

@@ -202,11 +202,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             Assert.Equal("Nid", telemetryWithProperties.Properties["Kubernetes.Node.ID"]);
             Assert.Equal("NName", telemetryWithProperties.Properties["Kubernetes.Node.Name"]);
-
-#if !NETSTANDARD1_3 && !NETSTANDARD1_6
-            Assert.NotNull(telemetryWithProperties.Properties["Process.CPU(%)"]);
-            Assert.NotNull(telemetryWithProperties.Properties["Process.Memory"]);
-#endif
         }
 
         [Fact(DisplayName = "K8sTelemetryInitializer will not overwrite custom dimension when it exists already.")]

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
@@ -10,7 +11,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// <summary>
         /// Constructor for <see cref="KubernetesDebuggingServiceCollectionBuilder"/>.
         /// </summary>
-        public KubernetesDebuggingServiceCollectionBuilder() : base(() => true) { }
+        public KubernetesDebuggingServiceCollectionBuilder(IOptions<AppInsightsForKubernetesOptions> options)
+        : base(isRunningInKubernetes: () => true, options) { }
 
         /// <summary>
         /// Injects the Application Insights for Kubernetes debugging services.
