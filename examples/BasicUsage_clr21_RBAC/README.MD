@@ -87,6 +87,12 @@ In [saRole.yaml](k8s/saRole.yaml), a cluster role named `appinsights-k8s-propert
 kubectl create -f k8s/saRole.yaml
 ```
 
+_Tips:_
+
+When there are applications deployed to various namespaces, the cluster role binding needs to be established for each namespace.
+
+For example, when you are deploy 2 applications to namespace `ns1` and `ns2` respectively, your role assignment yaml might look like [this](./k8s/saRoleMoreNS.yaml). **Be careful** not to use the same name for the cluster role binding to avoid one overwrite another.
+
 ## Deploy the application
 
 * Create the Kubernetes spec for the deployment and the service. Referencing [k8s.yaml](k8s/k8s.yaml). Please update the variable of `APPINSIGHTS_INSTRUMENTATIONKEY` to your own application insights instrumentation key.

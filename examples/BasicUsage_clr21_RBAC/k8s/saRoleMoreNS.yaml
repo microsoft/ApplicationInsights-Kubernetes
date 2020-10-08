@@ -1,0 +1,37 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: appinsights-k8s-property-reader
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["pods", "nodes", "replicasets", "deployments"]
+  verbs: ["get", "watch", "list"]
+---
+# cluster role binding in ns1
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: appinsights-k8s-property-reader-binding-in-ns1 # append suffix to avoid naming conflicts between the cluster role bindings
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: ns1 # this enables the default service account in `ns1` to take the referenced cluster role.
+roleRef:
+  kind: ClusterRole
+  name: appinsights-k8s-property-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+# cluster role binding in ns2
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: appinsights-k8s-property-reader-binding-in-ns2 # append suffix to avoid naming conflicts between the cluster role bindings
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: ns2 # this enables the default service account in `ns2` to take the referenced cluster role.
+roleRef:
+  kind: ClusterRole
+  name: appinsights-k8s-property-reader
+  apiGroup: rbac.authorization.k8s.io
