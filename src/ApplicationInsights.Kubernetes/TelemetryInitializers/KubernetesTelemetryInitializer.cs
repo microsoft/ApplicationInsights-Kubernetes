@@ -19,18 +19,17 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     /// </summary>
     internal class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
+        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+        
         private readonly SDKVersionUtils _sdkVersionUtils;
         private readonly DateTime _timeoutAt;
-
         internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
+        internal readonly AppInsightsForKubernetesOptions _options;
+        internal readonly ITelemetryKeyCache _telemetryKeyCache;
         internal IK8sEnvironment _k8sEnvironment { get; private set; }
-
-        internal AppInsightsForKubernetesOptions _options { get; private set; }
 
         internal bool _isK8sQueryTimeout = false;
         private bool _isK8sQueryTimeoutReported = false;
-        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
-        internal readonly ITelemetryKeyCache _telemetryKeyCache;
 
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,

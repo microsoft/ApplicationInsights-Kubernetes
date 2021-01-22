@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 InjectChangableServices(serviceCollection);
 
                 serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
-                
+
 #if NETSTANDARD2_0
                 if (_options.Value == null || !_options.Value.DisablePerformanceCounters)
                 {
