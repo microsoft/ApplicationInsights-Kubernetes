@@ -47,7 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 InjectChangableServices(serviceCollection);
 
                 serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
-
+                
 #if NETSTANDARD2_0
                 if (_options.Value == null || !_options.Value.DisablePerformanceCounters)
                 {
@@ -71,6 +71,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void InjectCommonServices(IServiceCollection serviceCollection)
         {
+            serviceCollection.AddSingleton<ITelemetryKeyCache, TelemetryKeyCache>();
             serviceCollection.AddSingleton<KubeHttpClientFactory>();
             serviceCollection.AddSingleton<K8sQueryClientFactory>();
             serviceCollection.AddSingleton<SDKVersionUtils>(SDKVersionUtils.Instance);

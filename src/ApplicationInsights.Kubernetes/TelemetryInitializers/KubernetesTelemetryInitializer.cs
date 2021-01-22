@@ -19,10 +19,24 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     /// </summary>
     internal class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
+        private readonly SDKVersionUtils _sdkVersionUtils;
+        private readonly DateTime _timeoutAt;
+
+        internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
+        internal IK8sEnvironment _k8sEnvironment { get; private set; }
+
+        internal AppInsightsForKubernetesOptions _options { get; private set; }
+
+        internal bool _isK8sQueryTimeout = false;
+        private bool _isK8sQueryTimeoutReported = false;
+        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+        internal readonly ITelemetryKeyCache _telemetryKeyCache;
+
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
             IOptions<AppInsightsForKubernetesOptions> options,
-            SDKVersionUtils sdkVersionUtils)
+            SDKVersionUtils sdkVersionUtils,
+            ITelemetryKeyCache telemetryKeyCache)
         {
             _k8sEnvironment = null;
 
@@ -33,6 +47,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             _logger.LogDebug(@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
 {0}", JsonConvert.SerializeObject(_options));
 
+            _telemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
             _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
             _timeoutAt = DateTime.Now.Add(_options.InitializationTimeout);
             _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
@@ -137,8 +152,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             SetCustomDimension(telemetry, Node.Name, this._k8sEnvironment.NodeName);
         }
 
-        private static void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)
+        private void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)
         {
+            key = _telemetryKeyCache.GetTelemetryProcessedKey(key);
+
             if (telemetry == null)
             {
                 _logger.LogError("telemetry object is null in telemetry initializer.");
@@ -182,17 +199,5 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
             }
         }
-
-        private readonly SDKVersionUtils _sdkVersionUtils;
-        private readonly DateTime _timeoutAt;
-
-        internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
-        internal IK8sEnvironment _k8sEnvironment { get; private set; }
-
-        internal AppInsightsForKubernetesOptions _options { get; private set; }
-
-        internal bool _isK8sQueryTimeout = false;
-        private bool _isK8sQueryTimeoutReported = false;
-        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     }
 }

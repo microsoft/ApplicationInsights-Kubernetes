@@ -20,6 +20,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private Process _currnetProcess;
 
         private static readonly int ProcessorCount = Environment.ProcessorCount <= 0 ? 1 : Environment.ProcessorCount;
+        private readonly ITelemetryKeyCache _telemetryKeyCache;
+
+        public SimplePerformanceCounterTelemetryInitializer(ITelemetryKeyCache telemetryKeyCache)
+        {
+            _telemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
+        }
 
         public void Initialize(ITelemetry telemetry)
         {
@@ -53,6 +59,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private void SetMetrics(ISupportMetrics telemetry, string key, double value)
         {
+            key = _telemetryKeyCache.GetTelemetryProcessedKey(key);
             if (!telemetry.Metrics.ContainsKey(key))
             {
                 telemetry.Metrics.Add(key, value);
