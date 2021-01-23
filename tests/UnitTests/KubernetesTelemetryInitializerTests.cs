@@ -59,7 +59,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envFactoryMock.Object,
                 GetOptions(TimeSpan.FromSeconds(1)),
@@ -79,7 +79,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
@@ -121,7 +121,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
@@ -161,7 +161,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
@@ -198,7 +198,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
@@ -237,7 +237,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
@@ -260,7 +260,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
@@ -285,7 +285,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
@@ -305,7 +305,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,
@@ -330,7 +330,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-            keyCacheMock.Setup(c => c.GetTelemetryProcessedKey(It.IsAny<string>())).Returns<string>(input => input.Replace('.', '_'));
+            keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input.Replace('.', '_'));
 
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 envFactoryMock.Object,

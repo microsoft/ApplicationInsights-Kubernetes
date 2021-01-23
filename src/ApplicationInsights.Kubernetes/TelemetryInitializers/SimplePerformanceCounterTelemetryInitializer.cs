@@ -59,7 +59,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private void SetMetrics(ISupportMetrics telemetry, string key, double value)
         {
-            key = _telemetryKeyCache.GetTelemetryProcessedKey(key);
+            key = _telemetryKeyCache.GetProcessedKey(key);
             if (!telemetry.Metrics.ContainsKey(key))
             {
                 telemetry.Metrics.Add(key, value);

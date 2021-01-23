@@ -153,7 +153,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)
         {
-            key = _telemetryKeyCache.GetTelemetryProcessedKey(key);
+            key = _telemetryKeyCache.GetProcessedKey(key);
 
             if (telemetry == null)
             {
