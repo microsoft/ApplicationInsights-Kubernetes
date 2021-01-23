@@ -16,7 +16,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             if (_options.TelemetryKeyProcessor != null)
             {
-                _telemetryKeyCache = new ConcurrentDictionary<string, string>();
+                _telemetryKeyCache = new ConcurrentDictionary<string, string>(
+                    concurrencyLevel: 16,
+                    capacity: 40);
             }
         }
 
