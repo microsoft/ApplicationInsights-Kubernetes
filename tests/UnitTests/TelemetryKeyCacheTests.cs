@@ -74,29 +74,5 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             Assert.Equal(expected, actual);
         }
-
-        [Fact]
-        public void ThereIsACapForCachedKeys()
-        {
-            AppInsightsForKubernetesOptions opts = new AppInsightsForKubernetesOptions();
-            opts.TelemetryKeyProcessor = (key) => key;
-
-            IOptions<AppInsightsForKubernetesOptions> options = Options.Create<AppInsightsForKubernetesOptions>(opts);
-            TelemetryKeyCache keyCache = new TelemetryKeyCache(options);
-
-            for (int i = 1; i <= TelemetryKeyCache.CacheCapacity; i++)
-            {
-                keyCache.GetProcessedKey($"Key{i}");
-            }
-
-            // No exception if the key has already been there.
-            keyCache.GetProcessedKey("Key20");
-
-            InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() =>
-            {
-                keyCache.GetProcessedKey("Key41");
-            });
-            Assert.Equal("Transformed key count is larger than the capacity of 40. This is not allowed. Please verify the TelemetryKeyProcessor option.", exception.Message);
-        }
     }
 }
