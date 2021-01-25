@@ -21,5 +21,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         [JsonProperty("DisablePerformanceCounters")]
         public bool DisablePerformanceCounters { get; set; }
+
+        /// <summary>
+        /// Gets or sets the processor for telemetry key. This is introduced to allow customization of
+        /// telemetry keys.
+        /// </summary>
+        public Func<string, string> TelemetryKeyProcessor { get; set; }
     }
 }

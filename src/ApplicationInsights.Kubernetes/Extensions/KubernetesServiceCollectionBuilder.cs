@@ -71,6 +71,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void InjectCommonServices(IServiceCollection serviceCollection)
         {
+            serviceCollection.AddSingleton<ITelemetryKeyCache, TelemetryKeyCache>();
             serviceCollection.AddSingleton<KubeHttpClientFactory>();
             serviceCollection.AddSingleton<K8sQueryClientFactory>();
             serviceCollection.AddSingleton<SDKVersionUtils>(SDKVersionUtils.Instance);
