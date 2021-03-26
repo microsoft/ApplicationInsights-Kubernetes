@@ -14,7 +14,6 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static partial class ApplicationInsightsExtensions
     {
-        private const string ConfigurationSectionName = "AppInsightsForKubernetes";
         private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
@@ -152,7 +151,7 @@ namespace Microsoft.Extensions.DependencyInjection
             IConfiguration configuration = serviceProvider.GetService<IConfiguration>();
             if (configuration != null)
             {
-                serviceCollection.Configure<AppInsightsForKubernetesOptions>(configuration.GetSection(ConfigurationSectionName));
+                serviceCollection.Configure<AppInsightsForKubernetesOptions>(configuration.GetSection(AppInsightsForKubernetesOptions.SectionName));
             }
 
             // Update settings when parameter is provided for backward compatibility.
