@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
-using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -60,6 +60,28 @@ namespace Microsoft.Extensions.DependencyInjection
                 ConfigureKubernetesTelemetryInitializer(services, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
             }
             return services;
+        }
+
+        /// <summary>
+        /// Enables Application Insights Kubernetes for a given TelemetryConfiguration.
+        /// </summary>
+        /// <param name="telemetryConfiguration">Sets the telemetry configuration to add the telemetry initializer to.</param>
+        /// <param name="applyOptions">Sets a delegate to apply the configuration for the telemetry initializer.</param>
+        /// <param name="kubernetesServiceCollectionBuilder">Sets a service collection builder.</param>
+        /// <param name="detectKubernetes">Sets a delegate to detect if the current application is running in Kubernetes hosted container.</param>
+        [Obsolete("Deprecated. This functionality will be removed afterwards. Use the other AddApplicationInsightsKubernetesEnricher overloads.", error: false)]
+        public static void AddApplicationInsightsKubernetesEnricher(
+            this TelemetryConfiguration telemetryConfiguration,
+            Action<AppInsightsForKubernetesOptions> applyOptions = null,
+            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null,
+            Func<bool> detectKubernetes = null)
+        {
+            IServiceCollection standaloneServiceCollection = new ServiceCollection();
+            standaloneServiceCollection.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
+            ConfigureKubernetesTelemetryInitializer(standaloneServiceCollection, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
+            using IServiceScope tempScope = standaloneServiceCollection.BuildServiceProvider().CreateScope();
+            ITelemetryInitializer k8sTelemetryInitializer = tempScope.ServiceProvider.GetServices<ITelemetryInitializer>().First(i => i is KubernetesTelemetryInitializer);
+            telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
         }
 
         /// <summary>

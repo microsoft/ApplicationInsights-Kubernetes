@@ -133,5 +133,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 Assert.True(false, "Not the target telemetry initializer.");
             }
         }
+
+        [Fact(DisplayName = "Support adding KubernetesTelemetryInitializer to given TelemetryConfiguration")]
+        [Obsolete("API to be removed later.", error: false)]
+        public void AddTheInitializerToGivenConfiguration()
+        {
+            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
+            telemetryConfiguration.AddApplicationInsightsKubernetesEnricher(null, new KubernetesTestServiceCollectionBuilder(), () => true);
+            Assert.NotNull(telemetryConfiguration.TelemetryInitializers);
+            Assert.Single(telemetryConfiguration.TelemetryInitializers);
+            Assert.True(telemetryConfiguration.TelemetryInitializers.First() is KubernetesTelemetryInitializer);
+        }
     }
 }
