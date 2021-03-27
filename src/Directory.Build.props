@@ -23,7 +23,6 @@
         <Authors>Microsoft</Authors>
         <Company>Microsoft</Company>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-        <!-- <PackageLicenseUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/blob/master/LICENSE</PackageLicenseUrl> -->
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageProjectUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</PackageProjectUrl>
         <PackageIcon>images/icon.png</PackageIcon>
