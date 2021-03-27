@@ -12,6 +12,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection">The collection of service descriptors.</param>
         /// <returns>The collection of services descriptors we injected into.</returns>
-        IServiceCollection InjectServices(IServiceCollection serviceCollection);
+        IServiceCollection RegisterServices(IServiceCollection serviceCollection);
     }
 }

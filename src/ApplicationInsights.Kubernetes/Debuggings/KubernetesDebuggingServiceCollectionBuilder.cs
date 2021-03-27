@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
@@ -15,13 +16,20 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         : base(isRunningInKubernetes: () => true, options) { }
 
         /// <summary>
-        /// Injects the Application Insights for Kubernetes debugging services.
+        /// Registers setttings provider for querying K8s proxy.
         /// </summary>
-        /// <param name="serviceCollection">The service collection to inject the debugging services into.</param>
-        protected override void InjectChangableServices(IServiceCollection serviceCollection)
+        /// <param name="serviceCollection"></param>
+        protected override void RegisterSettingsProvider(IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpDebuggingClientSettings>();
-            serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sDebuggingEnvironmentFactory>();
         }
+
+        /// <summary>
+        /// Registers K8s environment factory.
+        /// </summary>
+        protected override void RegisterK8sEnvironmentFactory(IServiceCollection serviceCollection)
+            => serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sDebuggingEnvironmentFactory>();
+
+
     }
 }
