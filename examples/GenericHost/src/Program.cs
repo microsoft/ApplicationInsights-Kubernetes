@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -49,7 +47,7 @@ namespace AIK8sGenericHost
                     services.AddHostedService<SendAIEventService>();
                 }).Build();
 
-            IApplicationLifetime lifetime = host.Services.GetRequiredService<IApplicationLifetime>();
+            IHostApplicationLifetime lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
             lifetime.ApplicationStopping.Register(() =>
             {
                 channel.Flush();
