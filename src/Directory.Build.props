@@ -26,7 +26,7 @@
         <!-- <PackageLicenseUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/blob/master/LICENSE</PackageLicenseUrl> -->
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
         <PackageProjectUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</PackageProjectUrl>
-        <PackageIconUrl>http://appanacdn.blob.core.windows.net/cdn/icons/aic.png</PackageIconUrl>
+        <PackageIcon>images/icon.png</PackageIcon>
         <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
         <RepositoryUrl>https://github.com/Microsoft/ApplicationInsights-Kubernetes/</RepositoryUrl>
         <RepositoryType />
@@ -44,5 +44,6 @@
     </ItemGroup>
     <ItemGroup>
         <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath=""/>
+        <None Include="$(MSBuildThisFileDirectory)/icon.png" Pack="true" PackagePath="images/" />
     </ItemGroup>
 </Project>
