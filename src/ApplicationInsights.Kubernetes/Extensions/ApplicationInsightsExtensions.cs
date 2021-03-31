@@ -124,8 +124,8 @@ namespace Microsoft.Extensions.DependencyInjection
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
             detectKubernetes = detectKubernetes ?? IsRunningInKubernetes;
-            using IServiceScope serviceScope = services.BuildServiceProvider().CreateScope();
-            var options = serviceScope.ServiceProvider.GetRequiredService<IOptions<AppInsightsForKubernetesOptions>>();
+            using ServiceProvider provider = services.BuildServiceProvider();
+            var options = provider.GetRequiredService<IOptions<AppInsightsForKubernetesOptions>>();
             kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ?? new KubernetesServiceCollectionBuilder(detectKubernetes, options);
             kubernetesServiceCollectionBuilder.RegisterServices(services);
         }
