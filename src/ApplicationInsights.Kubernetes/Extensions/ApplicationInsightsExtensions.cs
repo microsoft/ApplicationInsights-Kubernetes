@@ -123,10 +123,10 @@ namespace Microsoft.Extensions.DependencyInjection
             Func<bool> detectKubernetes,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
-            detectKubernetes = detectKubernetes ?? IsRunningInKubernetes;
+            detectKubernetes ??= IsRunningInKubernetes;
             using ServiceProvider provider = services.BuildServiceProvider();
             var options = provider.GetRequiredService<IOptions<AppInsightsForKubernetesOptions>>();
-            kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ?? new KubernetesServiceCollectionBuilder(detectKubernetes, options);
+            kubernetesServiceCollectionBuilder ??= new KubernetesServiceCollectionBuilder(detectKubernetes, options);
             kubernetesServiceCollectionBuilder.RegisterServices(services);
         }
 
