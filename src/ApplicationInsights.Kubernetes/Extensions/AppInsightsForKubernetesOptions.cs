@@ -10,6 +10,11 @@ namespace Microsoft.Extensions.DependencyInjection
     public class AppInsightsForKubernetesOptions
     {
         /// <summary>
+        /// Configuration section name.
+        /// </summary>
+        public const string SectionName = "AppInsightsForKubernetes";
+
+        /// <summary>
         /// Maximum time to wait for spinning up the container.
         /// </summary>
         [JsonProperty("InitializationTimeout")]

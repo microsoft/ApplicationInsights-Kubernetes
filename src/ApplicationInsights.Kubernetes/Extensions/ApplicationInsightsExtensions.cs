@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
-using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -14,9 +13,6 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static partial class ApplicationInsightsExtensions
     {
-        private const string ConfigurationSectionName = "AppInsightsForKubernetes";
-        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
-
         /// <summary>
         /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection system.
         /// </summary>
@@ -59,14 +55,11 @@ namespace Microsoft.Extensions.DependencyInjection
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
             Func<bool> detectKubernetes)
         {
-            return services.Configure<TelemetryConfiguration>((config) =>
+            if (!KubernetesTelemetryInitializerExists(services))
             {
-                if (!KubernetesTelemetryInitializerExists(services))
-                {
-                    ConfigureKubernetesTelemetryInitializer(services, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
-                }
-                config.AddKubernetesTelemetryInitializer(services);
-            });
+                ConfigureKubernetesTelemetryInitializer(services, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
+            }
+            return services;
         }
 
         /// <summary>
@@ -76,6 +69,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="applyOptions">Sets a delegate to apply the configuration for the telemetry initializer.</param>
         /// <param name="kubernetesServiceCollectionBuilder">Sets a service collection builder.</param>
         /// <param name="detectKubernetes">Sets a delegate to detect if the current application is running in Kubernetes hosted container.</param>
+        [Obsolete("Deprecated. This functionality will be removed afterwards. Use the other AddApplicationInsightsKubernetesEnricher overloads.", error: false)]
         public static void AddApplicationInsightsKubernetesEnricher(
             this TelemetryConfiguration telemetryConfiguration,
             Action<AppInsightsForKubernetesOptions> applyOptions = null,
@@ -83,29 +77,11 @@ namespace Microsoft.Extensions.DependencyInjection
             Func<bool> detectKubernetes = null)
         {
             IServiceCollection standaloneServiceCollection = new ServiceCollection();
+            standaloneServiceCollection.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
             ConfigureKubernetesTelemetryInitializer(standaloneServiceCollection, detectKubernetes, kubernetesServiceCollectionBuilder, applyOptions);
-            telemetryConfiguration.AddKubernetesTelemetryInitializer(standaloneServiceCollection);
-        }
-
-        /// <summary>
-        /// Gets the KubernetesTelemetryInitializer from the service collection and adds it into a TelemetryConfiguration instance.
-        /// </summary>
-        private static void AddKubernetesTelemetryInitializer(this TelemetryConfiguration telemetryConfiguration, IServiceCollection serviceCollection)
-        {
-            KubernetesTelemetryInitializer kubernetesTelemetryInitializer = null;
-            if (KubernetesTelemetryInitializerExists(serviceCollection))
-            {
-                IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-                kubernetesTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>()
-                    .FirstOrDefault(ti => ti.GetType() == typeof(KubernetesTelemetryInitializer)) as KubernetesTelemetryInitializer;
-                telemetryConfiguration.TelemetryInitializers.Add(kubernetesTelemetryInitializer);
-                _logger.LogTrace("KubernetesTelemetryInitializer has been injected into telemetry configuration #{0}.", telemetryConfiguration.GetHashCode());
-                _logger.LogInformation("KubernetesTelemetryInitializer is injected.");
-            }
-            else
-            {
-                _logger.LogError("No KubernetesTelemetryInitializer to append to TelemetryConfiguration.");
-            }
+            using IServiceScope tempScope = standaloneServiceCollection.BuildServiceProvider().CreateScope();
+            ITelemetryInitializer k8sTelemetryInitializer = tempScope.ServiceProvider.GetServices<ITelemetryInitializer>().First(i => i is KubernetesTelemetryInitializer);
+            telemetryConfiguration.TelemetryInitializers.Add(k8sTelemetryInitializer);
         }
 
         /// <summary>
@@ -113,9 +89,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
         private static bool KubernetesTelemetryInitializerExists(IServiceCollection serviceCollection)
-        {
-            return serviceCollection.Any<ServiceDescriptor>(t => t.ImplementationType == typeof(KubernetesTelemetryInitializer));
-        }
+            => serviceCollection.Any<ServiceDescriptor>(t => t.ImplementationType == typeof(KubernetesTelemetryInitializer));
 
         /// <summary>
         /// Configure the KubernetesTelemetryInitializer and its dependencies.
@@ -125,44 +99,23 @@ namespace Microsoft.Extensions.DependencyInjection
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
             Action<AppInsightsForKubernetesOptions> applyOptions)
         {
-            BuildServiceBases(serviceCollection, applyOptions);
+            InitializeServiceCollection(serviceCollection, applyOptions);
             BuildK8sServiceCollection(
                 serviceCollection,
                 detectKubernetes,
                 kubernetesServiceCollectionBuilder: kubernetesServiceCollectionBuilder);
         }
 
-        private static void BuildServiceBases(
+        private static void InitializeServiceCollection(
             IServiceCollection serviceCollection,
             Action<AppInsightsForKubernetesOptions> applyOptions)
         {
             serviceCollection.AddOptions();
-            IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-
-            // Apply the configurations if not yet.
-            IOptions<AppInsightsForKubernetesOptions> options = serviceProvider.GetService<IOptions<AppInsightsForKubernetesOptions>>();
-
-            if (options.Value == null)
+            serviceCollection.AddOptions<AppInsightsForKubernetesOptions>().Configure<IConfiguration>((opt, configuration) =>
             {
-                serviceCollection.AddSingleton<IOptions<AppInsightsForKubernetesOptions>>(
-                           new OptionsWrapper<AppInsightsForKubernetesOptions>(new AppInsightsForKubernetesOptions()));
-            }
-
-            // Update settings from configuration.
-            IConfiguration configuration = serviceProvider.GetService<IConfiguration>();
-            if (configuration != null)
-            {
-                serviceCollection.Configure<AppInsightsForKubernetesOptions>(configuration.GetSection(ConfigurationSectionName));
-            }
-
-            // Update settings when parameter is provided for backward compatibility.
-            if (applyOptions != null)
-            {
-                serviceCollection.Configure<AppInsightsForKubernetesOptions>(option =>
-                {
-                    applyOptions(option);
-                });
-            }
+                configuration.GetSection(AppInsightsForKubernetesOptions.SectionName).Bind(opt);
+                applyOptions?.Invoke(opt);
+            });
         }
 
         private static void BuildK8sServiceCollection(
@@ -170,11 +123,11 @@ namespace Microsoft.Extensions.DependencyInjection
             Func<bool> detectKubernetes,
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
         {
-            detectKubernetes = detectKubernetes ?? IsRunningInKubernetes;
-            var options = services.BuildServiceProvider().GetRequiredService<IOptions<AppInsightsForKubernetesOptions>>();
-            kubernetesServiceCollectionBuilder = kubernetesServiceCollectionBuilder ??
-                new KubernetesServiceCollectionBuilder(detectKubernetes, options);
-            kubernetesServiceCollectionBuilder.InjectServices(services);
+            detectKubernetes ??= IsRunningInKubernetes;
+            using ServiceProvider provider = services.BuildServiceProvider();
+            var options = provider.GetRequiredService<IOptions<AppInsightsForKubernetesOptions>>();
+            kubernetesServiceCollectionBuilder ??= new KubernetesServiceCollectionBuilder(detectKubernetes, options);
+            kubernetesServiceCollectionBuilder.RegisterServices(services);
         }
 
         private static bool IsRunningInKubernetes() => Directory.Exists(@"/var/run/secrets/kubernetes.io") || Directory.Exists(@"C:\var\run\secrets\kubernetes.io");
