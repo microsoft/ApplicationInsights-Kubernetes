@@ -2,6 +2,14 @@
 
 This is an example when building the application out of the container.
 
+## Prepare this example to try it locally
+
+There are some placeholders to update if you want to run this by yourself:
+
+* Edit [appsettings.json](./appsettings.json), update the `ConnectionString`. You can get a connection string from Azure Portal UI on your application insights resource. Refer to [Connection strings](https://docs.microsoft.com/en-us/azure/azure-monitor/app/sdk-connection-string) for more details.
+
+* In the following steps, when build / push the images, replace `dockerhubaccount` with your own account name. Also, update it in [K8s.yaml](./K8s.yaml) so that the image pull will success.
+
 ## Build the container
 
 * Build/Publish the binaries locally
@@ -28,11 +36,11 @@ This is an example when building the application out of the container.
 docker push dockerhubaccount/ai-k8s-oc
 ```
 
-## Create a deployment
+## Create a deployment and a service
 
 Refer to [K8s.yaml](./K8s.yaml) for an example.
 
-* Create the deployment: 
+* Create the deployment and the service:
 
     ```shell
     kubectl create -f K8s.yaml

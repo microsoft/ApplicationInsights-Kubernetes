@@ -11,9 +11,12 @@ namespace BuildOutOfContainer
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IWebHostEnvironment _environment;
+
+        public Startup(IConfiguration configuration,  IWebHostEnvironment env)
         {
             Configuration = configuration;
+            _environment = env ?? throw new System.ArgumentNullException(nameof(env));
         }
 
         public IConfiguration Configuration { get; }
@@ -23,10 +26,12 @@ namespace BuildOutOfContainer
         {
             // Application Insights connection string is set in appsettings.json
             services.AddApplicationInsightsTelemetry();
-            // Skip the following lines when it is in Production environment
-            ApplicationInsightsKubernetesDiagnosticObserver observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
-            ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
-            // ~
+            if (_environment.IsDevelopment())
+            {
+                // Skip the following lines when it is in Production environment
+                ApplicationInsightsKubernetesDiagnosticObserver observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
+                ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
+            }
             services.AddApplicationInsightsKubernetesEnricher();
 
             services.AddControllers();
