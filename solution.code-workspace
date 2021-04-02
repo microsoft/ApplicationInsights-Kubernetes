@@ -28,5 +28,6 @@
 			"**/.settings": true,
 			"**/.factorypath": true
 		},
+		"dotnet-test-explorer.testProjectPath": "**/*Tests.csproj"
 	}
 }

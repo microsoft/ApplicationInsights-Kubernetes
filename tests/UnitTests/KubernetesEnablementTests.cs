@@ -11,14 +11,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     public class KubernetesEnablementTest
     {
         [Fact(DisplayName = "The required services are properly injected")]
-        public void ServiceInjected()
+        public void ServicesRegistered()
         {
             IServiceCollection services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
+
             ApplicationInsightsExtensions.ConfigureKubernetesTelemetryInitializer(services, () => true, new KubernetesTestServiceCollectionBuilder(), null);
             Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
-            
+
             IServiceProvider serviceProvider = services.BuildServiceProvider();
-            ITelemetryInitializer targetTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>().FirstOrDefault(ti => ti is KubernetesTelemetryInitializer);
+            ITelemetryInitializer targetTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>().First(ti => ti is KubernetesTelemetryInitializer);
             Assert.NotNull(targetTelemetryInitializer);
 
             // K8s services	
@@ -31,12 +33,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Default timeout for waiting container to spin us is 2 minutes")]
         public void EnableAppInsightsForKubernetesWithDefaultTimeOut()
         {
-            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-            telemetryConfiguration.AddApplicationInsightsKubernetesEnricher(
-                    applyOptions: null,
-                    kubernetesServiceCollectionBuilder: new KubernetesTestServiceCollectionBuilder(),
-                    detectKubernetes: () => true);
-            ITelemetryInitializer targetTelemetryInitializer = telemetryConfiguration.TelemetryInitializers.FirstOrDefault(ti => ti is KubernetesTelemetryInitializer);
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
+
+            serviceCollection.AddApplicationInsightsKubernetesEnricher(
+                applyOptions: null,
+                kubernetesServiceCollectionBuilder: new KubernetesTestServiceCollectionBuilder(),
+                detectKubernetes: () => true);
+            ITelemetryInitializer targetTelemetryInitializer = serviceCollection.BuildServiceProvider().GetServices<ITelemetryInitializer>().First(i => i is KubernetesTelemetryInitializer);
 
             if (targetTelemetryInitializer is KubernetesTelemetryInitializer target)
             {
@@ -51,15 +55,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Set timeout through options works for telemetry initializer.")]
         public void EnableAppInsightsForKubernetesWithTimeOutSetThroughOptions()
         {
-            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-            telemetryConfiguration.AddApplicationInsightsKubernetesEnricher(
+            IServiceCollection serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
+            serviceCollection.AddApplicationInsightsKubernetesEnricher(
                     applyOptions: option =>
                     {
                         option.InitializationTimeout = TimeSpan.FromSeconds(5);
                     },
                     kubernetesServiceCollectionBuilder: new KubernetesTestServiceCollectionBuilder(),
                     detectKubernetes: () => true);
-            ITelemetryInitializer targetTelemetryInitializer = telemetryConfiguration.TelemetryInitializers.FirstOrDefault(ti => ti is KubernetesTelemetryInitializer);
+            ITelemetryInitializer targetTelemetryInitializer = serviceCollection.BuildServiceProvider().GetServices<ITelemetryInitializer>().First(i => i is KubernetesTelemetryInitializer);
 
             if (targetTelemetryInitializer is KubernetesTelemetryInitializer target)
             {
@@ -130,6 +135,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 
         [Fact(DisplayName = "Support adding KubernetesTelemetryInitializer to given TelemetryConfiguration")]
+        [Obsolete("API to be removed later.", error: false)]
         public void AddTheInitializerToGivenConfiguration()
         {
             TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();

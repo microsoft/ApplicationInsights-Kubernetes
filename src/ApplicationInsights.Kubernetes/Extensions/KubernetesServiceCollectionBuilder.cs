@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
         private readonly Func<bool> _isRunningInKubernetes;
-        private readonly IOptions<AppInsightsForKubernetesOptions> _options;
+        private readonly AppInsightsForKubernetesOptions _options;
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
@@ -27,15 +27,15 @@ namespace Microsoft.Extensions.DependencyInjection
             IOptions<AppInsightsForKubernetesOptions> options)
         {
             _isRunningInKubernetes = isRunningInKubernetes ?? throw new ArgumentNullException(nameof(isRunningInKubernetes));
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
         /// <summary>
-        /// Injects Kubernetes related service into the service collection.
+        /// Register Kubernetes related service into the service collection.
         /// </summary>
         /// <param name="serviceCollection">The service collector to inject the services into.</param>
         /// <returns>Returns the service collector with services injected.</returns>
-        public IServiceCollection InjectServices(IServiceCollection serviceCollection)
+        public IServiceCollection RegisterServices(IServiceCollection serviceCollection)
         {
             if (_isRunningInKubernetes())
             {
@@ -43,21 +43,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     throw new ArgumentNullException(nameof(serviceCollection));
                 }
-                InjectCommonServices(serviceCollection);
-                InjectChangableServices(serviceCollection);
-
+                RegisterCommonServices(serviceCollection);
+                RegisterSettingsProvider(serviceCollection);
+                RegisterK8sEnvironmentFactory(serviceCollection);
                 serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
-
-#if NETSTANDARD2_0
-                if (_options.Value == null || !_options.Value.DisablePerformanceCounters)
-                {
-                    serviceCollection.AddSingleton<ITelemetryInitializer, SimplePerformanceCounterTelemetryInitializer>();
-                }
-                else
-                {
-                    _logger.LogDebug("{initializerName} is disabled by configuration.", nameof(SimplePerformanceCounterTelemetryInitializer));
-                }
-#endif
+                RegisterPerformanceCounterTelemetryInitializer(serviceCollection);
 
                 _logger.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 return serviceCollection;
@@ -69,19 +59,31 @@ namespace Microsoft.Extensions.DependencyInjection
             }
         }
 
-        private static void InjectCommonServices(IServiceCollection serviceCollection)
+        private void RegisterPerformanceCounterTelemetryInitializer(IServiceCollection serviceCollection)
+        {
+            if (!_options.DisablePerformanceCounters)
+            {
+                serviceCollection.AddSingleton<ITelemetryInitializer, SimplePerformanceCounterTelemetryInitializer>();
+            }
+            else
+            {
+                _logger.LogDebug("{initializerName} is disabled by configuration.", nameof(SimplePerformanceCounterTelemetryInitializer));
+            }
+        }
+
+        private static void RegisterCommonServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<ITelemetryKeyCache, TelemetryKeyCache>();
             serviceCollection.AddSingleton<KubeHttpClientFactory>();
             serviceCollection.AddSingleton<K8sQueryClientFactory>();
-            serviceCollection.AddSingleton<SDKVersionUtils>(SDKVersionUtils.Instance);
+            serviceCollection.AddSingleton<SDKVersionUtils>(p => SDKVersionUtils.Instance);
         }
 
         /// <summary>
-        /// Injects the services of Application Insights for Kubernetes.
+        /// Registers setttings provider for querying K8s proxy.
         /// </summary>
-        /// <param name="serviceCollection">The service collector to inject the services into.</param>
-        protected virtual void InjectChangableServices(IServiceCollection serviceCollection)
+        /// <param name="serviceCollection"></param>
+        protected virtual void RegisterSettingsProvider(IServiceCollection serviceCollection)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
@@ -95,7 +97,12 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 _logger.LogError("Unsupported OS.");
             }
-            serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
         }
+
+        /// <summary>
+        /// Registers K8s environment factory.
+        /// </summary>
+        protected virtual void RegisterK8sEnvironmentFactory(IServiceCollection serviceCollection)
+            => serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
     }
 }
