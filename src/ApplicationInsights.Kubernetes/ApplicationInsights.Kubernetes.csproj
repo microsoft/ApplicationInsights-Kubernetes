@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.14" />
     <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="3.1.14" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.14" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
