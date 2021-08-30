@@ -3,6 +3,8 @@ using System.Diagnostics;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using static Microsoft.ApplicationInsights.Kubernetes.TelemetryProperty;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
@@ -18,15 +20,25 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private Process _currnetProcess;
 
         private static readonly int ProcessorCount = Environment.ProcessorCount <= 0 ? 1 : Environment.ProcessorCount;
+        private readonly AppInsightsForKubernetesOptions _options;
         private readonly ITelemetryKeyCache _telemetryKeyCache;
 
-        public SimplePerformanceCounterTelemetryInitializer(ITelemetryKeyCache telemetryKeyCache)
+        public SimplePerformanceCounterTelemetryInitializer(
+            IOptions<AppInsightsForKubernetesOptions> options,
+            ITelemetryKeyCache telemetryKeyCache)
         {
+            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _telemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
         }
 
         public void Initialize(ITelemetry telemetry)
         {
+            // Short circuit.
+            if (_options.DisablePerformanceCounters)
+            {
+                return;
+            }
+
             if (telemetry is ISupportMetrics metricsTelemetry)
             {
                 // Write CPU metrics
