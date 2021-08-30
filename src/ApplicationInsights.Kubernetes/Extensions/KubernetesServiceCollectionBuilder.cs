@@ -4,7 +4,6 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -14,20 +13,16 @@ namespace Microsoft.Extensions.DependencyInjection
     public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
         private readonly Func<bool> _isRunningInKubernetes;
-        private readonly AppInsightsForKubernetesOptions _options;
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
         /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.
         /// </summary>
         /// <param name="isRunningInKubernetes">A function that returns true when running inside Kubernetes.</param>
-        /// <param name="options"></param>
         public KubernetesServiceCollectionBuilder(
-            Func<bool> isRunningInKubernetes,
-            IOptions<AppInsightsForKubernetesOptions> options)
+            Func<bool> isRunningInKubernetes)
         {
             _isRunningInKubernetes = isRunningInKubernetes ?? throw new ArgumentNullException(nameof(isRunningInKubernetes));
-            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
         /// <summary>
@@ -61,14 +56,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private void RegisterPerformanceCounterTelemetryInitializer(IServiceCollection serviceCollection)
         {
-            if (!_options.DisablePerformanceCounters)
-            {
-                serviceCollection.AddSingleton<ITelemetryInitializer, SimplePerformanceCounterTelemetryInitializer>();
-            }
-            else
-            {
-                _logger.LogDebug("{initializerName} is disabled by configuration.", nameof(SimplePerformanceCounterTelemetryInitializer));
-            }
+            serviceCollection.AddSingleton<ITelemetryInitializer, SimplePerformanceCounterTelemetryInitializer>();
         }
 
         private static void RegisterCommonServices(IServiceCollection serviceCollection)

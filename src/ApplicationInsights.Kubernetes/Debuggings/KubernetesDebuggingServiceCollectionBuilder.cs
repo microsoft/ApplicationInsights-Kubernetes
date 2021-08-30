@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
@@ -13,7 +12,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
         /// Constructor for <see cref="KubernetesDebuggingServiceCollectionBuilder"/>.
         /// </summary>
         public KubernetesDebuggingServiceCollectionBuilder(IOptions<AppInsightsForKubernetesOptions> options)
-        : base(isRunningInKubernetes: () => true, options) { }
+        : base(isRunningInKubernetes: () => true) { }
 
         /// <summary>
         /// Registers setttings provider for querying K8s proxy.

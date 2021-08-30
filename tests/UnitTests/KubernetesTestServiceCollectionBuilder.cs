@@ -7,7 +7,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     internal class KubernetesTestServiceCollectionBuilder : KubernetesServiceCollectionBuilder
     {
         public KubernetesTestServiceCollectionBuilder()
-            : base(isRunningInKubernetes: () => true, Options.Create(new AppInsightsForKubernetesOptions()))
+            : base(isRunningInKubernetes: () => true)
         {
         }
 
