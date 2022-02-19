@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
@@ -10,16 +12,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private readonly string _namespaceFilePath;
 
         public KubeHttpSettingsWinContainerProvider(
+            IEnumerable<IContainerIdProvider> containerIdProviders,
             string serviceAccountFolder = @"C:\var\run\secrets\kubernetes.io\serviceaccount",
             string tokenFileName = "token",
             string certFileName = "ca.crt",
             string namespaceFileName = "namespace",
             string kubernetesServiceHost = null,
             string kubernetesServicePort = null)
-            : base(kubernetesServiceHost, kubernetesServicePort)
+            : base(kubernetesServiceHost, kubernetesServicePort, containerIdProviders)
         {
             // Container id won't be fetched for windows container.
-            ContainerId = null;
             DirectoryInfo serviceAccountDirectory =
                 new DirectoryInfo(Arguments.IsNotNullOrEmpty(serviceAccountFolder, nameof(serviceAccountFolder)));
             foreach (FileInfo fileInfo in serviceAccountDirectory.EnumerateFiles("*", SearchOption.AllDirectories))

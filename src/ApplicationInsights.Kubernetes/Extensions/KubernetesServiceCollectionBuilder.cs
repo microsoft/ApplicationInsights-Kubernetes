@@ -2,8 +2,10 @@
 using System.Runtime.InteropServices;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
+using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -75,10 +77,14 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                serviceCollection.TryAddEnumerable(new ServiceDescriptor(typeof(IContainerIdProvider), typeof(CGroupContainerIdProvider), ServiceLifetime.Singleton));
+                serviceCollection.TryAddEnumerable(new ServiceDescriptor(typeof(IContainerIdProvider), typeof(HostnameContainerIdProvider), ServiceLifetime.Singleton));
+
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsProvider>();
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                serviceCollection.TryAddEnumerable(new ServiceDescriptor(typeof(IContainerIdProvider), typeof(NullContainerIdProvider), ServiceLifetime.Singleton));
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpSettingsWinContainerProvider>();
             }
             else

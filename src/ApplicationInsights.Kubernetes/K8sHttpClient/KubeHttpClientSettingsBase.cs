@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
@@ -10,11 +12,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal abstract class KubeHttpClientSettingsBase : IKubeHttpClientSettingsProvider
     {
+        private readonly IEnumerable<IContainerIdProvider> _containerIdProviders;
         protected readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         public KubeHttpClientSettingsBase(
             string kubernetesServiceHost,
-            string kubernetesServicePort)
+            string kubernetesServicePort,
+            IEnumerable<IContainerIdProvider> containerIdProviders)
         {
             kubernetesServiceHost = kubernetesServiceHost ?? Environment.GetEnvironmentVariable(@"KUBERNETES_SERVICE_HOST");
             if (string.IsNullOrEmpty(kubernetesServiceHost))
@@ -31,9 +35,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             string baseAddress = Invariant($"https://{kubernetesServiceHost}:{kubernetesServicePort}/");
             _logger.LogDebug("Kubernetes base address: {0}", baseAddress);
             ServiceBaseAddress = new Uri(baseAddress, UriKind.Absolute);
+            _containerIdProviders = containerIdProviders ?? throw new ArgumentNullException(nameof(containerIdProviders));
+
+            ContainerId = GetContainerIdOrThrow();
         }
 
-        public string ContainerId { get; protected set; }
+        public string ContainerId { get; }
 
         public string QueryNamespace { get; protected set; }
 
@@ -130,6 +137,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 throw new FileNotFoundException("File contains namespace does not exist.", pathToNamespace);
             }
             return File.ReadAllText(pathToNamespace);
+        }
+
+        private string GetContainerIdOrThrow()
+        {
+            foreach (IContainerIdProvider provider in _containerIdProviders)
+            {
+                if (provider.TryGetMyContainerId(out string containerId))
+                {
+                    return containerId;
+                }
+            }
+            throw new InvalidOperationException("Failed fetching container id.");
         }
     }
 }

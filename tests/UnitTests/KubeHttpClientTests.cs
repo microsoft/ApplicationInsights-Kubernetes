@@ -24,12 +24,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var settingsMock = new Mock<IKubeHttpClientSettingsProvider>();
             settingsMock.Setup(p => p.CreateMessageHandler()).Returns(() => null);
 
-            Exception ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
                 KubeHttpClient client = new KubeHttpClient(settingsMock.Object);
             });
 
-            Assert.Equal("Value cannot be null.\r\nParameter name: handler", ex.Message);
+            Assert.Equal("handler", ex.ParamName);
         }
 
         [Fact(DisplayName = "KubeHttpClient ctor should set the BaseAddress property")]
