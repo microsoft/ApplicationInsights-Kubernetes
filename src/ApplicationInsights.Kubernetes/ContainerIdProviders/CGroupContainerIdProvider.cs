@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿#nullable enable
+
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -21,13 +23,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public bool TryGetMyContainerId(out string containerId)
+        public bool TryGetMyContainerId(out string? containerId)
         {
             containerId = FetchContainerId(CGroupPath);
             return containerId != null;
         }
 
-        private string FetchContainerId(string pathToCGroup)
+        private string? FetchContainerId(string pathToCGroup)
         {
             if (!File.Exists(pathToCGroup))
             {
@@ -39,7 +41,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
             return ParseContainerId(content);
         }
 
-        internal string ParseContainerId(string content)
+        internal string? ParseContainerId(string? content)
         {
             if (!string.IsNullOrEmpty(content))
             {

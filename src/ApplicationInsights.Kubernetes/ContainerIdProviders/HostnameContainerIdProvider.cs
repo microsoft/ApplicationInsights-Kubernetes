@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
 {
@@ -19,7 +21,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
         /// A host name is only first 12 characters of the container name in Linux.
         /// This should only be used as a fallback when there is no other means to get it.
         /// </remarks>
-        public bool TryGetMyContainerId(out string containerId)
+        public bool TryGetMyContainerId(out string? containerId)
         {
             containerId = Environment.GetEnvironmentVariable(_environemntVariableName);
             return containerId != null;
