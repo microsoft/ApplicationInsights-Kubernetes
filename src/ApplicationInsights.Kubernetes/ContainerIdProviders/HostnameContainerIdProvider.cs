@@ -9,7 +9,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
     /// </summary>
     internal class HostnameContainerIdProvider : IContainerIdProvider
     {
-        private const string _environemntVariableName = "HOSTNAME";
+        private const string _environmentVariableName = "HOSTNAME";
 
         /// <summary>
         /// Gets the container id by host name.
@@ -23,9 +23,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
         /// </remarks>
         public bool TryGetMyContainerId(out string? containerId)
         {
-            containerId = Environment.GetEnvironmentVariable(_environemntVariableName);
+            containerId = Environment.GetEnvironmentVariable(_environmentVariableName);
             return containerId != null;
-
         }
     }
 }

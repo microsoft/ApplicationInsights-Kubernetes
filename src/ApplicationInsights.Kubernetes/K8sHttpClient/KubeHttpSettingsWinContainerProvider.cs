@@ -50,6 +50,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             QueryNamespace = FetchQueryNamespace(_namespaceFilePath);
         }
 
+        public override string QueryNamespace { get; }
+
         protected override string GetTokenFilePath()
         {
             _logger.LogDebug("Token file path: {0}", _tokenFilePath);

@@ -10,11 +10,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     // Extension methods for Pod
     internal static class PodExtensions
     {
-        public static ContainerStatus? GetContainerStatus(this K8sPod self, string containerId) 
-            => self.Status.ContainerStatuses?.FirstOrDefault(
-                    cs => !string.IsNullOrEmpty(cs.ContainerID) && 
-                    cs.ContainerID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1
-                );
+        public static ContainerStatus? GetContainerStatus(this K8sPod self, string containerId)
+            => containerId == string.Empty ? null // Special case when container id is an empty string,
+                : self.Status?.ContainerStatuses?.FirstOrDefault(
+                    status => !string.IsNullOrEmpty(status.ContainerID) && status.ContainerID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1);
 
         /// <summary>
         /// Gets the ReplicaSet for the current pod.

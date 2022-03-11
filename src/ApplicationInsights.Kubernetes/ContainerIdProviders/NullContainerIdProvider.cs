@@ -2,16 +2,17 @@
 
 namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
 {
-    internal class NullContainerIdProvider : IContainerIdProvider
+    internal class EmptyContainerIdProvider : IContainerIdProvider
     {
         /// <summary>
-        /// Gets null for container id. This is useful in environemnt like Windows, where there is no way to findout the contaienr id.
+        /// Gets string.Empty for container id. This is useful in environment like Windows, where there is no way to findout the container id.
         /// </summary>
         /// <returns>Returns true with output container id of null.</returns>
         public bool TryGetMyContainerId(out string? containerId)
         {
-            containerId = null;
-            return true; 
+            // Notice that empty is a valid result, returns true; null would lead to false.
+            containerId = string.Empty;
+            return true;
         }
     }
 }

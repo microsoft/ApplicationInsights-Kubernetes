@@ -84,7 +84,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, NullContainerIdProvider>());
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, EmptyContainerIdProvider>());
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpSettingsWinContainerProvider>();
             }
             else

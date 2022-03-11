@@ -36,7 +36,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Equal(expected.Port, target.ServiceBaseAddress.Port);
         }
 
-        [Fact(DisplayName = "Container id is set to null for windows container settings")]
+        [Fact(DisplayName = "Container id is set to string.Empty for windows container settings")]
         public void ContainerIdIsAlwaysNullForWinSettings()
         {
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
@@ -45,7 +45,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 namespaceFileName: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
-            Assert.Null(target.ContainerId);
+            Assert.Equal(string.Empty, target.ContainerId);
         }
 
         [Fact(DisplayName = "Token can be fetched")]
@@ -128,7 +128,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private IEnumerable<IContainerIdProvider> GetConatinerIdProviders()
         {
-            yield return new NullContainerIdProvider();
+            yield return new EmptyContainerIdProvider();
         }
     }
 }

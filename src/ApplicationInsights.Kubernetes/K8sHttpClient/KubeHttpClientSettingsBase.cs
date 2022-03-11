@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -16,8 +18,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         protected readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         public KubeHttpClientSettingsBase(
-            string kubernetesServiceHost,
-            string kubernetesServicePort,
+            string? kubernetesServiceHost,
+            string? kubernetesServicePort,
             IEnumerable<IContainerIdProvider> containerIdProviders)
         {
             kubernetesServiceHost = kubernetesServiceHost ?? Environment.GetEnvironmentVariable(@"KUBERNETES_SERVICE_HOST");
@@ -40,9 +42,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             ContainerId = GetContainerIdOrThrow();
         }
 
+        /// <summary>
+        /// Gets the container Id by best effort.
+        /// </summary>
+        /// <remarks>
+        /// Notice, containerId can't be null but could be string.Empty in environment like Windows Container.
+        /// </remarks>
         public string ContainerId { get; }
 
-        public string QueryNamespace { get; protected set; }
+        public abstract string QueryNamespace { get; }
 
         public Uri ServiceBaseAddress { get; private set; }
 
@@ -132,6 +140,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         protected static string FetchQueryNamespace(string pathToNamespace)
         {
+            if (string.IsNullOrEmpty(pathToNamespace))
+            {
+                throw new ArgumentException($"'{nameof(pathToNamespace)}' cannot be null or empty.", nameof(pathToNamespace));
+            }
+
             if (!File.Exists(pathToNamespace))
             {
                 throw new FileNotFoundException("File contains namespace does not exist.", pathToNamespace);
@@ -143,8 +156,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             foreach (IContainerIdProvider provider in _containerIdProviders)
             {
-                if (provider.TryGetMyContainerId(out string containerId))
+                if (provider.TryGetMyContainerId(out string? containerId))
                 {
+                    if (containerId is null)
+                    {
+                        throw new InvalidOperationException("Valid containerId can't be null.");
+                    }
                     return containerId;
                 }
             }
