@@ -77,14 +77,14 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                serviceCollection.TryAddEnumerable(new ServiceDescriptor(typeof(IContainerIdProvider), typeof(CGroupContainerIdProvider), ServiceLifetime.Singleton));
-                serviceCollection.TryAddEnumerable(new ServiceDescriptor(typeof(IContainerIdProvider), typeof(HostnameContainerIdProvider), ServiceLifetime.Singleton));
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, CGroupContainerIdProvider>());
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, HostnameContainerIdProvider>());
 
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsProvider>();
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                serviceCollection.TryAddEnumerable(new ServiceDescriptor(typeof(IContainerIdProvider), typeof(NullContainerIdProvider), ServiceLifetime.Singleton));
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, NullContainerIdProvider>());
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpSettingsWinContainerProvider>();
             }
             else
