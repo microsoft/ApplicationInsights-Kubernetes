@@ -10,8 +10,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "ParseContainerId should return correct result")]
         public void ParseContainerIdShouldWork()
         {
-            Mock<ILogger<CGroupContainerIdProvider>> loggerMock = new Mock<ILogger<CGroupContainerIdProvider>>();
-            CGroupContainerIdProvider target = new CGroupContainerIdProvider(loggerMock.Object);
+            CGroupContainerIdProvider target = new CGroupContainerIdProvider();
             const string testCase_1 = "12:memory:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
                 "11:freezer:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
                 "10:devices:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +

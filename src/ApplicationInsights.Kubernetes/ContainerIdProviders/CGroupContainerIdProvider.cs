@@ -1,6 +1,6 @@
 ﻿#nullable enable
 
-using Microsoft.Extensions.Logging;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -16,12 +16,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
         private const string CGroupPathPatternString = "cpu.+/([^/]*)$";
         private static readonly Regex CGroupPathPattern = new Regex(CGroupPathPatternString, RegexOptions.CultureInvariant | RegexOptions.Multiline, TimeSpan.FromSeconds(1));
 
-        private readonly ILogger<CGroupContainerIdProvider> _logger;
-
-        public CGroupContainerIdProvider(ILogger<CGroupContainerIdProvider> logger)
-        {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
+        private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         public bool TryGetMyContainerId(out string? containerId)
         {
