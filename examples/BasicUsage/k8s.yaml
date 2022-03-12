@@ -1,13 +1,18 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-k8s-basic
+  labels:
+    app: ai-k8s-basic
 spec:
   replicas: 1
+  selector:
+  matchLabels:
+    app: ai-k8s-basic
   template:
     metadata:
       labels:
-        app: webapp
+        app: ai-k8s-basic
     spec:
       containers:
       - name: ai-k8s-basic-container
@@ -30,5 +35,5 @@ spec:
     port: 80
     targetPort: 80
   selector:
-    app: webapp
+    app: ai-k8s-basic
   type: LoadBalancer
