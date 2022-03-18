@@ -176,11 +176,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
 #pragma warning restore CA1031 // Do not catch general exception types
 
-                if (myPod != null && myPod.GetContainerStatus(myContainerId).Ready)
+                if (myPod != null)
                 {
-                    stopwatch.Stop();
-                    _logger.LogDebug(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
-                    return true;
+                    ContainerStatus status = myPod.GetContainerStatus(myContainerId);
+                    if (status != null && status.Ready)
+                    {
+                        stopwatch.Stop();
+                        _logger.LogDebug(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
+                        return true;
+                    }
                 }
 
                 // The time to get the container ready dependes on how much time will a container to be initialized.

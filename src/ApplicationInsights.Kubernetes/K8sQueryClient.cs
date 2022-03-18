@@ -65,10 +65,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
             else if (!string.IsNullOrEmpty(myContainerId))
             {
-                targetPod = allPods.FirstOrDefault(pod => pod.Status != null &&
-                                    pod.Status.ContainerStatuses != null &&
-                                    pod.Status.ContainerStatuses.Any(
-                                        cs => !string.IsNullOrEmpty(cs.ContainerID) && cs.ContainerID.EndsWith(myContainerId, StringComparison.Ordinal)));
+                targetPod = allPods.FirstOrDefault(pod =>
+                                pod.Status?.ContainerStatuses != null &&
+                                pod.Status.ContainerStatuses.Any(
+                                    status => !string.IsNullOrEmpty(status.ContainerID) && 
+                                    status.ContainerID.IndexOf(myContainerId, StringComparison.Ordinal) > -1));
             }
             else
             {
