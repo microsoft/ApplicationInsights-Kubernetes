@@ -18,7 +18,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
         /// Returns the value of $HOSTNAME.
         /// </returns>
         /// <remarks>
-        /// A host name is only first 12 characters of the container name in Linux.
+        /// The containerId retrieved from $HOSTNAME will only be the first 12 characters.
+        /// Chances are, it should be good enough to be used to findout the pod for it.
+        ///
         /// This should only be used as a fallback when there is no other means to get it.
         /// </remarks>
         public bool TryGetMyContainerId(out string? containerId)
