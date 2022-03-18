@@ -11,7 +11,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     internal static class PodExtensions
     {
         public static ContainerStatus? GetContainerStatus(this K8sPod self, string containerId)
-            => containerId == string.Empty ? null // Special case when container id is an empty string,
+            => string.IsNullOrEmpty(containerId) ? null // Special case when container id is an empty string,
                 : self.Status?.ContainerStatuses?.FirstOrDefault(
                     status => !string.IsNullOrEmpty(status.ContainerID) && status.ContainerID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1);
 
