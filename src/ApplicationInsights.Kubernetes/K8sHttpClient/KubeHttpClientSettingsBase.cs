@@ -1,8 +1,12 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
@@ -10,11 +14,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal abstract class KubeHttpClientSettingsBase : IKubeHttpClientSettingsProvider
     {
+        private readonly IEnumerable<IContainerIdProvider> _containerIdProviders;
         protected readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         public KubeHttpClientSettingsBase(
-            string kubernetesServiceHost,
-            string kubernetesServicePort)
+            string? kubernetesServiceHost,
+            string? kubernetesServicePort,
+            IEnumerable<IContainerIdProvider> containerIdProviders)
         {
             kubernetesServiceHost = kubernetesServiceHost ?? Environment.GetEnvironmentVariable(@"KUBERNETES_SERVICE_HOST");
             if (string.IsNullOrEmpty(kubernetesServiceHost))
@@ -31,11 +37,20 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             string baseAddress = Invariant($"https://{kubernetesServiceHost}:{kubernetesServicePort}/");
             _logger.LogDebug("Kubernetes base address: {0}", baseAddress);
             ServiceBaseAddress = new Uri(baseAddress, UriKind.Absolute);
+            _containerIdProviders = containerIdProviders ?? throw new ArgumentNullException(nameof(containerIdProviders));
+
+            ContainerId = GetContainerIdOrThrow();
         }
 
-        public string ContainerId { get; protected set; }
+        /// <summary>
+        /// Gets the container Id by best effort.
+        /// </summary>
+        /// <remarks>
+        /// Notice, containerId can't be null but could be string.Empty in environment like Windows Container.
+        /// </remarks>
+        public string ContainerId { get; }
 
-        public string QueryNamespace { get; protected set; }
+        public abstract string QueryNamespace { get; }
 
         public Uri ServiceBaseAddress { get; private set; }
 
@@ -125,11 +140,32 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         protected static string FetchQueryNamespace(string pathToNamespace)
         {
+            if (string.IsNullOrEmpty(pathToNamespace))
+            {
+                throw new ArgumentException($"'{nameof(pathToNamespace)}' cannot be null or empty.", nameof(pathToNamespace));
+            }
+
             if (!File.Exists(pathToNamespace))
             {
                 throw new FileNotFoundException("File contains namespace does not exist.", pathToNamespace);
             }
             return File.ReadAllText(pathToNamespace);
+        }
+
+        private string GetContainerIdOrThrow()
+        {
+            foreach (IContainerIdProvider provider in _containerIdProviders)
+            {
+                if (provider.TryGetMyContainerId(out string? containerId))
+                {
+                    if (containerId is null)
+                    {
+                        throw new InvalidOperationException("Valid containerId can't be null.");
+                    }
+                    return containerId;
+                }
+            }
+            throw new InvalidOperationException("Failed fetching container id.");
         }
     }
 }

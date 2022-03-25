@@ -30,14 +30,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Constructor should throw given null KubeHttpClient")]
         public void CtorNullHttpClientThrows()
         {
-            Exception ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
                 using (new K8sQueryClient(null)) { }
             });
 
-            Assert.Equal("Value cannot be null." + Environment.NewLine +
-                "Parameter name: kubeHttpClient",
-                ex.Message);
+            Assert.Equal("kubeHttpClient", ex.ParamName);
         }
 
         [Fact(DisplayName = "Constructor should set KubeHttpClient")]

@@ -1,51 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public class KuteHttpClientSettingsProviderTests
     {
-        [Fact(DisplayName = "ParseContainerId should return correct result")]
-        public void ParseContainerIdShouldWork()
-        {
-            const string testCase_1 = "12:memory:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "11:freezer:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "10:devices:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "9:pids:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "8:hugetlb:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "7:net_cls,net_prio:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "6:cpu,cpuacct:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "5:perf_event:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "4:blkio:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "3:rdma:/\n" +
-                "2:cpuset:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553\n" +
-                "1:name=systemd:/kubepods/besteffort/pod3775c228-ceef-11e7-9bd3-0a58ac1f0867/b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553";
-            Assert.Equal("b414a8fd62411213667643030d7ebf7264465df1b724fc6e7315106d0ed60553", KubeHttpClientSettingsProvider.ParseContainerId(testCase_1));
-
-            const string testCase_2 = "12:rdma:/\n" +
-                "11:pids:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "10:memory:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "9:freezer:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "8:perf_event:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "7:blkio:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "6:hugetlb:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "5:cpuset:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "4:cpu,cpuacct:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "3:net_cls,net_prio:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "2:devices:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a\n" +
-                "1:name=systemd:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a";
-            Assert.Equal("4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a", KubeHttpClientSettingsProvider.ParseContainerId(testCase_2));
-
-            const string testCase_3 = "2:cpu,cpuacct:\n1:name=systemd:/docker/4561e2e3ceb8377038c27ea5c40aa64a44c2dc02e53a141d20b7c98b2af59b1a";
-            Assert.Throws<InvalidCastException>(() => KubeHttpClientSettingsProvider.ParseContainerId(testCase_3));
-        }
-
         [Fact(DisplayName = "Base address is formed by constructor")]
         public void BaseAddressShouldBeFormed()
         {
             IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                pathToCGroup: "TestCGroup",
+                GetConatinerIdProviders(),
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
@@ -59,6 +26,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void BaseAddressShouldBeFormedWin()
         {
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
+                GetConatinerIdProviders(),
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -68,15 +36,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Equal(expected.Port, target.ServiceBaseAddress.Port);
         }
 
-        [Fact(DisplayName = "Container id is set to null for windows container settings")]
+        [Fact(DisplayName = "Container id is set to string.Empty for windows container settings")]
         public void ContainerIdIsAlwaysNullForWinSettings()
         {
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
+                GetConatinerIdProviders(),
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
-            Assert.Null(target.ContainerId);
+            Assert.Equal(string.Empty, target.ContainerId);
         }
 
         [Fact(DisplayName = "Token can be fetched")]
@@ -84,7 +53,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void TokenShoudBeFetched()
         {
             IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                pathToCGroup: "TestCGroup",
+                GetConatinerIdProviders(),
                 pathToNamespace: "namespace",
                 pathToToken: "token",
                 kubernetesServiceHost: "127.0.0.1",
@@ -96,6 +65,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void TokenShouldBeFetchedForWin()
         {
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
+                GetConatinerIdProviders(),
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 tokenFileName:"token",
@@ -109,7 +79,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void TrueWhenValidCertificate()
         {
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                pathToCGroup: "TestCGroup",
+                GetConatinerIdProviders(),
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
@@ -126,7 +96,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void FalseWhenInvalidCertificate()
         {
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                pathToCGroup: "TestCGroup",
+                GetConatinerIdProviders(),
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
@@ -143,7 +113,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public void FalseWhenOutOfDateCertificate()
         {
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                pathToCGroup: "TestCGroup",
+                GetConatinerIdProviders(),
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
@@ -154,6 +124,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             X509Certificate2 clientCert = new X509Certificate2(Convert.FromBase64String("MIIDdDCCAt2gAwIBAgIBADANBgkqhkiG9w0BAQUFADCBmzELMAkGA1UEBhMCSlAxDjAMBgNVBAgTBVRva3lvMRAwDgYDVQQHEwdDaHVvLWt1MREwDwYDVQQKEwhGcmFuazRERDEYMBYGA1UECxMPV2ViQ2VydCBTdXBwb3J0MRgwFgYDVQQDEw9GcmFuazRERCBXZWIgQ0ExIzAhBgkqhkiG9w0BCQEWFHN1cHBvcnRAZnJhbms0ZGQuY29tMCIYDzE3NjkwODE1MTU0NjQxWhgPMTgyMTA1MDUxNjUzMjFaMIHbMQswCQYDVQQGEwJGUjEXMBUGA1UECBQOw45sZS1kZS1GcmFuY2UxDjAMBgNVBAcTBVBhcmlzMRwwGgYDVQQKExNIZXJlZGl0YXJ5IE1vbmFyY2h5MRYwFAYDVQQLEw1IZWFkIG9mIFN0YXRlMSkwJwYJKoZIhvcNAQkBFhpuYXBwaUBncmVhdGZyZW5jaGVtcGlyZS5mcjEbMBkGA1UEAxMSRW1wZXJvciBOYXBvbGVvbiBJMRIwEAYDVQQEEwlCb25hcGFydGUxETAPBgNVBCoTCE5hcG9sZW9uMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvdcwMpsM3EgNmeO/fvcuZsirnBZCh0yJlySGmev792ohOBvfC+v27ZKcXN+H7V+xSxEDDAFq9SCEk4MZ8h/ggtw63T6SEYeNGtnfyLv8atienun/6ocDp0+26xvj8NxmaKL4MQM9j9aYgt2EOxUTH5kBc7mc621q2RJi0q/y0/SdX2Pp/3MKDirOs81vfc2icEaYAisd5IOF9vpMpLr3b3Qg9T66/4hQS6DgIOkfUurWqe33sA2RRv7ql1gcxL1ImBxBtYQGsujn8fCNRK5jtMtICkEi9tks/tYzSaqgby3QGfbA18xl7FLLjnZDLVX3ZVchhveR78/f7U/xh8C2WQIDAQABMA0GCSqGSIb3DQEBBQUAA4GBAFmEiU2vn10fXvL+nJdRHJsf0P+f6v8H+vbkomog4gVbagDuFACJfAdKJhnc/gzkCF1fyeowOD68k4e0H1vyLuk23BUmjW41nOjdg8LrTAS8fMwkj5FVSKR2mHciHWgY/BU4UypYJtcgajH1bsqwUI50wfbggW4VzLD842q5LhnW"));
             bool result = target.CertificateValidationCallBack(null, serverCert, clientCert, new X509Chain(), System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors);
             Assert.False(result);
+        }
+
+        private IEnumerable<IContainerIdProvider> GetConatinerIdProviders()
+        {
+            yield return new EmptyContainerIdProvider();
         }
     }
 }

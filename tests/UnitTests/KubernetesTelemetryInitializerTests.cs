@@ -17,7 +17,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "K8sEnvFactory can't be null in K8sTelemetryInitializer")]
         public void ConstructorSetsNullGetsNull()
         {
-            Exception ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
                 Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
                 KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
@@ -28,7 +28,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     );
             });
 
-            Assert.Equal("Value cannot be null.\r\nParameter name: k8sEnvFactory", ex.Message);
+            Assert.Equal("k8sEnvFactory", ex.ParamName);
         }
 
         [Fact(DisplayName = "K8sTelemetryInitializer sets the K8s env correct")]
