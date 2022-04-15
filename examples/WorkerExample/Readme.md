@@ -12,7 +12,7 @@ And this example will walk you through the key steps.
 
 ## Prerequisite
 
-* .NET 6 SDK if you haven't yet. Refer to <https://dot.net> for more details.
+* .NET 6 SDK. Refer to <https://dot.net> for more details.
 * [DockerDesktop](https://www.docker.com/products/docker-desktop/).
     * For building docker image.
     * For running a local Kubernetes Cluster.
