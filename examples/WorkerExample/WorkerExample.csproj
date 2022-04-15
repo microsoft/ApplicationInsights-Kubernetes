@@ -14,4 +14,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Build action is `None`, and the option for copy to output directory could be `Always` or `PreserveNewest` -->
+    <None Include="./appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

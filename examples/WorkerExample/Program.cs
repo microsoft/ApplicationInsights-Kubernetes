@@ -16,6 +16,7 @@ class Program
             .ConfigureServices((hostContext, services) =>
             {
                 services.AddApplicationInsightsTelemetryWorkerService();
+                services.AddApplicationInsightsKubernetesEnricher();
                 services.AddHostedService<Worker>();
             });
 }
