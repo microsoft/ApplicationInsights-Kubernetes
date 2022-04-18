@@ -12,13 +12,20 @@ And this example will walk you through the key steps.
 
 ## Prerequisite
 
+To finish the walk-through, there are some prerequisites.
+
 * .NET 6 SDK. Refer to <https://dot.net> for more details.
-* [DockerDesktop](https://www.docker.com/products/docker-desktop/).
-    * For building docker image.
-    * For running a local Kubernetes Cluster.
-* [An application insights resource](https://docs.microsoft.com/en-us/azure/azure-monitor/app/create-new-resource) for testing the result.
+    * This should work in .NET Core 3.1 with some simple tweaks.
+* Ability to build a docker image for sanity check from a dockerfile.
+    * Pick your way to build the docker image.
+    * We used [DockerDesktop](https://www.docker.com/products/docker-desktop/) in this example.
+* A kubernetes cluster to deploy the image to.
+    * We also used the one provided by [DockerDesktop](https://www.docker.com/products/docker-desktop/) but it should work in any Kubernetes cluster.
+* A container registry works with the Kubernetes cluster for deployment.
+    * We used docker hub in this example.
+* An [application insights resource](https://docs.microsoft.com/en-us/azure/azure-monitor/app/create-new-resource) for testing the result.
 * A clone/fork this repo.
-    * Navigate to example folder of: examples/WorkerExample.
+    * Starting by navigate to example folder of: examples/WorkerExample.
 
 ## How is the application built
 
@@ -30,6 +37,8 @@ And this example will walk you through the key steps.
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     ```
+
+    _Notes: these are current packages by the time of this example. As a common practice, it is recommended you always checking for latest stable ones to use._
 
 * Add a [Worker](./Worker.cs) class. Notes:
     * It inherits from `BackgroundService`.
@@ -95,11 +104,14 @@ And this example will walk you through the key steps.
 
 ## Push the image when it is ready
 
-* Tag the image properly, for example:
+_Notes: we are using dockerhub here as an example. you could use any container registry that deploys to your Kubernetes cluster._
 
+* Tag the image properly, for example:
     ```shell
     docker tag workerapp dockerhub_account_name/ai-k8s-worker-example:0.0.1
     ```
+    
+    
 
 * Push the image:
 
