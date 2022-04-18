@@ -2,7 +2,7 @@
 
 [![Nuget](https://img.shields.io/nuget/v/Microsoft.ApplicationInsights.Kubernetes)](https://www.nuget.org/packages/Microsoft.ApplicationInsights.Kubernetes/)
 
-This repository has code for Application Insights for Kubernetes, which works on .NET Core applications within the containers, managed by Kubernetes, on Azure Container Service.
+This repository has code for Application Insights for Kubernetes, which works on .NET Core/.NET 6 applications within the containers, managed by Kubernetes, on Azure Container Service.
 
 ![Screenshot for Application Insights for Kubernetes enhanced telemetry](./docs/TelemetryEnhancement.png)
 
@@ -15,6 +15,8 @@ This repository has code for Application Insights for Kubernetes, which works on
 | ![Rolling-Build Status](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5974/badge) | ![Nightly-Build Status](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5976/badge) |
 
 ## Get Started
+
+This is a quick guide for ASP.NET Core project. For [Worker Services in .NET](https://docs.microsoft.com/en-us/dotnet/core/extensions/workers), refer to [Application Insights Kubernetes Example (Worker)](./examples/WorkerExample/Readme.md).
 
 ### Prerequisite
 

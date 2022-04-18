@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-k8s-worker-example-deployment
+  labels:
+    app: ai-k8s-worker-example
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-k8s-worker-example
+  template:
+    metadata:
+      labels:
+        app: ai-k8s-worker-example
+    spec:
+      containers:
+      - name: ai-k8s-worker-example
+        image: dockerhub_account_name/ai-k8s-worker-example:0.0.1
