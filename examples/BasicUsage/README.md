@@ -12,54 +12,55 @@ _Note:_ This is a simple example that does not follow all best practices, includ
 
 * Let's start by creating an ASP.NET Core MVC application:
 
-```shell
-dotnet new mvc
-```
+    ```shell
+    dotnet new mvc
+    ```
 
 * Add the NuGet Packages:
 
-```shell
-dotnet add package Microsoft.ApplicationInsights.AspNetCore
-dotnet add package Microsoft.ApplicationInsights.Kubernetes
-```
+    ```shell
+    dotnet add package Microsoft.ApplicationInsights.AspNetCore
+    dotnet add package Microsoft.ApplicationInsights.Kubernetes
+    ```
 
-* Edit the project file, add the following property:
+* If you are on .NET Core 2.0, like it is in this example, edit the project file, add the following property:
 
-```xml
-<PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
-```
+    ```xml
+    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+    ```
 
-Reference [ASP.NET Core implicit store](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store#aspnet-core-implicit-store) for more details with regarding this property.
+  * Reference [ASP.NET Core implicit store](https://docs.microsoft.com/en-us/dotnet/core/deploying/runtime-store#aspnet-core-implicit-store) for more details with regarding this property.
+  * You don't need it for `.NET Core 2.1`+ or `.NET 6`+. Refer to [here](https://github.com/dotnet/aspnetcore/issues/3310#issuecomment-404986286) for details.
 
 * Enable Application Insights for Kubernetes in Startup.cs:
 
-```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    ...
-    services.AddApplicationInsightsTelemetry();
-    services.AddApplicationInsightsKubernetesEnricher();
-    ...
-}
-```
+    ```csharp
+    public void ConfigureServices(IServiceCollection services)
+    {
+        ...
+        services.AddApplicationInsightsTelemetry();
+        services.AddApplicationInsightsKubernetesEnricher();
+        ...
+    }
+    ```
 
 * Optionally, update the base images:
 
-```shell
-docker pull microsoft/aspnetcore-build:2.0
-docker pull microsoft/aspnetcore:2.0
-```
+    ```shell
+    docker pull microsoft/aspnetcore-build:2.0
+    docker pull microsoft/aspnetcore:2.0
+    ```
 
 * Add [Dockerfile](Dockerfile) to the project folder. Build the docker container (dockeraccount/aik8sbasic, for example) using [Dockerfile](Dockerfile) and upload it to an image registry.
 
-```shell
-docker build . -t dockeraccount/aik8sbasic:latest
-docker push dockeraccount/aik8sbasic:latest
-```
+    ```shell
+    docker build . -t dockeraccount/aik8sbasic:latest
+    docker push dockeraccount/aik8sbasic:latest
+    ```
 
 * Create the Kubernetes spec for the deployment and the service. Referencing [k8s.yaml](k8s.yaml). Please update the variable of `APPINSIGHTS_INSTRUMENTATIONKEY` to your own application insights instrumentation key.
 
-Deploy it:
+### Deploy
 
 ```shell
 kubectl create -f k8s.yaml
