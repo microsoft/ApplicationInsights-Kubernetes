@@ -1,8 +1,8 @@
-FROM microsoft/aspnetcore:2.0.3-nanoserver-1709 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:3.1-nanoserver-ltsc2022 AS base
 WORKDIR /app
 EXPOSE 80 443
 
-FROM microsoft/aspnetcore-build:2.0.3-nanoserver-1709 AS build
+FROM mcr.microsoft.com/dotnet/sdk:3.1-nanoserver-ltsc2022 AS build
 WORKDIR /src
 COPY AspNetCoreNano.csproj .
 COPY NuGet.config .
