@@ -1,10 +1,11 @@
-﻿using System;
+﻿// using System.Diagnostics;
+// using Microsoft.ApplicationInsights.Kubernetes.Debugging;
+
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,8 +23,8 @@ namespace BasicConsoleAppILogger
 
             // Uncomment the following lines for debugging AI.K8s.
             // Refer to https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/develop/docs/SelfDiagnostics.MD for details.
-            var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Debug);
-            ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
+            // var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
+            // ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
 
             services.AddApplicationInsightsKubernetesEnricher();
 
