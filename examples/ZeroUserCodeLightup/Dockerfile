@@ -1,4 +1,4 @@
-﻿FROM microsoft/aspnetcore-build:2.0.5-2.1.4 AS build-env
+﻿FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build-env
 WORKDIR /app
 
 # Copy everything else and build
@@ -8,7 +8,7 @@ RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM microsoft/aspnetcore:2.0.5
+FROM mcr.microsoft.com/dotnet/aspnet:3.1
 
 # Create an argument to allow docker builder to passing in application insights key.
 # For example: docker build . --build-arg APPINSIGHTS_KEY=YOUR_APPLICATIONINSIGHTS_INSTRUMENTATION_KEY
