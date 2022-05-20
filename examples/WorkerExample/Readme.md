@@ -32,7 +32,7 @@ To finish the walk-through, there are some prerequisites.
 * Refer to [WorkerExample.csproj](./WorkerExample.csproj) for NuGet packages needed. Here's a copy:
 
     ```xml
-    <PackageReference Include="Microsoft.ApplicationInsights.Kubernetes" Version="2.0.2" />
+    <PackageReference Include="Microsoft.ApplicationInsights.Kubernetes" Version="2.*" />
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.20.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
@@ -110,8 +110,6 @@ _Notes: we are using dockerhub here as an example. you could use any container r
     ```shell
     docker tag workerapp dockerhub_account_name/ai-k8s-worker-example:0.0.1
     ```
-    
-    
 
 * Push the image:
 

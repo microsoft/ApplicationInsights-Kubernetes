@@ -16,4 +16,4 @@ spec:
     spec:
       containers:
       - name: ai-k8s-worker-example
-        image: dockerhub_account_name/ai-k8s-worker-example:0.0.1
+        image: dockerhub_account_name/ai-k8s-worker-example:0.0.8
