@@ -28,7 +28,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
         {
             if (!File.Exists(pathToCGroup))
             {
-                _logger.LogWarning("CGroup file doesn't exist. Path: {filePath}", pathToCGroup);
+                _logger.LogWarning("CGroup file doesn't exist. Path: {0}", pathToCGroup);
                 return null;
             }
 
@@ -46,7 +46,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
                     return matches[0].Groups[1].Value;
                 }
             }
-            _logger.LogWarning("Can't figure out container id. Input: {content}. Pattern: {CGroupPathPatternString}", content, CGroupPathPatternString);
+            _logger.LogWarning("Can't figure out container id. Input: {0}. Pattern: {1}", content, CGroupPathPatternString);
             return null;
         }
     }
