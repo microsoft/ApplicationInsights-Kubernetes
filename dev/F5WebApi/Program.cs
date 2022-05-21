@@ -1,19 +1,13 @@
-using System.Diagnostics;
 using System.Reflection;
-using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-// Output the diagnostic source logs to the console.
-var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
-ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
-
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
 
 builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddApplicationInsightsKubernetesEnricher();
+builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Warning);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
