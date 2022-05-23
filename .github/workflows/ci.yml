@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.x
+    - name: Restore dependencies
+      run: dotnet restore src/ApplicationInsights.Kubernetes
+    - name: Build
+      run: dotnet build src/ApplicationInsights.Kubernetes --no-restore
+    - name: Test
+      run: dotnet test tests/UnitTests --verbosity normal
