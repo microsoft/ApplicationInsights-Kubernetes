@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
@@ -39,7 +40,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             serviceCollection.AddApplicationInsightsKubernetesEnricher(
                 applyOptions: null,
                 kubernetesServiceCollectionBuilder: new KubernetesTestServiceCollectionBuilder(),
-                detectKubernetes: () => true);
+                detectKubernetes: () => true,
+                diagnosticLogLevel: LogLevel.None);
             ITelemetryInitializer targetTelemetryInitializer = serviceCollection.BuildServiceProvider().GetServices<ITelemetryInitializer>().First(i => i is KubernetesTelemetryInitializer);
 
             if (targetTelemetryInitializer is KubernetesTelemetryInitializer target)
@@ -63,7 +65,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                         option.InitializationTimeout = TimeSpan.FromSeconds(5);
                     },
                     kubernetesServiceCollectionBuilder: new KubernetesTestServiceCollectionBuilder(),
-                    detectKubernetes: () => true);
+                    detectKubernetes: () => true,
+                    LogLevel.None);
             ITelemetryInitializer targetTelemetryInitializer = serviceCollection.BuildServiceProvider().GetServices<ITelemetryInitializer>().First(i => i is KubernetesTelemetryInitializer);
 
             if (targetTelemetryInitializer is KubernetesTelemetryInitializer target)
@@ -132,17 +135,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 Assert.True(false, "Not the target telemetry initializer.");
             }
-        }
-
-        [Fact(DisplayName = "Support adding KubernetesTelemetryInitializer to given TelemetryConfiguration")]
-        [Obsolete("API to be removed later.", error: false)]
-        public void AddTheInitializerToGivenConfiguration()
-        {
-            TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration();
-            telemetryConfiguration.AddApplicationInsightsKubernetesEnricher(null, new KubernetesTestServiceCollectionBuilder(), () => true);
-            Assert.NotNull(telemetryConfiguration.TelemetryInitializers);
-            Assert.Single(telemetryConfiguration.TelemetryInitializers);
-            Assert.True(telemetryConfiguration.TelemetryInitializers.First() is KubernetesTelemetryInitializer);
         }
     }
 }
