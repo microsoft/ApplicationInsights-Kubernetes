@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
 
 builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Warning);
+builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Trace);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
