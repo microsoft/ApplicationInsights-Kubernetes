@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-k8s-f5webapi-deployment
+  labels:
+    app: ai-k8s-f5webapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-k8s-f5webapi
+  template:
+    metadata:
+      labels:
+        app: ai-k8s-f5webapi
+    spec:
+      containers:
+      - name: ai-k8s-f5webapi
+        image: registry_account_name/f5webapi:latest
