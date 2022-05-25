@@ -104,7 +104,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             }
             catch (UnauthorizedAccessException ex)
             {
-                _logger.LogCritical("Forbidden. Are you missing cluster role assignment? Refer to https://aka.ms/ai-k8s-rbac for more details. Message: {0}.", ex.Message);
+                HandleUnauthorizedAccess(ex);
                 return null;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -127,6 +127,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 try
                 {
                     myPod = await client.GetMyPodAsync().ConfigureAwait(false);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    HandleUnauthorizedAccess(ex);
+                    myPod = null;
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch (Exception ex)
@@ -200,6 +205,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 await Task.Delay(500).ConfigureAwait(false);
             } while (DateTime.Now < timeoutAt);
             return false;
+        }
+
+        private void HandleUnauthorizedAccess(UnauthorizedAccessException exception)
+        {
+            _logger.LogCritical(
+                "Forbidden. Are you missing cluster role assignment? Refer to https://aka.ms/ai-k8s-rbac for more details. Message: {0}.",
+                exception.Message);
+            _logger.LogDebug(exception.ToString());
         }
     }
 }
