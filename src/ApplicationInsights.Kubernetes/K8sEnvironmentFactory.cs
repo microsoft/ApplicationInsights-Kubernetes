@@ -102,6 +102,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
                 return instance;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogCritical("Forbidden. Are you missing cluster role assignment? Refer to https://aka.ms/ai-k8s-rbac for more details. Message: {0}.", ex.Message);
+                return null;
+            }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
             {
