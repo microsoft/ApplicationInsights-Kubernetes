@@ -209,8 +209,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private void HandleUnauthorizedAccess(UnauthorizedAccessException exception)
         {
-            _logger.LogCritical(
-                "Forbidden. Are you missing cluster role assignment? Refer to https://aka.ms/ai-k8s-rbac for more details. Message: {0}.",
+            _logger.LogError(
+                "Unauthorized. Are you missing cluster role assignment? Refer to https://aka.ms/ai-k8s-rbac for more details. Message: {0}.",
                 exception.Message);
             _logger.LogDebug(exception.ToString());
         }
