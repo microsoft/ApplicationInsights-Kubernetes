@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services)
         {
-            return AddApplicationInsightsKubernetesEnricher(services, applyOptions: null, diagnosticLogLevel: LogLevel.None);
+            return AddApplicationInsightsKubernetesEnricher(services, applyOptions: null, diagnosticLogLevel: LogLevel.Error);
         }
 
         /// <summary>
