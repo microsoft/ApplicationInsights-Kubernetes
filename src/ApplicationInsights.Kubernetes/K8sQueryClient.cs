@@ -68,7 +68,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 targetPod = allPods.FirstOrDefault(pod =>
                                 pod.Status?.ContainerStatuses != null &&
                                 pod.Status.ContainerStatuses.Any(
-                                    status => !string.IsNullOrEmpty(status.ContainerID) && 
+                                    status => !string.IsNullOrEmpty(status.ContainerID) &&
                                     status.ContainerID.IndexOf(myContainerId, StringComparison.Ordinal) > -1));
             }
             else
@@ -137,6 +137,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 string resultString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 K8sEntityList<TEntity> resultList = JsonConvert.DeserializeObject<K8sEntityList<TEntity>>(resultString);
                 return resultList.Items ?? Enumerable.Empty<TEntity>();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                throw new UnauthorizedAccessException(response.ReasonPhrase);
             }
             else
             {

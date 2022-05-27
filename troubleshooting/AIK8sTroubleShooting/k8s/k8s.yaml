@@ -1,9 +1,14 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-k8s-troubleshooting
+  labels:
+    app: webapp
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: webapp
   template:
     metadata:
       labels:
@@ -11,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ai-k8s-troubleshooting-container
-        image: appinsightskubernetes/aik8s_troubleshoot:1.0.1
+        image: saars/aik8s_troubleshoot:latest
         ports:
         - containerPort: 80
         env:
