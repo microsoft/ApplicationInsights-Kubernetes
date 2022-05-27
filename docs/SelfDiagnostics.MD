@@ -2,13 +2,24 @@
 
 ## Enable self-diagnostics
 
-Enabling self-diagnostics helps troubleshoot issues and determine whether the problem is with service code/configuration, or with the `ApplicationInsights.Kubernetes` package itself.
+Enabling self-diagnostics helps troubleshoot issues and determine whether the problem is with service code/configuration, or with the `ApplicationInsights.Kubernetes` package.
 
-If problem with ApplicationInsights.Kubernetes package is suspected, please open an [issues](https://github.com/microsoft/ApplicationInsights-Kubernetes/issues) and we will look into it.
+If problem with `ApplicationInsights.Kubernetes` is suspected, please open an [issues](https://github.com/microsoft/ApplicationInsights-Kubernetes/issues) and we will look into it.
 
-Application Insights for Kubernetes is instrumented with DiagnosticsSource. To see the logs, create a diagnostic source observer that subscribe to `Microsoft.ApplicationInsights.Kubernetes.Debugging.ApplicationInsightsKubernetesDiagnosticSource.Observable`. The observable(DiagnosticSource) will emits logs in different levels.
+## With 2.0.4-beta1 or above
 
-To make diagnostic easier, a default observer that outputs logs into the console is provided and and could be enabled like it below before `AddApplicationInsightsKubernetesEnricher` is called:
+```csharp
+// LogLevel.Error is the default; Setting it to LogLevel.Trace to see detailed logs.
+builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Trace);
+```
+
+Refer to [Program.cs](https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/c8a906080f368570078d873b61f58dd742277916/dev/F5WebApi/Program.cs#L10) for a complete example.
+
+
+## With versions before 2.0.4-beta1
+
+<details>
+<summary>Click to expand!</summary>
 
 ```csharp
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
@@ -16,6 +27,11 @@ using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
 ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
 ```
+
+Refer to [Startup.cs](https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/36e31d39e4ef867fadbb3a4191f82565af3cb5b0/dev/F5WebApi/Startup.cs#L26) for a complete example.
+</details>
+
+## Log example
 
 When the observer above is enabled, you will see diagnostic logs like this in the console:
 
@@ -40,8 +56,9 @@ A similar log will be output to the terminal.
 
 ## Logging Levels
 
-There are 5 levels of the events, each is assigned with a number like:
+There are 6 levels of the events, each is assigned with a number like:
 
+* None - 6
 * Critical - 5
 * Error - 4
 * Warning - 3
@@ -49,13 +66,8 @@ There are 5 levels of the events, each is assigned with a number like:
 * Debug - 1
 * Trace - 0
 
-When minimum level is set at the creation of the observer, issues that has a number greater or equal to it will be printed. For example, if the minimum level is set to `Error`(4) like this:
-
-```csharp
-var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Error); // Set the minimum level to Error 4.
-```
-
-Logs with the level of critical or error will be printed to the console.
+When minimum level is set at the creation of the observer, issues that has a number greater or equal to it will be printed. For example, if the minimum level is set to `Error`(4), logs with the level of critical or error will be printed to the console.
+Set LogLevel to None to complete turn off the logs.
 
 ## About the Diagnostic Source
 
