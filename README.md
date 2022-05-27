@@ -1,6 +1,7 @@
 # Microsoft Application Insights for Kubernetes
 
 [![Nuget](https://img.shields.io/nuget/v/Microsoft.ApplicationInsights.Kubernetes)](https://www.nuget.org/packages/Microsoft.ApplicationInsights.Kubernetes/)
+[![Downloads](https://img.shields.io/nuget/dt/Microsoft.ApplicationInsights.Kubernetes)](https://www.nuget.org/packages/Microsoft.ApplicationInsights.Kubernetes/)
 
 This repository has code for Application Insights for Kubernetes, which works on .NET Core/.NET 6 applications within the containers, managed by Kubernetes, on Azure Container Service.
 
