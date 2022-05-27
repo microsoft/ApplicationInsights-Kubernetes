@@ -80,6 +80,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 // Notes: pay attention to the order. Injecting uses the order of registering in this case.
                 // For example, on Linux, CGroupContainerIdProvider will take precedence.
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, CGroupContainerIdProvider>());
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, MountInfoContainerIdProvider>());
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, HostnameContainerIdProvider>());
 
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsProvider>();
