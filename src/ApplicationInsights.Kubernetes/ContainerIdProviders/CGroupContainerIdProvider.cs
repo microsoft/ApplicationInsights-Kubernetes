@@ -43,7 +43,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
                 MatchCollection matches = CGroupPathPattern.Matches(content);
                 if (matches.Count >= 1 && matches[0].Groups.Count >= 2)
                 {
-                    return matches[0].Groups[1].Value;
+                    string containerId = matches[0].Groups[1].Value;
+                    _logger.LogInformation($"Got container id: {containerId}");
+                    return containerId;
                 }
             }
             _logger.LogWarning("Can't figure out container id. Input: {0}. Pattern: {1}", content, CGroupPathPatternString);

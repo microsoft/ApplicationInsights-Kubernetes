@@ -35,6 +35,8 @@ internal class MountInfoContainerIdProvider : IContainerIdProvider
             string line = reader.ReadLine();
             if (TryParseContainerId(line, out string containerId))
             {
+                _logger.LogDebug($"Got container id by: {line}");
+                _logger.LogInformation($"Got container id: {containerId}");
                 return containerId;
             }
         }
