@@ -10,8 +10,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 internal class MountInfoContainerIdProvider : IContainerIdProvider
 {
     private const string InfoFilePath = "/proc/self/mountinfo";
-    private const string MatchPattern = @"\/docker\/containers\/(.*?)\/";
-    private static readonly Regex MatchRegex = new Regex(MatchPattern, RegexOptions.CultureInvariant | RegexOptions.Multiline, TimeSpan.FromSeconds(1));
+    private const string MatchPattern = @"/docker/containers/(.*?)/";
+    private static readonly Regex MatchRegex = new Regex(MatchPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
