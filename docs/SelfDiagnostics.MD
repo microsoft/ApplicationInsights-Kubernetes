@@ -4,7 +4,7 @@
 
 Enabling self-diagnostics helps troubleshoot issues and determine whether the problem is with service code/configuration, or with the `ApplicationInsights.Kubernetes` package.
 
-If problem with `ApplicationInsights.Kubernetes` is suspected, please open an [issues](https://github.com/microsoft/ApplicationInsights-Kubernetes/issues) and we will look into it.
+If problem with `ApplicationInsights.Kubernetes` is suspected, please open an [issue](https://github.com/microsoft/ApplicationInsights-Kubernetes/issues) and we will look into it.
 
 ## With 2.0.4-beta1 or above
 
