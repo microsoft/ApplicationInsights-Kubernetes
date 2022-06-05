@@ -12,8 +12,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
         private const string CGroupPath = "/proc/self/cgroup";
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
-        public CGroupContainerIdProvider(CGroupV1Matcher lineMatcher) : 
-            base(lineMatcher, CGroupPath, providerName: default)
+        public CGroupContainerIdProvider(
+            CGroupV1Matcher lineMatcher,
+            IStreamLineReader streamLineReader) : 
+            base(lineMatcher, streamLineReader, CGroupPath, providerName: default)
         {
         }
     }

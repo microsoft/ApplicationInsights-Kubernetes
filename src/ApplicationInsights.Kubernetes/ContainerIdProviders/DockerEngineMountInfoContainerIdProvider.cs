@@ -8,8 +8,8 @@ internal class DockerEngineMountInfoContainerIdProvider : FileBasedContainerIdPr
 
     public DockerEngineMountInfoContainerIdProvider(
         DockerEngineMountInfoMatcher matcher,
-        string filePath,
-        string? providerName) : base(matcher, filePath, providerName)
+        IStreamLineReader streamLineReader)
+            : base(matcher, streamLineReader, InfoFilePath, providerName: default)
     {
     }
 }

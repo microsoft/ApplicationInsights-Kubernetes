@@ -12,10 +12,15 @@ internal abstract class FileBasedContainerIdProvider : IContainerIdProvider
 {
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     private readonly IContainerIdMatcher _lineMatcher;
+    private readonly IStreamLineReader _streamLineReader;
     private readonly string _providerName;
     private readonly string _targetFile;
 
-    public FileBasedContainerIdProvider(IContainerIdMatcher lineMatcher, string filePath, string? providerName)
+    public FileBasedContainerIdProvider(
+        IContainerIdMatcher lineMatcher, 
+        IStreamLineReader streamLineReader,
+        string filePath, 
+        string? providerName)
     {
         _providerName = this.GetType().Name;
 
@@ -26,6 +31,7 @@ internal abstract class FileBasedContainerIdProvider : IContainerIdProvider
         _targetFile = filePath;
 
         _lineMatcher = lineMatcher ?? throw new System.ArgumentNullException(nameof(lineMatcher));
+        _streamLineReader = streamLineReader ?? throw new System.ArgumentNullException(nameof(streamLineReader));
     }
 
     public bool TryGetMyContainerId(out string? containerId)
@@ -43,9 +49,13 @@ internal abstract class FileBasedContainerIdProvider : IContainerIdProvider
         }
 
         using StreamReader reader = File.OpenText(_targetFile);
-        while (!reader.EndOfStream)
+        while (_streamLineReader.TryReadLine(reader, out string? line))
         {
-            string line = reader.ReadLine();
+            if(string.IsNullOrEmpty(line))
+            {
+                continue;
+            }
+            
             if (_lineMatcher.TryParseContainerId(line, out string containerId))
             {
                 _logger.LogDebug($"[{_providerName}] Got container id by: {line}");
