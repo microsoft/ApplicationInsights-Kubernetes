@@ -75,8 +75,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="serviceCollection"></param>
         protected virtual void RegisterSettingsProvider(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IStreamLineReader, StreamLineReader>();
-            
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 // Matchers are dependencies of the container id providers.

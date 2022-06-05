@@ -7,9 +7,8 @@ internal class DockerEngineMountInfoContainerIdProvider : FileBasedContainerIdPr
     private const string InfoFilePath = "/proc/self/mountinfo";
 
     public DockerEngineMountInfoContainerIdProvider(
-        DockerEngineMountInfoMatcher matcher,
-        IStreamLineReader streamLineReader)
-            : base(matcher, streamLineReader, InfoFilePath, providerName: default)
+        DockerEngineMountInfoMatcher matcher)
+            : base(matcher, InfoFilePath, providerName: default)
     {
     }
 }

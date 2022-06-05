@@ -13,9 +13,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         public CGroupContainerIdProvider(
-            CGroupV1Matcher lineMatcher,
-            IStreamLineReader streamLineReader) : 
-            base(lineMatcher, streamLineReader, CGroupPath, providerName: default)
+            CGroupV1Matcher lineMatcher) : 
+            base(lineMatcher, CGroupPath, providerName: default)
         {
         }
     }

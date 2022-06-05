@@ -7,9 +7,8 @@ internal class ContainerDMountInfoContainerIdProvider : FileBasedContainerIdProv
     private const string InfoFilePath = "/proc/self/mountinfo";
 
     public ContainerDMountInfoContainerIdProvider(
-        ContainerDMountInfoMatcher matcher,
-        IStreamLineReader streamLineReader)
-            : base(matcher, streamLineReader, InfoFilePath, providerName: default)
+        ContainerDMountInfoMatcher matcher)
+            : base(matcher, InfoFilePath, providerName: default)
     {
     }
 }
