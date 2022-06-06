@@ -77,10 +77,18 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                // Matchers are dependencies of the container id providers.
+                serviceCollection.AddSingleton<CGroupV1Matcher>();
+                serviceCollection.AddSingleton<DockerEngineMountInfoMatcher>();
+                serviceCollection.AddSingleton<ContainerDMountInfoMatcher>();
+
                 // Notes: pay attention to the order. Injecting uses the order of registering in this case.
-                // For example, on Linux, CGroupContainerIdProvider will take precedence.
-                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, CGroupContainerIdProvider>());
-                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, HostnameContainerIdProvider>());
+                // For example, on Linux, EnvironmentVariableContainerIdProvider will take precedence.
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, EnvironmentVariableContainerIdProvider>());    // Environment variable
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, CGroupContainerIdProvider>());                 // Then CGroupV1
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, ContainerDMountInfoContainerIdProvider>());    // Then ContainerD
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, DockerEngineMountInfoContainerIdProvider>());  // Then DockerEngine
+                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, HostnameContainerIdProvider>());               // Hostname is not going to work in K8s. This bug is tracked by: https://github.com/microsoft/ApplicationInsights-Kubernetes/issues/259.
 
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsProvider>();
             }
