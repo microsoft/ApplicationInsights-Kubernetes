@@ -21,6 +21,8 @@ internal class ContainerDMountInfoMatcher : IContainerIdMatcher
     private const string MatchPattern = @"/kubepods/.*?/.*?/(.*?)[\s|/]";
     private static readonly Regex MatchRegex = new Regex(MatchPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
+    private const string LogCategory = nameof(ContainerDMountInfoMatcher);
+
     public bool TryParseContainerId(string? line, out string containerId)
     {
         containerId = string.Empty;
@@ -32,10 +34,10 @@ internal class ContainerDMountInfoMatcher : IContainerIdMatcher
         Match match = MatchRegex.Match(line);
         if (!match.Success)
         {
-            _logger.LogDebug($"No match for containerId. Input: {line}, pattern: {MatchPattern}");
+            _logger.LogDebug($"[{LogCategory}] No match for containerId. Input: {line}, pattern: {MatchPattern}");
             return false;
         }
-        _logger.LogTrace($"Matched container id.");
+        _logger.LogTrace($"[{LogCategory}] Matched container id.");
         containerId = match.Groups[1].Value;
         return true;
     }

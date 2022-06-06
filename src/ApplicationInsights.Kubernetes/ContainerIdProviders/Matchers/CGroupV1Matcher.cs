@@ -8,7 +8,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 
 internal class CGroupV1Matcher : IContainerIdMatcher
 {
+    private const string LogCategory = nameof(CGroupV1Matcher);
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+
     private const string MatchPattern = @"cpu.+/([^/]*)$";
     private static readonly Regex MatchRegex = new Regex(MatchPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
 
@@ -23,10 +25,10 @@ internal class CGroupV1Matcher : IContainerIdMatcher
         Match match = MatchRegex.Match(line);
         if (!match.Success)
         {
-            _logger.LogDebug($"No match for containerId. Input: {line}, pattern: {MatchPattern}");
+            _logger.LogDebug($"[{LogCategory}] No match for containerId. Input: {line}, pattern: {MatchPattern}");
             return false;
         }
-        _logger.LogTrace($"Matched container id.");
+        _logger.LogTrace($"[{LogCategory}] Matched container id.");
         containerId = match.Groups[1].Value;
         return true;
     }

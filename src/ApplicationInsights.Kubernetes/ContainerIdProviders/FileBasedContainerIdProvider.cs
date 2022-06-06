@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using System.IO;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
@@ -20,11 +21,10 @@ internal abstract class FileBasedContainerIdProvider : IContainerIdProvider
         string filePath, 
         string? providerName)
     {
-        _providerName = this.GetType().Name;
-
+        _providerName = GetType().Name;
         if (string.IsNullOrEmpty(filePath))
         {
-            throw new System.ArgumentException($"'{nameof(filePath)}' cannot be null or empty.", nameof(filePath));
+            throw new ArgumentException($"'[{_providerName}] {nameof(filePath)}' cannot be null or empty.", nameof(filePath));
         }
         _targetFile = filePath;
 
@@ -57,11 +57,11 @@ internal abstract class FileBasedContainerIdProvider : IContainerIdProvider
             if (_lineMatcher.TryParseContainerId(line, out string containerId))
             {
                 _logger.LogDebug($"[{_providerName}] Got container id by: {line}");
-                _logger.LogInformation($"[{_providerName}]Got container id: {containerId}");
+                _logger.LogInformation($"[{_providerName}] Got container id: {containerId}");
                 return containerId;
             }
         }
-        _logger.LogWarning($"[{_providerName}]Can't figure out container id.");
+        _logger.LogWarning($"[{_providerName}] Can't figure out container id.");
         return null;
     }
 }
