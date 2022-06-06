@@ -2,7 +2,7 @@
     <!-- <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /> -->
     <!--Build-->
     <PropertyGroup>
-        <LangVersion>8.0</LangVersion>
+        <LangVersion>10.0</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <OutputPath>$(MSBuildThisFileDirectory)..\bin\Debug\</OutputPath>
