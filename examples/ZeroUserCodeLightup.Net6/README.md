@@ -24,13 +24,21 @@ Reference the full [Dockerfile](./dockerfile).
 ## Build and run the Docker image
 
 1. Open a command prompt and navigate to your project folder.
-2. Use the following commands to build and run your Docker image:
+1. Use the following commands to build and run your Docker image:
 
-```shell
-docker build -t ai-k8s-app --build-arg APPINSIGHTS_KEY=YOUR_APPLICATION_INSIGHTS_KEY .
-docker container rm test-ai-k8s-app -f # Making sure any existing container with the same name is deleted
-docker run -d -p 8080:80 --name test-ai-k8s-app ai-k8s-app
-```
+    ```shell
+    docker build -t ai-k8s-app --build-arg APPINSIGHTS_KEY=YOUR_APPLICATION_INSIGHTS_KEY .
+    docker container rm test-ai-k8s-app -f # Making sure any existing container with the same name is deleted
+    docker run -d -p 8080:80 --name test-ai-k8s-app ai-k8s-app
+    docker logs test-ai-k8s-app
+    ```
+
+1. Delete the running container after the verification is done:
+
+    ```shell
+    docker container rm test-ai-k8s-app -f
+    ```
+
 
 ## Expect the error
 

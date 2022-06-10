@@ -1,3 +1,9 @@
+**A newer version of this example is available at: [ZeroCodeLightUp.Net6](../ZeroUserCodeLightup.Net6/)**.
+
+---
+
+This page is not maintained anymore.
+
 # Zero Code light up Example
 
 This walkthrough shows how to enable application insights for Kubernetes for ASP.NET Core 2.0 Web App without code change for the existing project.
@@ -58,7 +64,7 @@ docker push dockeraccount/ai-k8s-app:0.0.1
 
 ## Deploy the application in Kubernetes
 
-Now that the image is in the container registry, it is time to deploy it to Kubernetes. Create a Kubernets deployment file. Reference [deployment.yaml](./k8s/deployment.yaml) as an example.
+Now that the image is in the container registry, it is time to deploy it to Kubernetes. Create a Kubernetes deployment file. Reference [deployment.yaml](./k8s/deployment.yaml) as an example.
 
 Some key lines:
 
