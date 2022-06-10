@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ApplicationInsights.Kubernetes.HostingStartup
 {
@@ -16,8 +17,8 @@ namespace ApplicationInsights.Kubernetes.HostingStartup
         {
             builder.ConfigureServices((cxt, services) =>
             {
+                services.AddApplicationInsightsTelemetry();
                 services.AddApplicationInsightsKubernetesEnricher();
-                services.AddApplicationInsightsTelemetry(cxt.Configuration);
             });
         }
     }
