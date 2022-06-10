@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else
             {
-                _logger.LogWarning("Application is not running inside a Kubernetes cluster.");
+                _logger.LogError("Application is not running inside a Kubernetes cluster.");
                 return serviceCollection;
             }
         }
