@@ -13,7 +13,7 @@ RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup -
 
 # Light up Application Insights for Kubernetes
 ENV APPINSIGHTS_INSTRUMENTATIONKEY $APPINSIGHTS_KEY
-ENV ASPNETCORE_HOSTINGSTARTUPASSEMBLIES Microsoft.ApplicationInsights.Kubernetes.HostingStartup
+ENV ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=Microsoft.ApplicationInsights.Kubernetes.HostingStartup
 ...
 ```
 

@@ -19,7 +19,7 @@ RUN test -n "$APPINSIGHTS_KEY"
 
 # Light up Application Insights for Kubernetes
 ENV APPINSIGHTS_INSTRUMENTATIONKEY $APPINSIGHTS_KEY
-ENV ASPNETCORE_HOSTINGSTARTUPASSEMBLIES Microsoft.ApplicationInsights.Kubernetes.HostingStartup
+ENV ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=Microsoft.ApplicationInsights.Kubernetes.HostingStartup
 
 WORKDIR /app
 COPY --from=build-env /app/out .
