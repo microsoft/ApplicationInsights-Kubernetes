@@ -18,8 +18,10 @@ spec:
       - name: ai-k8s-app
         image: dockerhub_account_name/ai-k8s-app:0.0.8
         env:
-        # Uncomment the following lines to overwrite the Application Insights Instrumentation Key
-        #- name: APPINSIGHTS_INSTRUMENTATIONKEY
-        #  value: APPLICATION INSIGHTS KEY OVERWRITE 
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: app-env-secret  # Matches your secret name
+              key: appinsights-connection-string  # matches the key of the secret data
         - name: ASPNETCORE_HOSTINGSTARTUPASSEMBLIES
           value: Microsoft.ApplicationInsights.Kubernetes.HostingStartup
