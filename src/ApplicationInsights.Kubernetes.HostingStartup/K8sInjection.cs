@@ -16,8 +16,8 @@ namespace ApplicationInsights.Kubernetes.HostingStartup
         {
             builder.ConfigureServices((cxt, services) =>
             {
+                services.AddApplicationInsightsTelemetry();
                 services.AddApplicationInsightsKubernetesEnricher();
-                services.AddApplicationInsightsTelemetry(cxt.Configuration);
             });
         }
     }
