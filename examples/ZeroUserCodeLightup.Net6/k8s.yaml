@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-k8s-app-deployment
+  labels:
+    app: ai-k8s-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-k8s-app
+  template:
+    metadata:
+      labels:
+        app: ai-k8s-app
+    spec:
+      containers:
+      - name: ai-k8s-app
+        image: dockerhub_account_name/ai-k8s-app:0.0.8
+        env:
+        - name: APPLICATIONINSIGHTS_CONNECTION_STRING
+          valueFrom:
+            secretKeyRef:
+              name: app-env-secret  # Matches your secret name
+              key: appinsights-connection-string  # matches the key of the secret data
+        - name: ASPNETCORE_HOSTINGSTARTUPASSEMBLIES
+          value: Microsoft.ApplicationInsights.Kubernetes.HostingStartup
