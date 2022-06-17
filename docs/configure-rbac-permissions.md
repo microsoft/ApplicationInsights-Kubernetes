@@ -50,7 +50,9 @@ To help configure it successfully, in this post, we will start by describe a met
     ```shell
     kubectl create -f `sa-role.yaml`
     ```
-    See [saRole.yaml](../examples/BasicUsage_clr21_RBAC/k8s/saRole.yaml) for a full example.
+    See [sa-role.yaml](sa-role.yaml) for a full example.
+
+> :warning: Check back for various permissions needed. Depends on the implementations, it may change in the over time.
 
 ## Ad-hoc troubleshooting for permission
 
