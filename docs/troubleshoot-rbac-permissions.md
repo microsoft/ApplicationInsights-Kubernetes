@@ -1,8 +1,8 @@
 # Configure RBAC permissions
 
-`Microsoft.ApplicationInsights.Kubernetes` uses the defualt service account to query kubernetes infomation to enchance telemetry. It is important to have proper permissions configured for information like node, pod and so on to be fetched correctly.
+`Microsoft.ApplicationInsights.Kubernetes` uses the default service account to query kubernetes information to enhance telemetries. It is important to have proper permissions configured for kubernetes related information like node, pod and so on to be fetched correctly.
 
-To help configure it successfully, in this post, we will start by desribe a method to correctly configure the permissions for an RBAC enabled cluster. And then, we will share a guidance for troubleshooting.
+To help configure it successfully, in this post, we will start by describe a method to correctly configure the permissions for an RBAC enabled cluster. And then, we will share a guidance for troubleshooting.
 
 ## Configure ClusterRole and ClusterRoleBinding for the service account
 
@@ -26,6 +26,7 @@ To help configure it successfully, in this post, we will start by desribe a meth
     You don't have to use the exact name, but you will need to making sure the name is referenced correctly in the following steps.
 
 * Append a Cluster role binding spec, you will need to update the namespace accordingly:
+
     ```yaml
     ---
     kind: ClusterRoleBinding
@@ -40,15 +41,16 @@ To help configure it successfully, in this post, we will start by desribe a meth
     kind: ClusterRole
     name: appinsights-k8s-property-reader
     apiGroup: rbac.authorization.k8s.io
-    ```appinsights-k8s-property-reader
+    ```
+    
     That is to grant the role of `appinsights-k8s-property-reader` to the default service account.
     
-* Now you can deploy the them:
+* Now you can deploy it:
 
     ```shell
     kubectl create -f `sa-role.yaml`
     ```
-    See [saRole.yaml](../examples/BasicUsage_clr21_RBAC/k8s/saRole.yaml) for an example.
+    See [saRole.yaml](../examples/BasicUsage_clr21_RBAC/k8s/saRole.yaml) for a full example.
 
 ## Ad-hoc troubleshooting for permission
 
@@ -63,7 +65,7 @@ There are several `default` there, let's break it down:
 * --namespace **default**: This is the target namespace, it is usually where your applications deploys to.
 * system:serviceaccount:**default**:**default**: The first default is the **namespace** of the service account. The second is the **name** of your service account.
 
-The response for the commandline will simply be `yes` or `no`, for example:
+The response for the command-line will simply be `yes` or `no`, for example:
 
 ```shell
 $ kubectl auth can-i list pod --namespace default --as system:serviceaccount:default:default
@@ -87,14 +89,14 @@ Kubernetes also provides `SubjectAccessReview` to check permission for given use
         resource: pods
         verb: list
         namespace: default
-    user: system:serviceaccount:default:default
+    user: system:serviceaccount:default:default # service account in default namespace and named default
     ```
 * Deploy and output the content as yaml:
 
     ```shell
     kubectl create -f subject-access-review.yaml -o yaml
     ```
-    When the permission is configured correctly, it will give out detailed descripitions like this:
+    When the permission is configured correctly, it will give out detailed descriptions like this:
 
     ```yaml
     apiVersion: authorization.k8s.io/v1
@@ -113,7 +115,7 @@ Kubernetes also provides `SubjectAccessReview` to check permission for given use
         of ClusterRole "appinsights-k8s-property-reader" to ServiceAccount "default/default"'
     ```
 
-    Or if there no permission:
+    Or, lack of permission:
     
     ```yaml
     apiVersion: authorization.k8s.io/v1
@@ -133,9 +135,9 @@ Kubernetes also provides `SubjectAccessReview` to check permission for given use
     To make it easier, we provide 2 pre-built yaml for you to leverage:
 
     * [subject-access-review-key.yaml](./subject-access-review-key.yaml): a subset of permissions for probing the RBAC settings.
-    * [subject-access-review-full.yaml](./subject-access-review-full.yaml): a full list of all permissions needed for RBAC settings.
+    * [subject-access-review-full.yaml](./subject-access-review-full.yaml): a full list of all permissions needed for RBAC settings in case any specific permission is missing.
 
-Let us know if there's quesitons, suggestions by filing [issues](https://github.com/microsoft/ApplicationInsights-Kubernetes/issues).
+Let us know if there's questions, suggestions by filing [issues](https://github.com/microsoft/ApplicationInsights-Kubernetes/issues).
 
 ## References
 
