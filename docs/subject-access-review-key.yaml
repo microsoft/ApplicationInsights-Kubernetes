@@ -1,0 +1,39 @@
+apiVersion: authorization.k8s.io/v1
+kind: SubjectAccessReview
+spec:
+  resourceAttributes:
+    group: ""
+    resource: deployments
+    verb: list
+    namespace: default
+  user: system:serviceaccount:default:default
+---
+apiVersion: authorization.k8s.io/v1
+kind: SubjectAccessReview
+spec:
+  resourceAttributes:
+    group: ""
+    resource: pods
+    verb: list
+    namespace: default
+  user: system:serviceaccount:default:default
+---
+apiVersion: authorization.k8s.io/v1
+kind: SubjectAccessReview
+spec:
+  resourceAttributes:
+    group: ""
+    resource: replicasets
+    verb: list
+    namespace: default
+  user: system:serviceaccount:default:default
+---
+apiVersion: authorization.k8s.io/v1
+kind: SubjectAccessReview
+spec:
+  resourceAttributes:
+    group: ""
+    resource: nodes
+    verb: list
+    namespace: default
+  user: system:serviceaccount:default:default
