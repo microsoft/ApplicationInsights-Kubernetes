@@ -1,4 +1,4 @@
-# Troubleshoot RBAC permissions
+# Configure RBAC permissions
 
 `Microsoft.ApplicationInsights.Kubernetes` uses the defualt service account to query kubernetes infomation to enchance telemetry. It is important to have proper permissions configured for information like node, pod and so on to be fetched correctly.
 
