@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: "ai-k8s-demo"
   name: ai-k8s-f5webapi-deployment
   labels:
     app: ai-k8s-f5webapi

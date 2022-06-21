@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: ai-k8s-demo
+  labels:
+    name: ai-k8s-demo

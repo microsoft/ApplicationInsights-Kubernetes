@@ -5,8 +5,8 @@ spec:
     group: ""
     resource: deployments
     verb: list
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -16,8 +16,8 @@ spec:
     group: ""
     resource: deployments
     verb: get
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -27,8 +27,8 @@ spec:
     group: ""
     resource: nodes
     verb: list
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -38,8 +38,8 @@ spec:
     group: ""
     resource: nodes
     verb: get
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -49,8 +49,8 @@ spec:
     group: ""
     resource: pods
     verb: list
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -60,8 +60,8 @@ spec:
     group: ""
     resource: pods
     verb: get
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -71,8 +71,8 @@ spec:
     group: ""
     resource: replicasets
     verb: list
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -82,8 +82,8 @@ spec:
     group: ""
     resource: replicasets
     verb: get
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -93,8 +93,8 @@ spec:
     group: apps
     resource: deployments
     verb: list
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -104,8 +104,8 @@ spec:
     group: apps
     resource: deployments
     verb: get
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -115,8 +115,8 @@ spec:
     group: apps
     resource: nodes
     verb: list
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -126,8 +126,8 @@ spec:
     group: apps
     resource: nodes
     verb: get
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -137,8 +137,8 @@ spec:
     group: apps
     resource: pods
     verb: list
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -148,8 +148,8 @@ spec:
     group: apps
     resource: pods
     verb: get
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -159,8 +159,8 @@ spec:
     group: apps
     resource: replicasets
     verb: list
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
 apiVersion: authorization.k8s.io/v1
@@ -170,7 +170,7 @@ spec:
     group: apps
     resource: replicasets
     verb: get
-    namespace: default
-  user: system:serviceaccount:default:default
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
 ---
 
