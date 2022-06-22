@@ -1,0 +1,29 @@
+apiVersion: authorization.k8s.io/v1
+kind: SubjectAccessReview
+spec:
+  resourceAttributes:
+    group: ""
+    resource: deployments
+    verb: list
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
+---
+apiVersion: authorization.k8s.io/v1
+kind: SubjectAccessReview
+spec:
+  resourceAttributes:
+    group: ""
+    resource: pods
+    verb: list
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
+---
+apiVersion: authorization.k8s.io/v1
+kind: SubjectAccessReview
+spec:
+  resourceAttributes:
+    group: apps
+    resource: nodes
+    verb: list
+    namespace: ai-k8s-demo
+  user: system:serviceaccount:ai-k8s-demo:default
