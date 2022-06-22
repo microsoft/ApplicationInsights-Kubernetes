@@ -18,15 +18,15 @@ In this demo, we will have the following assumptions. Please change the related 
     * Write spec to define a cluster role, name it `appinsights-k8s-property-reader` for example:
  
         ```yaml
-        kind: ClusterRole
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-        # "namespace" omitted since ClusterRoles are not namespaced
-        name: appinsights-k8s-property-reader
-        rules:
-        - apiGroups: ["", "apps"]
-        resources: ["pods", "nodes", "replicasets", "deployments"]
-        verbs: ["get", "list"]
+         kind: ClusterRole
+         apiVersion: rbac.authorization.k8s.io/v1
+         metadata:
+           # "namespace" omitted since ClusterRoles are not namespaced
+           name: appinsights-k8s-property-reader
+         rules:
+         - apiGroups: ["", "apps"]
+           resources: ["pods", "nodes", "replicasets", "deployments"]
+           verbs: ["get", "list"]
         ```
         That spec defines the name of the role, and what permission does the role has, for example, list pods.
 
@@ -36,20 +36,21 @@ In this demo, we will have the following assumptions. Please change the related 
 
         ```yaml
         ---
+        # actual binding to the role
         kind: ClusterRoleBinding
         apiVersion: rbac.authorization.k8s.io/v1
         metadata:
-        name: appinsights-k8s-property-reader-binding
+          name: appinsights-k8s-property-reader-binding
         subjects:
         - kind: ServiceAccount
-        name: default
-        namespace: 
+          name: default
+          namespace: ai-k8s-demo
         roleRef:
-        kind: ClusterRole
-        name: appinsights-k8s-property-reader
-        apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: appinsights-k8s-property-reader
+          apiGroup: rbac.authorization.k8s.io
         ```
-    
+
     That is to grant the role of `appinsights-k8s-property-reader` to the default service account in namespace of `ai-k8s-demo`.
     
 * Now you can deploy it:
