@@ -62,15 +62,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     // We will send out a warning to let the Linux user know about code flaws. However, on both platforms, the intention is to make the container id optional.
                     string containerId = _httpClientSettings.ContainerId;
 
+                    // Give out warnings on Linux in case the auto detect has a bug.
+                    if (string.IsNullOrEmpty(containerId) && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        _logger.LogWarning("Can't fetch container id. Container id info will be missing. Please file an issue at https://github.com/microsoft/ApplicationInsights-Kubernetes/issues.");
+                    }
+
+                    // Most pod has only 1 container, use it.
                     if (string.IsNullOrEmpty(containerId))
                     {
-                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                        {
-                            // Give out warnings on Linux in case the auto detect has a bug.
-                            _logger.LogWarning("Can't fetch container id. Container id info will be missing. Please file an issue at https://github.com/microsoft/ApplicationInsights-Kubernetes/issues.");
-                        }
-
-                        // Most pod has only 1 container, use it.
                         ContainerStatus[] containerStatuses = myPod.Status.ContainerStatuses.ToArray();
                         if (containerStatuses.Length == 1)
                         {
@@ -79,6 +79,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                         }
                     }
 
+                    // Notes: It is still possible for the optional container id to be empty at this point, the following method needs to handle the case.
                     if (!await SpinWaitContainerReadyAsync(timeoutAt, queryClient, myPod, containerId, cancellationToken).ConfigureAwait(false))
                     {
                         _logger.LogError(Invariant($"Kubernetes info is not available before the timeout at {timeoutAt}."));
