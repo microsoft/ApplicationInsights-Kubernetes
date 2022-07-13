@@ -46,7 +46,7 @@ internal class PodInfoManager : IPodInfoManager
         // Find pod by name
         if (!string.IsNullOrEmpty(podName))
         {
-            K8sPod? targetPod = allPods.FirstOrDefault(p => p.Metadata.Name.Equals(podName, StringComparison.Ordinal));
+            K8sPod? targetPod = allPods.FirstOrDefault(p => string.Equals(p.Metadata?.Name, podName, StringComparison.Ordinal));
             if (targetPod is not null)
             {
                 _logger.LogInformation($"Found pod by name providers: {targetPod.Metadata?.Name}");
