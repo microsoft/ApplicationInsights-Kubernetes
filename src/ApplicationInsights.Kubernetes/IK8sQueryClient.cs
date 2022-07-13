@@ -7,8 +7,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     internal interface IK8sQueryClient
     {
         Task<IEnumerable<K8sDeployment>> GetDeploymentsAsync();
-        Task<ContainerStatus> GetMyContainerStatusAsync();
-        Task<K8sPod> GetMyPodAsync();
         Task<IEnumerable<K8sNode>> GetNodesAsync();
         Task<IEnumerable<K8sPod>> GetPodsAsync();
         Task<IEnumerable<K8sReplicaSet>> GetReplicasAsync();

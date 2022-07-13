@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
@@ -51,7 +52,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             _timeoutAt = DateTime.Now.Add(_options.InitializationTimeout);
             _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
 
-            _ = SetK8sEnvironment();
+            _ = SetK8sEnvironment(default);
         }
 
         public void Initialize(ITelemetry telemetry)
@@ -107,9 +108,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             _logger.LogTrace("Finish telemetry initializer.");
         }
 
-        private async Task SetK8sEnvironment()
+        private async Task SetK8sEnvironment(CancellationToken cancellationToken)
         {
-            Task<IK8sEnvironment> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt);
+            Task<IK8sEnvironment> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt, cancellationToken);
             await Task.WhenAny(
                 createK8sEnvTask,
                 Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
@@ -129,9 +130,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private void SetCustomDimensions(ISupportProperties telemetry)
         {
-            // Container
-            SetCustomDimension(telemetry, Container.ID, this._k8sEnvironment.ContainerID);
-            SetCustomDimension(telemetry, Container.Name, this._k8sEnvironment.ContainerName);
+            // Container 
+            SetCustomDimension(telemetry, Container.ID, this._k8sEnvironment.ContainerID, isValueOptional: true);
+            SetCustomDimension(telemetry, Container.Name, this._k8sEnvironment.ContainerName, isValueOptional: true);
 
             // Pod
             SetCustomDimension(telemetry, Pod.ID, this._k8sEnvironment.PodID);

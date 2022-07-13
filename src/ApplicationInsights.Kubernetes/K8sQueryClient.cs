@@ -46,37 +46,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             string url = Invariant($"api/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/pods");
             return GetAllItemsAsync<K8sPod>(url);
         }
-
-        /// <summary>
-        /// Gets the pod the current container is running upon.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<K8sPod> GetMyPodAsync()
-        {
-            EnsureNotDisposed();
-
-            var allPods = await GetPodsAsync().ConfigureAwait(false);
-            K8sPod targetPod = null;
-            string podName = Environment.GetEnvironmentVariable(@"APPINSIGHTS_KUBERNETES_POD_NAME");
-            string myContainerId = KubeHttpClient.Settings.ContainerId;
-            if (!string.IsNullOrEmpty(podName))
-            {
-                targetPod = allPods.FirstOrDefault(p => p.Metadata.Name.Equals(podName, StringComparison.Ordinal));
-            }
-            else if (!string.IsNullOrEmpty(myContainerId))
-            {
-                targetPod = allPods.FirstOrDefault(pod =>
-                                pod.Status?.ContainerStatuses != null &&
-                                pod.Status.ContainerStatuses.Any(
-                                    status => !string.IsNullOrEmpty(status.ContainerID) &&
-                                    status.ContainerID.IndexOf(myContainerId, StringComparison.Ordinal) > -1));
-            }
-            else
-            {
-                _logger.LogError("Neither container id nor %APPINSIGHTS_KUBERNETES_POD_NAME% could be fetched.");
-            }
-            return targetPod;
-        }
         #endregion
 
         #region Replica Sets
@@ -106,21 +75,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             string url = Invariant($"api/v1/nodes");
             return GetAllItemsAsync<K8sNode>(url);
-        }
-        #endregion
-
-        #region ContainerStatus
-        /// <summary>
-        /// Gets the container status for the pod, where the current container is running upon.
-        /// </summary>
-        /// <returns></returns>
-        public async Task<ContainerStatus> GetMyContainerStatusAsync()
-        {
-            EnsureNotDisposed();
-
-            string myContainerId = KubeHttpClient.Settings.ContainerId;
-            K8sPod myPod = await GetMyPodAsync().ConfigureAwait(false);
-            return myPod.GetContainerStatus(myContainerId);
         }
         #endregion
 

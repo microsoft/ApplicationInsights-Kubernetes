@@ -4,6 +4,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
+using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -70,11 +71,14 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Registers setttings provider for querying K8s proxy.
+        /// Registers settings provider for querying K8s proxy.
         /// </summary>
         /// <param name="serviceCollection"></param>
         protected virtual void RegisterSettingsProvider(IServiceCollection serviceCollection)
         {
+            // This happens before any of the other IContainerIdProvider. See comments below for details.
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, EnvironmentVariableContainerIdProvider>());    // Environment variable - works for both Linux & Windows;
+            
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 // Matchers are dependencies of the container id providers.
@@ -83,17 +87,17 @@ namespace Microsoft.Extensions.DependencyInjection
                 serviceCollection.AddSingleton<ContainerDMountInfoMatcher>();
 
                 // Notes: pay attention to the order. Injecting uses the order of registering in this case.
-                // For example, on Linux, EnvironmentVariableContainerIdProvider will take precedence.
-                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, EnvironmentVariableContainerIdProvider>());    // Environment variable
+                // For example, EnvironmentVariableContainerIdProvider will take precedence, then CGroupContainerIdProvider on Linux.
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, CGroupContainerIdProvider>());                 // Then CGroupV1
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, ContainerDMountInfoContainerIdProvider>());    // Then ContainerD
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, DockerEngineMountInfoContainerIdProvider>());  // Then DockerEngine
-                serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, HostnameContainerIdProvider>());               // Hostname is not going to work in K8s. This bug is tracked by: https://github.com/microsoft/ApplicationInsights-Kubernetes/issues/259.
 
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsProvider>();
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                // Notes: pay attention to the order. Injecting uses the order of registering in this case.
+                // For example, EnvironmentVariableContainerIdProvider will take precedence, then EmptyContainerIdProvider on Windows.
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, EmptyContainerIdProvider>());
                 serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpSettingsWinContainerProvider>();
             }
@@ -101,6 +105,13 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 _logger.LogError("Unsupported OS.");
             }
+
+            // Notes: pay attention to the order. Injecting uses the order of registering in this case.
+            // For backward compatibility, $APPINSIGHTS_KUBERNETES_POD_NAME has been agreed upon to allow customize pod name with downward API.
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider>(p => new EnvironmentVariablePodNameProvider("APPINSIGHTS_KUBERNETES_POD_NAME")));
+            // $Hostname will be overwritten by Kubernetes to reveal pod name: https://kubernetes.io/docs/concepts/containers/container-environment/#container-information.
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider>(p => new EnvironmentVariablePodNameProvider("HOSTNAME")));
+            serviceCollection.AddSingleton<IPodInfoManager, PodInfoManager>();
         }
 
         /// <summary>

@@ -1,12 +1,15 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Entities;
-
+using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
@@ -17,24 +20,27 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private readonly IKubeHttpClientSettingsProvider _httpClientSettings;
         private readonly KubeHttpClientFactory _httpClientFactory;
         private readonly K8sQueryClientFactory _k8sQueryClientFactory;
+        private readonly IPodInfoManager _podInfoManager;
 
         public K8sEnvironmentFactory(
             IKubeHttpClientSettingsProvider httpClientSettingsProvider,
             KubeHttpClientFactory httpClientFactory,
-            K8sQueryClientFactory k8SQueryClientFactory)
+            K8sQueryClientFactory k8SQueryClientFactory,
+            IPodInfoManager podInfoManager)
         {
             _httpClientSettings = Arguments.IsNotNull(httpClientSettingsProvider, nameof(httpClientSettingsProvider));
             _httpClientFactory = Arguments.IsNotNull(httpClientFactory, nameof(httpClientFactory));
             _k8sQueryClientFactory = Arguments.IsNotNull(k8SQueryClientFactory, nameof(k8SQueryClientFactory));
+            _podInfoManager = podInfoManager ?? throw new ArgumentNullException(nameof(podInfoManager));
         }
 
         /// <summary>
         /// Async factory method to build the instance of a K8sEnvironment.
         /// </summary>
         /// <returns></returns>
-        public async Task<IK8sEnvironment> CreateAsync(DateTime timeoutAt)
+        public async Task<IK8sEnvironment?> CreateAsync(DateTime timeoutAt, CancellationToken cancellationToken)
         {
-            K8sEnvironment instance = null;
+            K8sEnvironment? instance = null;
 
             try
             {
@@ -42,27 +48,37 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 using (K8sQueryClient queryClient = _k8sQueryClientFactory.Create(httpClient))
                 {
                     // TODO: See if there's better way to fetch the container id
-                    K8sPod myPod = await SpinWaitUntilGetPod(timeoutAt, queryClient).ConfigureAwait(false);
+                    K8sPod? myPod = await SpinWaitUntilGetPodAsync(timeoutAt, queryClient, cancellationToken).ConfigureAwait(false);
                     if (myPod != null)
                     {
-                        string containerId = null;
-                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                        {
-                            // For Windows, is there a way to fetch the current container id from within the container?
-                            containerId = myPod.Status.ContainerStatuses.First().ContainerID;
-                        }
-                        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                        {
-                            // For Linux, container id could be fetched directly from cGroup.
-                            containerId = _httpClientSettings.ContainerId;
-                        }
-                        // ~
+                        // Notice: _httpClientSettings.ContainerId is provided by various container id providers.
+                        string containerId = _httpClientSettings.ContainerId;
 
-                        if (await SpinWaitContainerReady(timeoutAt, queryClient, containerId).ConfigureAwait(false))
+                        // There is a chance for the container id to be empty.
+                        // This is less likely to happen on Linux but it will happen on Windows when the variable of `ContainerId` is not properly set.
+                        // We will send out a warning to let the Linux user know about code flaws. However, on both platforms, the intention is to make the container id optional.
+
+                        if (string.IsNullOrEmpty(containerId))
+                        {
+                            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                            {
+                                // Give out warnings on Linux in case the auto detect has a bug.
+                                _logger.LogWarning("Can't fetch container id. Container id info will be missing. Please file an issue at https://github.com/microsoft/ApplicationInsights-Kubernetes/issues.");
+                            }
+
+                            // Most pod has only 1 container, use it.
+                            ContainerStatus[] containerStatuses = myPod.Status.ContainerStatuses.ToArray();
+                            if (containerStatuses.Length == 1)
+                            {
+                                containerId = containerStatuses[0].ContainerID;
+                            }
+                        }
+
+                        if (await SpinWaitContainerReadyAsync(timeoutAt, queryClient, containerId, cancellationToken).ConfigureAwait(false))
                         {
                             instance = new K8sEnvironment()
                             {
-                                ContainerID = containerId
+                                ContainerID = containerId,
                             };
 
                             instance.myPod = myPod;
@@ -84,7 +100,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                                 string nodeName = instance.myPod.Spec.NodeName;
                                 if (!string.IsNullOrEmpty(nodeName))
                                 {
-                                    instance.myNode = nodeList.FirstOrDefault(node => !string.IsNullOrEmpty(node.Metadata?.Name) && node.Metadata.Name.Equals(nodeName, StringComparison.OrdinalIgnoreCase));
+                                    instance.myNode = nodeList.FirstOrDefault(node => string.Equals(node.Metadata?.Name, nodeName, StringComparison.OrdinalIgnoreCase));
                                 }
                             }
                         }
@@ -116,17 +132,17 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 #pragma warning restore CA1031 // Do not catch general exception types
         }
 
-        private async Task<K8sPod> SpinWaitUntilGetPod(DateTime timeoutAt, K8sQueryClient client)
+        private async Task<K8sPod?> SpinWaitUntilGetPodAsync(DateTime timeoutAt, K8sQueryClient client, CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            K8sPod myPod = null;
+            K8sPod? myPod = null;
             do
             {
                 // When my pod become available and it's status become ready, we recognize the container is ready.
                 try
                 {
-                    myPod = await client.GetMyPodAsync().ConfigureAwait(false);
+                    myPod = await _podInfoManager.GetMyPodAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -142,20 +158,22 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
 #pragma warning restore CA1031 // Do not catch general exception types
 
-                if (myPod != null)
+                if (myPod is not null)
                 {
                     stopwatch.Stop();
-                    _logger.LogDebug(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
+                    _logger.LogDebug(Invariant($"K8s info available in: {stopwatch.ElapsedMilliseconds} ms."));
                     return myPod;
                 }
 
-                // The time to get the container ready dependes on how much time will a container to be initialized.
+                // The time to get the container ready depends on how much time will a container to be initialized.
                 // When there is readiness probe, the pod info will not be available until the initial delay of it is elapsed.
                 // When there is no readiness probe, the minimum seems about 1000ms. 
                 // Try invoke a probe on readiness every 500ms until the container is ready
                 // Or it will timeout per the timeout settings.
                 await Task.Delay(500).ConfigureAwait(false);
             } while (DateTime.Now < timeoutAt);
+
+            _logger.LogDebug($"{nameof(SpinWaitUntilGetPodAsync)} timed out. Return null.");
             return null;
         }
 
@@ -167,17 +185,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// <param name="client">Query client to try getting info from the Kubernetes cluster API.</param>
         /// <param name="myContainerId">The container that we are interested in.</param>
         /// <returns></returns>
-        private async Task<bool> SpinWaitContainerReady(DateTime timeoutAt, K8sQueryClient client, string myContainerId)
+        private async Task<bool> SpinWaitContainerReadyAsync(DateTime timeoutAt, K8sQueryClient client, string myContainerId, CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            K8sPod myPod = null;
+
+            K8sPod? myPod;
             do
             {
                 // When my pod become available and it's status become ready, we recognize the container is ready.
                 try
                 {
-                    myPod = await client.GetMyPodAsync().ConfigureAwait(false);
+                    myPod = await _podInfoManager.GetMyPodAsync(cancellationToken).ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
                 catch
@@ -188,16 +207,22 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
                 if (myPod != null)
                 {
-                    ContainerStatus status = myPod.GetContainerStatus(myContainerId);
+                    if (myContainerId == string.Empty)
+                    {
+                        _logger.LogWarning("No container id available. Fallback to use the first container for status checking.");
+                        myContainerId = myPod.GetAllContainerStatus().FirstOrDefault().ContainerID;
+                    }
+
+                    ContainerStatus? status = myPod.GetContainerStatus(myContainerId);
                     if (status != null && status.Ready)
                     {
                         stopwatch.Stop();
-                        _logger.LogDebug(Invariant($"K8s info avaialbe in: {stopwatch.ElapsedMilliseconds} ms."));
+                        _logger.LogDebug(Invariant($"K8s info available in: {stopwatch.ElapsedMilliseconds} ms."));
                         return true;
                     }
                 }
 
-                // The time to get the container ready dependes on how much time will a container to be initialized.
+                // The time to get the container ready depends on how much time will a container to be initialized.
                 // When there is readiness probe, the pod info will not be available until the initial delay of it is elapsed.
                 // When there is no readiness probe, the minimum seems about 1000ms. 
                 // Try invoke a probe on readiness every 500ms until the container is ready
