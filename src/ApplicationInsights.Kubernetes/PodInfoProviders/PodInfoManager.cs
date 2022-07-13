@@ -30,8 +30,6 @@ internal class PodInfoManager : IPodInfoManager
     /// <inheritdoc />
     public async Task<K8sPod?> GetMyPodAsync(CancellationToken cancellationToken)
     {
-        IEnumerable<K8sPod> allPods = await _k8SQueryClient.GetPodsAsync().ConfigureAwait(false);
-
         string podName = string.Empty;
         foreach (IPodNameProvider podNameProvider in _podNameProviders)
         {
@@ -46,7 +44,7 @@ internal class PodInfoManager : IPodInfoManager
         // Find pod by name
         if (!string.IsNullOrEmpty(podName))
         {
-            K8sPod? targetPod = allPods.FirstOrDefault(p => string.Equals(p.Metadata?.Name, podName, StringComparison.Ordinal));
+            K8sPod? targetPod = await GetPodByNameAsync(podName, cancellationToken).ConfigureAwait(false);
             if (targetPod is not null)
             {
                 _logger.LogInformation($"Found pod by name providers: {targetPod.Metadata?.Name}");
@@ -59,6 +57,7 @@ internal class PodInfoManager : IPodInfoManager
         }
 
         // Find pod by container id:
+        IEnumerable<K8sPod> allPods = await _k8SQueryClient.GetPodsAsync(cancellationToken).ConfigureAwait(false);
         string myContainerId = _settingsProvider.ContainerId;
         _logger.LogDebug($"Looking for pod name by container id: {myContainerId}");
 
@@ -80,4 +79,7 @@ internal class PodInfoManager : IPodInfoManager
         _logger.LogError("Pod name can't be determined.");
         return null;
     }
+
+    public Task<K8sPod?> GetPodByNameAsync(string podName, CancellationToken cancellationToken)
+        => _k8SQueryClient.GetPodAsync(podName, cancellationToken);
 }

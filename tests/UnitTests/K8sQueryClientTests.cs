@@ -57,7 +57,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                await target.GetPodsAsync();
+                await target.GetPodsAsync(cancellationToken: default);
             }
 
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/api/v1/namespaces/queryNamespace/pods"))), Times.Once);
@@ -85,7 +85,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                IEnumerable<K8sPod> result = await target.GetPodsAsync();
+                IEnumerable<K8sPod> result = await target.GetPodsAsync(cancellationToken: default);
 
                 Assert.NotNull(result);
                 Assert.Equal(2, result.Count());
@@ -111,7 +111,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                await target.GetReplicasAsync();
+                await target.GetReplicasAsync(cancellationToken: default);
             }
 
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m =>
@@ -141,7 +141,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             IEnumerable<K8sReplicaSet> result;
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                result = await target.GetReplicasAsync();
+                result = await target.GetReplicasAsync(cancellationToken: default);
             }
             Assert.NotNull(result);
             Assert.Equal(2, result.Count());
@@ -165,7 +165,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                await target.GetDeploymentsAsync();
+                await target.GetDeploymentsAsync(cancellationToken: default);
             }
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(
                 m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/apps/v1/namespaces/queryNamespace/deployments"))), Times.Once);
@@ -192,7 +192,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                IEnumerable<K8sDeployment> result = await target.GetDeploymentsAsync();
+                IEnumerable<K8sDeployment> result = await target.GetDeploymentsAsync(cancellationToken: default);
                 Assert.NotNull(result);
                 Assert.Equal(2, result.Count());
                 Assert.Contains(result, p => p.Metadata.Name.Equals("D1"));
@@ -214,7 +214,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                await target.GetNodesAsync();
+                await target.GetNodesAsync(cancellationToken: default);
             }
 
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/api/v1/nodes"))), Times.Once);
@@ -244,7 +244,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                IEnumerable<K8sNode> result = await target.GetNodesAsync();
+                IEnumerable<K8sNode> result = await target.GetNodesAsync(cancellationToken: default);
 
                 Assert.NotNull(result);
                 Assert.Equal(2, result.Count());

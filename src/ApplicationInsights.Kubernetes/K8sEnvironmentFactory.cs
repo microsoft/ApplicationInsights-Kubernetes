@@ -96,18 +96,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     _logger.LogDebug(Invariant($"Getting container status of container-id: {containerId}"));
                     instance.myContainerStatus = myPod.GetContainerStatus(containerId);
 
-                    IEnumerable<K8sReplicaSet> replicaSetList = await queryClient.GetReplicasAsync().ConfigureAwait(false);
+                    IEnumerable<K8sReplicaSet> replicaSetList = await queryClient.GetReplicasAsync(cancellationToken).ConfigureAwait(false);
                     instance.myReplicaSet = myPod.GetMyReplicaSet(replicaSetList);
 
                     if (instance.myReplicaSet is not null)
                     {
-                        IEnumerable<K8sDeployment> deploymentList = await queryClient.GetDeploymentsAsync().ConfigureAwait(false);
+                        IEnumerable<K8sDeployment> deploymentList = await queryClient.GetDeploymentsAsync(cancellationToken).ConfigureAwait(false);
                         instance.myDeployment = instance.myReplicaSet.GetMyDeployment(deploymentList);
                     }
 
                     if (instance.myPod is not null)
                     {
-                        IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync().ConfigureAwait(false);
+                        IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync(cancellationToken).ConfigureAwait(false);
                         string nodeName = instance.myPod.Spec.NodeName;
                         if (!string.IsNullOrEmpty(nodeName))
                         {
@@ -190,17 +190,34 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-
+            string podName = myPod.Metadata.Name;
+            if (string.IsNullOrEmpty(podName))
+            {
+                throw new InvalidOperationException("Valid pod name shall never be null or empty.");
+            }
             do
             {
-                if (string.IsNullOrEmpty(myContainerId))
+                bool readyToGo = false;
+                K8sPod? podInfo = await _podInfoManager.GetPodByNameAsync(podName, cancellationToken).ConfigureAwait(false);
+                if (podInfo is null)
                 {
-                    _logger.LogWarning("No container id available. Fallback to use the first container for status checking.");
-                    myContainerId = myPod.GetAllContainerStatus().First().ContainerID;
+                    _logger.LogWarning("No pod info is fetched. This should not happen frequently.");
+                    await Task.Delay(500).ConfigureAwait(false);
+                    continue;
                 }
 
-                ContainerStatus? status = myPod.GetContainerStatus(myContainerId);
-                if (status != null && status.Ready)
+                if (!string.IsNullOrEmpty(myContainerId))
+                {
+                    // Check targeted container status
+                    readyToGo = IsContainerReady(myPod.GetContainerStatus(myContainerId));
+                }
+                else
+                {
+                    _logger.LogWarning("No container id available. Fallback to use the any container for status checking.");
+                    readyToGo = myPod.GetAllContainerStatus().Any(s => IsContainerReady(s));
+                }
+
+                if (readyToGo)
                 {
                     stopwatch.Stop();
                     _logger.LogDebug(Invariant($"K8s info available in: {stopwatch.ElapsedMilliseconds} ms."));
@@ -224,5 +241,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 exception.Message);
             _logger.LogDebug(exception.ToString());
         }
+
+        private bool IsContainerReady(ContainerStatus? containerStatus)
+            => containerStatus is not null && containerStatus.Ready;
     }
 }
