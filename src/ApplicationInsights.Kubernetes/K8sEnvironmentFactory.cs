@@ -184,6 +184,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// <param name="timeoutAt">A point in time when the wait on container startup is abandoned.</param>
         /// <param name="client">Query client to try getting info from the Kubernetes cluster API.</param>
         /// <param name="myContainerId">The container that we are interested in.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         private async Task<bool> SpinWaitContainerReadyAsync(DateTime timeoutAt, K8sQueryClient client, string myContainerId, CancellationToken cancellationToken)
         {

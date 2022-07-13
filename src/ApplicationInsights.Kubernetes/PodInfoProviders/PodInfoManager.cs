@@ -27,7 +27,7 @@ internal class PodInfoManager : IPodInfoManager
         _podNameProviders = podNameProviders ?? throw new System.ArgumentNullException(nameof(podNameProviders));
     }
 
-    /// <inheritdoc>
+    /// <inheritdoc />
     public async Task<K8sPod?> GetMyPodAsync(CancellationToken cancellationToken)
     {
         IEnumerable<K8sPod> allPods = await _k8SQueryClient.GetPodsAsync().ConfigureAwait(false);
