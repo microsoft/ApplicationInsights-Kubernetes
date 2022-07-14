@@ -8,12 +8,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders
     /// <summary>
     /// Gets current container id by given environment variable.
     /// </summary>
-    internal class EnvironmentVariablePodNameProvider : IPodNameProvider
+    internal abstract class EnvironmentVariablePodNameProviderBase : IPodNameProvider
     {
         private readonly string _environmentVariableName;
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
-        public EnvironmentVariablePodNameProvider(string environmentVariableName)
+        public EnvironmentVariablePodNameProviderBase(string environmentVariableName)
         {
             if (string.IsNullOrEmpty(environmentVariableName))
             {

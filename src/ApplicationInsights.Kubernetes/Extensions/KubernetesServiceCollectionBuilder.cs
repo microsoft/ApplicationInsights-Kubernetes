@@ -108,9 +108,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
             // Notes: pay attention to the order. Injecting uses the order of registering in this case.
             // For backward compatibility, $APPINSIGHTS_KUBERNETES_POD_NAME has been agreed upon to allow customize pod name with downward API.
-            serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, EnvironmentVariablePodNameProvider>(p => new EnvironmentVariablePodNameProvider("APPINSIGHTS_KUBERNETES_POD_NAME")));
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, UserSetPodNameProvider>());
             // $Hostname will be overwritten by Kubernetes to reveal pod name: https://kubernetes.io/docs/concepts/containers/container-environment/#container-information.
-            serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, EnvironmentVariablePodNameProvider>(p => new EnvironmentVariablePodNameProvider("HOSTNAME")));
+            serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, HostNamePodNameProvider>());
             serviceCollection.AddSingleton<IPodInfoManager, PodInfoManager>();
         }
 
