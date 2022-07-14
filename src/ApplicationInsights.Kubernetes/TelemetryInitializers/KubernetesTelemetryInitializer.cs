@@ -21,7 +21,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     internal class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
         private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
-        
+
         private readonly SDKVersionUtils _sdkVersionUtils;
         private readonly DateTime _timeoutAt;
         internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
@@ -110,22 +110,33 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private async Task SetK8sEnvironment(CancellationToken cancellationToken)
         {
-            Task<IK8sEnvironment> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt, cancellationToken);
-            await Task.WhenAny(
-                createK8sEnvTask,
-                Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
+            try
+            {
+                Task<IK8sEnvironment> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt, cancellationToken);
+                await Task.WhenAny(
+                    createK8sEnvTask,
+                    Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
 
-            if (createK8sEnvTask.IsCompleted)
-            {
-                _logger.LogDebug("Application Insights for Kubernetes environment initialized.");
-                _k8sEnvironment = createK8sEnvTask.Result;
+                if (createK8sEnvTask.IsCompleted)
+                {
+                    _logger.LogDebug("Application Insights for Kubernetes environment initialized.");
+                    _k8sEnvironment = createK8sEnvTask.Result;
+                }
+                else
+                {
+                    _isK8sQueryTimeout = true;
+                    _k8sEnvironment = null;
+                    _logger.LogError("Application Insights for Kubernetes environment initialization timed out.");
+                }
             }
-            else
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
             {
-                _isK8sQueryTimeout = true;
-                _k8sEnvironment = null;
-                _logger.LogError("Application Insights for Kubernetes environment initialization timed out.");
+                // In case of any unexpected exception, we shall log it than let it throw.
+                _logger.LogError("Unexpected error happened. Telemetry enhancement with Kubernetes info won't happen. Message: {0}", ex.Message);
+                _logger.LogTrace("Unexpected error happened. Telemetry enhancement with Kubernetes info won't happen. Details: {0}", ex.ToString());
             }
+#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         private void SetCustomDimensions(ISupportProperties telemetry)
