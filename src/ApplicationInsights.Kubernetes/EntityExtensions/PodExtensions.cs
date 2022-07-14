@@ -13,7 +13,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     {
         public static ContainerStatus? GetContainerStatus(this K8sPod self, string containerId)
             => string.IsNullOrEmpty(containerId) ? null // Special case when container id is an empty string,
-                : self?.Status?.ContainerStatuses?.FirstOrDefault(status => string.Equals(status.ContainerID, containerId, StringComparison.Ordinal));
+                : self.Status?.ContainerStatuses?.FirstOrDefault(
+                    // Notice, we are using partial matching because there could be prefix of container ids like: docker://b1bf9cd89b57ba86c20e17bfd474638110e489da784a5e388983294d94ae9fc4
+                    status => !string.IsNullOrEmpty(status.ContainerID) && status.ContainerID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1);  
 
         public static IEnumerable<ContainerStatus> GetAllContainerStatus(this K8sPod pod)
         {

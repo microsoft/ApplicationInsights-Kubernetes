@@ -111,6 +111,7 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, UserSetPodNameProvider>());
             // $Hostname will be overwritten by Kubernetes to reveal pod name: https://kubernetes.io/docs/concepts/containers/container-environment/#container-information.
             serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, HostNamePodNameProvider>());
+
             serviceCollection.AddSingleton<IPodInfoManager, PodInfoManager>();
         }
 

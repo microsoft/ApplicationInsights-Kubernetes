@@ -2,7 +2,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 
 internal class HostNamePodNameProvider : EnvironmentVariablePodNameProviderBase
 {
-    public HostNamePodNameProvider() : base("HOSTNAME")
+    internal const string VariableName = "HOSTNAME";
+    public HostNamePodNameProvider() : base(VariableName)
     {
     }
 }
