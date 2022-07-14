@@ -28,6 +28,5 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             this.BaseAddress = settingsProvider.ServiceBaseAddress;
         }
-
     }
 }

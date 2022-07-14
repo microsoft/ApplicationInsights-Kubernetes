@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Kubernetes.Entities;
 using Moq;
@@ -54,13 +55,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                 }))
             };
-            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
+            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetPodsAsync(cancellationToken: default);
             }
 
-            httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/api/v1/namespaces/queryNamespace/pods"))), Times.Once);
+            httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/api/v1/namespaces/queryNamespace/pods")), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact(DisplayName = "GetPodsAsync should deserialize multiple pods")]
@@ -81,7 +82,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                 }))
             };
-            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
+            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
@@ -108,14 +109,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     Items = new List<K8sReplicaSet>()
                 }))
             };
-            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
+            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetReplicasAsync(cancellationToken: default);
             }
 
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m =>
-                m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/apps/v1/namespaces/queryNamespace/replicasets"))), Times.Once);
+                m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/apps/v1/namespaces/queryNamespace/replicasets")), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact(DisplayName = "GetReplicasAsync should deserialize multiple replicas")]
@@ -136,7 +137,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                 }))
             };
-            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
+            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
 
             IEnumerable<K8sReplicaSet> result;
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
@@ -161,14 +162,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 Content = new StringContent(JsonConvert.SerializeObject(new K8sEntityList<K8sPod>()))
             };
-            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
+            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetDeploymentsAsync(cancellationToken: default);
             }
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(
-                m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/apps/v1/namespaces/queryNamespace/deployments"))), Times.Once);
+                m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/apis/apps/v1/namespaces/queryNamespace/deployments")), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact(DisplayName = "GetDeploymentsAsync should deserialize multiple deployments")]
@@ -188,7 +189,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                 }))
             };
-            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
+            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
@@ -211,13 +212,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 Content = new StringContent(JsonConvert.SerializeObject(new K8sEntityList<K8sPod>()))
             };
-            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(response));
+            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
                 await target.GetNodesAsync(cancellationToken: default);
             }
 
-            httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/api/v1/nodes"))), Times.Once);
+            httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/api/v1/nodes")), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact(DisplayName = "GetNodesAsync should deserialize multiple nodes")]
@@ -239,7 +240,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }))
             };
 
-            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>())).Returns(Task.FromResult(
+            httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(
                 response));
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))

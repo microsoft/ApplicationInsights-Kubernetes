@@ -10,10 +10,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     {
         IKubeHttpClientSettingsProvider Settings { get; }
 
-        Task<string> GetStringAsync(Uri requestUri);
-
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
-
         Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken);
 
         HttpRequestHeaders DefaultRequestHeaders { get; }

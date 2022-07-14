@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using Microsoft.ApplicationInsights.Kubernetes.Entities;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    internal interface IK8sQueryClient
+    internal interface IK8sQueryClient : IDisposable
     {
         Task<IEnumerable<K8sDeployment>> GetDeploymentsAsync(CancellationToken cancellationToken);
         Task<IEnumerable<K8sNode>> GetNodesAsync(CancellationToken cancellationToken);

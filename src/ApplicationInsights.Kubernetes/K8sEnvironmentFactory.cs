@@ -19,13 +19,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
         private readonly IKubeHttpClientSettingsProvider _httpClientSettings;
         private readonly KubeHttpClientFactory _httpClientFactory;
-        private readonly K8sQueryClientFactory _k8sQueryClientFactory;
+        private readonly IK8sQueryClientFactory _k8sQueryClientFactory;
         private readonly IPodInfoManager _podInfoManager;
 
         public K8sEnvironmentFactory(
             IKubeHttpClientSettingsProvider httpClientSettingsProvider,
             KubeHttpClientFactory httpClientFactory,
-            K8sQueryClientFactory k8SQueryClientFactory,
+            IK8sQueryClientFactory k8SQueryClientFactory,
             IPodInfoManager podInfoManager)
         {
             _httpClientSettings = Arguments.IsNotNull(httpClientSettingsProvider, nameof(httpClientSettingsProvider));
@@ -44,8 +44,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             try
             {
-                using (IKubeHttpClient httpClient = _httpClientFactory.Create(_httpClientSettings))
-                using (K8sQueryClient queryClient = _k8sQueryClientFactory.Create(httpClient))
+                using (IK8sQueryClient queryClient = _k8sQueryClientFactory.Create())
                 {
                     // TODO: See if there's better way to fetch the container id
                     K8sPod? myPod = await SpinWaitUntilGetPodAsync(timeoutAt, queryClient, cancellationToken).ConfigureAwait(false);
@@ -131,7 +130,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 #pragma warning restore CA1031 // Do not catch general exception types
         }
 
-        private async Task<K8sPod?> SpinWaitUntilGetPodAsync(DateTime timeoutAt, K8sQueryClient client, CancellationToken cancellationToken)
+        private async Task<K8sPod?> SpinWaitUntilGetPodAsync(DateTime timeoutAt, IK8sQueryClient client, CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -186,7 +185,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// <param name="myContainerId">The container that we are interested in. When string.Empty is provided, the first container inside the pod will be used to determine the container status.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        private async Task<bool> SpinWaitContainerReadyAsync(DateTime timeoutAt, K8sQueryClient client, K8sPod myPod, string myContainerId, CancellationToken cancellationToken)
+        private async Task<bool> SpinWaitContainerReadyAsync(DateTime timeoutAt, IK8sQueryClient client, K8sPod myPod, string myContainerId, CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
