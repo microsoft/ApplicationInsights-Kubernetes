@@ -34,6 +34,7 @@ internal class PodInfoManager : IPodInfoManager
         string podName = string.Empty;
         foreach (IPodNameProvider podNameProvider in _podNameProviders)
         {
+            _logger.LogDebug($"Getting pod name by provider: {podNameProvider.GetType().Name}");
             if (podNameProvider.TryGetPodName(out podName))
             {
                 // Got pod name successfully.
