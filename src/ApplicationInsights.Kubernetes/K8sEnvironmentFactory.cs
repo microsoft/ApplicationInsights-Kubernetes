@@ -245,7 +245,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private bool IsContainerReady(ContainerStatus? containerStatus)
         {
-            _logger.LogDebug("Container status object: {0}, isReady:: {1}", containerStatus, containerStatus?.Ready);
+            _logger.LogTrace("Container status object: {0}, isReady: {1}", containerStatus, containerStatus?.Ready);
             return containerStatus is not null && containerStatus.Ready;
         }
     }
