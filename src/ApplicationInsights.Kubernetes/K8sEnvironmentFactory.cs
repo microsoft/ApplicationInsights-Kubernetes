@@ -159,7 +159,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 if (myPod is not null)
                 {
                     stopwatch.Stop();
-                    _logger.LogDebug(Invariant($"K8s info available in: {stopwatch.ElapsedMilliseconds} ms."));
+                    _logger.LogDebug(Invariant($"K8s pod info available in: {stopwatch.ElapsedMilliseconds} ms."));
                     return myPod;
                 }
 
@@ -194,9 +194,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 throw new InvalidOperationException("Valid pod name shall never be null or empty.");
             }
+
             do
             {
                 bool readyToGo = false;
+                // It is important to fetch the pod info every iteration to get the latest status.
                 K8sPod? podInfo = await _podInfoManager.GetPodByNameAsync(podName, cancellationToken).ConfigureAwait(false);
                 if (podInfo is null)
                 {
@@ -208,18 +210,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 if (!string.IsNullOrEmpty(myContainerId))
                 {
                     // Check targeted container status
-                    readyToGo = IsContainerReady(myPod.GetContainerStatus(myContainerId));
+                    readyToGo = IsContainerReady(podInfo.GetContainerStatus(myContainerId));
                 }
                 else
                 {
                     _logger.LogWarning("No container id available. Fallback to use the any container for status checking.");
-                    readyToGo = myPod.GetAllContainerStatus().Any(s => IsContainerReady(s));
+                    readyToGo = podInfo.GetAllContainerStatus().Any(s => IsContainerReady(s));
                 }
 
                 if (readyToGo)
                 {
                     stopwatch.Stop();
-                    _logger.LogDebug(Invariant($"K8s info available in: {stopwatch.ElapsedMilliseconds} ms."));
+                    _logger.LogDebug(Invariant($"K8s container info available in: {stopwatch.ElapsedMilliseconds} ms."));
                     return true;
                 }
 
@@ -242,6 +244,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 
         private bool IsContainerReady(ContainerStatus? containerStatus)
-            => containerStatus is not null && containerStatus.Ready;
+        {
+            _logger.LogDebug("Container status object: {0}, isReady:: {1}", containerStatus, containerStatus?.Ready);
+            return containerStatus is not null && containerStatus.Ready;
+        }
     }
 }
