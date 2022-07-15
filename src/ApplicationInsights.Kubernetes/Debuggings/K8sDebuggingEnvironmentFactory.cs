@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Kubernetes.Entities;
 
@@ -7,7 +8,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
 {
     internal class K8sDebuggingEnvironmentFactory : IK8sEnvironmentFactory
     {
-        public Task<IK8sEnvironment> CreateAsync(DateTime timeoutAt)
+        public Task<IK8sEnvironment> CreateAsync(DateTime timeoutAt, CancellationToken cancellationToken)
         {
             return Task.FromResult((IK8sEnvironment)new K8sEnvironment()
             {

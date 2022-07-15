@@ -16,7 +16,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: default
-  namespace: YOUR-NAMESPACE
+  namespace: ai-k8s-demo
 roleRef:
   kind: ClusterRole
   name: appinsights-k8s-property-reader
