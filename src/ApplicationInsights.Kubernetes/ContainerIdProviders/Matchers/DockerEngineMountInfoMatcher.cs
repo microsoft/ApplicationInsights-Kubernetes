@@ -25,7 +25,7 @@ internal class DockerEngineMountInfoMatcher : IContainerIdMatcher
         Match match = MatchRegex.Match(line);
         if (!match.Success)
         {
-            _logger.LogDebug($"[{LogCategory}] No match for containerId. Input: {line}, pattern: {MatchPattern}");
+            _logger.LogTrace($"[{LogCategory}] No match for containerId. Input: {line}, pattern: {MatchPattern}");
             return false;
         }
         _logger.LogTrace($"[{LogCategory}] Matched container id.");

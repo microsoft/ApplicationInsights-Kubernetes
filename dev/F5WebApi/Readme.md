@@ -37,6 +37,12 @@
     docker push $docker_account/f5webapi
     ```
 
+1. Deploy a namespace if it isn't there already:
+
+    ```shell
+    kubectl create -f ./k8s-namespace.yml
+    ```
+
 1. Update [K8s.yml](./k8s.yml) with the proper image name, then deploy
 
     ```shell

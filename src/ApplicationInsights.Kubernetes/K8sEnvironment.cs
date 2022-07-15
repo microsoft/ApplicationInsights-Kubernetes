@@ -23,7 +23,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         public string ContainerID { get; internal set; }
 
         /// <summary>
-        /// Name of the container specificed in deployment spec.
+        /// Name of the container specified in deployment spec.
         /// </summary>
         public string ContainerName => this.myContainerStatus?.Name;
 
