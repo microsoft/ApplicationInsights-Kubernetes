@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+WORKDIR /app
+
+# Copy everything else and build
+COPY . ./
+# Adding a reference to hosting startup package
+# Remove '--prerelease' if you want to stay only on stable version.
+RUN dotnet add package Microsoft.ApplicationInsights.Kubernetes.HostingStartup --prerelease
+RUN dotnet publish -c Release -o out
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+
+# Light up Application Insights for Kubernetes
+ENV ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=Microsoft.ApplicationInsights.Kubernetes.HostingStartup
+
+WORKDIR /app
+COPY --from=build-env /app/out .
+ENTRYPOINT ["dotnet", "ZeroUserCodeLightup.Net6.dll"]

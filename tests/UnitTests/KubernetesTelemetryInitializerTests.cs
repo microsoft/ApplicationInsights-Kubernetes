@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
@@ -36,7 +37,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             var envMock = new Mock<IK8sEnvironment>();
             var factoryMock = new Mock<IK8sEnvironmentFactory>();
-            factoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            factoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
@@ -57,7 +58,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
@@ -77,7 +78,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("New RoleName");
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
@@ -118,7 +119,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.NodeName).Returns("NName");
 
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
@@ -158,7 +159,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.NodeName).Returns<string>(null);
 
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
@@ -195,7 +196,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
 
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
@@ -234,7 +235,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.ContainerID).Returns("Cid");
 
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
@@ -258,7 +259,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerID).Returns("Cid");
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
@@ -283,7 +284,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerID).Returns("Cid");
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
@@ -303,7 +304,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerID).Returns("Cid");
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
@@ -327,7 +328,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             envMock.Setup(env => env.ContainerID).Returns("Hello.Cid");
 
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>())).ReturnsAsync(() => envMock.Object);
+            envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
 
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input.Replace('.', '_'));

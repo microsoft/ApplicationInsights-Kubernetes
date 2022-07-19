@@ -27,7 +27,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             // K8s services	
             serviceProvider.GetRequiredService<IKubeHttpClientSettingsProvider>();
             serviceProvider.GetRequiredService<KubeHttpClientFactory>();
-            serviceProvider.GetRequiredService<K8sQueryClientFactory>();
+            serviceProvider.GetRequiredService<IK8sQueryClientFactory>();
             serviceProvider.GetRequiredService<IK8sEnvironmentFactory>();
         }
 

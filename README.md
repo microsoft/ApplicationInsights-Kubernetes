@@ -25,6 +25,8 @@ This is a quick guide for ASP.NET Core project. For [Worker Services in .NET](ht
 * [Docker Containers](https://www.docker.com/)
 * [Kubernetes](https://kubernetes.io/)
 
+* For RBAC enabled Kubernetes, making sure [permissions are configured](./docs/configure-rbac-permissions.md).
+
 ### Instrument an ASP.NET Core application
 
 These are the basic steps to instrument an ASP.NET Core application to enable Application Insights for Kubernetes. You will need to run the application in containers managed by Kubernetes to see the change.

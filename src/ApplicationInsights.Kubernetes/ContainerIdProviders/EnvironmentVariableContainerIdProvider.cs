@@ -17,8 +17,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
         public bool TryGetMyContainerId(out string? containerId)
         {
             containerId = Environment.GetEnvironmentVariable(EnvironmentVariableName);
-            _logger.LogWarning($"Getting container id by environment variable {EnvironmentVariableName}. Result: {containerId}.");
-            return !string.IsNullOrEmpty(containerId);
+            _logger.LogDebug($"Getting container id by environment variable {EnvironmentVariableName}. Result: {containerId}.");
+
+            bool result = !string.IsNullOrEmpty(containerId);
+            if (result)
+            {
+                _logger.LogInformation($"[{nameof(EnvironmentVariableContainerIdProvider)}] Found container id: {containerId}");
+            }
+            return result;
         }
     }
 }
