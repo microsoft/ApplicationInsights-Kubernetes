@@ -45,7 +45,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 RegisterSettingsProvider(serviceCollection);
                 RegisterK8sEnvironmentFactory(serviceCollection);
                 serviceCollection.AddSingleton<ITelemetryInitializer, KubernetesTelemetryInitializer>();
-                RegisterPerformanceCounterTelemetryInitializer(serviceCollection);
 
                 _logger.LogDebug("Application Insights Kubernetes injected the service successfully.");
                 return serviceCollection;
@@ -55,11 +54,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 _logger.LogError("Application is not running inside a Kubernetes cluster.");
                 return serviceCollection;
             }
-        }
-
-        private void RegisterPerformanceCounterTelemetryInitializer(IServiceCollection serviceCollection)
-        {
-            serviceCollection.AddSingleton<ITelemetryInitializer, SimplePerformanceCounterTelemetryInitializer>();
         }
 
         private static void RegisterCommonServices(IServiceCollection serviceCollection)

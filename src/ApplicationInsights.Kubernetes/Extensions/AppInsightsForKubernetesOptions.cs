@@ -21,13 +21,6 @@ namespace Microsoft.Extensions.DependencyInjection
         public TimeSpan InitializationTimeout { get; set; } = TimeSpan.FromMinutes(2);
 
         /// <summary>
-        /// Gets or sets to disable CPU and memory counters on telemetry.
-        /// Optional. Default to false.
-        /// </summary>
-        [JsonProperty("DisablePerformanceCounters")]
-        public bool DisablePerformanceCounters { get; set; }
-
-        /// <summary>
         /// Gets or sets the processor for telemetry key. This is introduced to allow customization of
         /// telemetry keys.
         /// </summary>
