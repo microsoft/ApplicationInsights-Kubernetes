@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 
 /// <summary>

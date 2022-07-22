@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders

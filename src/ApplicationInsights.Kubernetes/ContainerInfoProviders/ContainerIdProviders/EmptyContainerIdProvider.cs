@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
+﻿namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
 {
     internal class EmptyContainerIdProvider : IContainerIdProvider
     {

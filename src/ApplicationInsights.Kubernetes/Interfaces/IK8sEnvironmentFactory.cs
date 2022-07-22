@@ -6,6 +6,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     internal interface IK8sEnvironmentFactory
     {
-        Task<IK8sEnvironment> CreateAsync(DateTime timeoutAt, CancellationToken cancellationToken);
+        Task<IK8sEnvironment?> CreateAsync(DateTime timeoutAt, CancellationToken cancellationToken);
     }
 }

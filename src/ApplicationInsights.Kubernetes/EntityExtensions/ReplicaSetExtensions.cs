@@ -1,25 +1,25 @@
-﻿namespace Microsoft.ApplicationInsights.Kubernetes
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using k8s.Models;
+
+namespace Microsoft.ApplicationInsights.Kubernetes;
+
+internal static class ReplicaSetExtensions
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using Microsoft.ApplicationInsights.Kubernetes.Entities;
-
-    internal static class ReplicaSetExtensions
+    public static V1Deployment? GetMyDeployment(this V1ReplicaSet self, IEnumerable<V1Deployment> scope)
     {
-        public static K8sDeployment GetMyDeployment(this K8sReplicaSet self, IEnumerable<K8sDeployment> scope)
+        if (self is null)
         {
-            IDictionary<string, string> replicaLabels = self.Metadata.Labels;
-
-            foreach (K8sDeployment deployment in scope)
-            {
-                IDictionary<string, string> matchRule = deployment.Spec.Selector.MatchLabels;
-                if (matchRule.Intersect(replicaLabels).Count() == matchRule.Count)
-                {
-                    // All labels are matched
-                    return deployment;
-                }
-            }
             return null;
         }
+
+        V1OwnerReference? ownerReference = self.Metadata.OwnerReferences.FirstOrDefault(o => string.Equals(o.Kind, V1Deployment.KubeKind, StringComparison.Ordinal));
+        if (ownerReference is not null)
+        {
+            V1Deployment? deployment = scope.FirstOrDefault(d => string.Equals(d.Metadata.Uid, ownerReference.Uid, StringComparison.Ordinal));
+            return deployment;
+        }
+        return null;
     }
 }

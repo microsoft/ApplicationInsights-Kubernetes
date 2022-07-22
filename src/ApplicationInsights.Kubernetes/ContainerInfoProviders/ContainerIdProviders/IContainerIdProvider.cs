@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
+﻿namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
 {
     /// <summary>
     /// A service that tries to get container id.

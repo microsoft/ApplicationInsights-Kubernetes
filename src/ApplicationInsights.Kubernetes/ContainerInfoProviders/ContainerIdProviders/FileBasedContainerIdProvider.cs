@@ -1,5 +1,3 @@
-#nullable enable
-
 using System;
 using System.IO;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;

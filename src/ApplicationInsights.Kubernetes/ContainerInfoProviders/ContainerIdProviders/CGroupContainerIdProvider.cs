@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using Microsoft.ApplicationInsights.Kubernetes.Debugging;
+﻿using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
 {

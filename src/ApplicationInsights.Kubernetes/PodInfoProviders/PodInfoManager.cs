@@ -1,35 +1,32 @@
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.ApplicationInsights.Kubernetes.Entities;
-using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 
 internal class PodInfoManager : IPodInfoManager
 {
-    private readonly IK8sQueryClientFactory _k8SQueryClientFactory;
-    private readonly IKubeHttpClientSettingsProvider _settingsProvider;
+    private readonly IK8sQueryClient _k8SQueryClient;
+    private readonly IContainerIdHolder _containerIdHolder;
     private readonly IEnumerable<IPodNameProvider> _podNameProviders;
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
     public PodInfoManager(
-        IK8sQueryClientFactory k8SQueryClientFactory,
-        IKubeHttpClientSettingsProvider settingsProvider,
+        IK8sQueryClient k8sQueryClient,
+        IContainerIdHolder containerIdHolder,
         IEnumerable<IPodNameProvider> podNameProviders)
     {
-        _k8SQueryClientFactory = k8SQueryClientFactory ?? throw new ArgumentNullException(nameof(k8SQueryClientFactory));
-        _settingsProvider = settingsProvider ?? throw new System.ArgumentNullException(nameof(settingsProvider));
+        _k8SQueryClient = k8sQueryClient ?? throw new ArgumentNullException(nameof(k8sQueryClient));
+        _containerIdHolder = containerIdHolder ?? throw new ArgumentNullException(nameof(containerIdHolder));
         _podNameProviders = podNameProviders ?? throw new System.ArgumentNullException(nameof(podNameProviders));
     }
 
     /// <inheritdoc />
-    public async Task<K8sPod?> GetMyPodAsync(CancellationToken cancellationToken)
+    public async Task<V1Pod?> GetMyPodAsync(CancellationToken cancellationToken)
     {
         string podName = string.Empty;
         foreach (IPodNameProvider podNameProvider in _podNameProviders)
@@ -46,7 +43,7 @@ internal class PodInfoManager : IPodInfoManager
         // Find pod by name
         if (!string.IsNullOrEmpty(podName))
         {
-            K8sPod? targetPod = await GetPodByNameAsync(podName, cancellationToken).ConfigureAwait(false);
+            V1Pod? targetPod = await GetPodByNameAsync(podName, cancellationToken).ConfigureAwait(false);
             if (targetPod is not null)
             {
                 _logger.LogInformation($"Found pod by name providers: {targetPod.Metadata?.Name}");
@@ -59,17 +56,14 @@ internal class PodInfoManager : IPodInfoManager
         }
 
         // Find pod by container id:
-        string myContainerId = _settingsProvider.ContainerId;
+        string? myContainerId = _containerIdHolder.ContainerId;
         _logger.LogDebug($"Looking for pod name by container id: {myContainerId}");
 
         if (!string.IsNullOrEmpty(myContainerId))
         {
-            K8sPod? targetPod = null;
-            using (IK8sQueryClient k8sQueryClient = _k8SQueryClientFactory.Create())
-            {
-                IEnumerable<K8sPod> allPods = (await k8sQueryClient.GetPodsAsync(cancellationToken).ConfigureAwait(false)).NullAsEmpty();
-                targetPod = allPods.FirstOrDefault(pod => pod.GetContainerStatus(myContainerId) != null);
-            }
+            V1Pod? targetPod = null;
+            IEnumerable<V1Pod> allPods = await _k8SQueryClient.GetPodsAsync(cancellationToken: cancellationToken);
+            targetPod = allPods.FirstOrDefault(pod => pod.GetContainerStatus(myContainerId) != null);
 
             if (targetPod is not null)
             {
@@ -86,15 +80,7 @@ internal class PodInfoManager : IPodInfoManager
         return null;
     }
 
-    public async Task<K8sPod?> GetPodByNameAsync(string podName, CancellationToken cancellationToken)
-    {
-        K8sPod? targetPod = null;
-
-        using (IK8sQueryClient k8sQueryClient = _k8SQueryClientFactory.Create())
-        {
-            targetPod = await k8sQueryClient.GetPodAsync(podName, cancellationToken).ConfigureAwait(false);
-        }
-
-        return targetPod;
-    }
+    /// <inheritdoc />
+    public Task<V1Pod?> GetPodByNameAsync(string podName, CancellationToken cancellationToken)
+        => _k8SQueryClient.GetPodAsync(podName, cancellationToken);
 }

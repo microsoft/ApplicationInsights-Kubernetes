@@ -1,13 +1,11 @@
-#nullable enable
-
 namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 
-internal class ContainerDMountInfoContainerIdProvider : FileBasedContainerIdProvider
+internal class DockerEngineMountInfoContainerIdProvider : FileBasedContainerIdProvider
 {
     private const string InfoFilePath = "/proc/self/mountinfo";
 
-    public ContainerDMountInfoContainerIdProvider(
-        ContainerDMountInfoMatcher matcher)
+    public DockerEngineMountInfoContainerIdProvider(
+        DockerEngineMountInfoMatcher matcher)
             : base(matcher, InfoFilePath, providerName: default)
     {
     }

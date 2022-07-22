@@ -1,19 +1,16 @@
-﻿#nullable enable
-
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.ApplicationInsights.Kubernetes.Entities;
+using k8s.Models;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
-    internal interface IK8sQueryClient : IDisposable
+    internal interface IK8sQueryClient
     {
-        Task<IEnumerable<K8sDeployment>> GetDeploymentsAsync(CancellationToken cancellationToken);
-        Task<IEnumerable<K8sNode>> GetNodesAsync(CancellationToken cancellationToken);
-        Task<IEnumerable<K8sPod>> GetPodsAsync(CancellationToken cancellationToken);
-        Task<K8sPod?> GetPodAsync(string podName, CancellationToken cancellationToken);
-        Task<IEnumerable<K8sReplicaSet>> GetReplicasAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<V1Deployment>> GetDeploymentsAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<V1Node>> GetNodesAsync(CancellationToken cancellationToken);
+        Task<IEnumerable<V1Pod>> GetPodsAsync(CancellationToken cancellationToken);
+        Task<V1Pod?> GetPodAsync(string podName, CancellationToken cancellationToken);
+        Task<IEnumerable<V1ReplicaSet>> GetReplicasAsync(CancellationToken cancellationToken);
     }
 }

@@ -59,9 +59,11 @@ namespace Microsoft.Extensions.DependencyInjection
         private static void RegisterCommonServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<ITelemetryKeyCache, TelemetryKeyCache>();
-            serviceCollection.AddSingleton<KubeHttpClientFactory>();
-            serviceCollection.AddSingleton<IK8sQueryClientFactory, K8sQueryClientFactory>();
             serviceCollection.AddSingleton<SDKVersionUtils>(p => SDKVersionUtils.Instance);
+            serviceCollection.AddSingleton<IK8sClientService>(p => K8sClientService.Instance);
+            serviceCollection.AddSingleton<IK8sQueryClient, K8sQueryClient>();
+            serviceCollection.AddSingleton<IContainerIdHolder, ContainerIdHolder>();
+            serviceCollection.AddSingleton<IPodInfoManager, PodInfoManager>();
         }
 
         /// <summary>
@@ -85,15 +87,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, CGroupContainerIdProvider>());                 // Then CGroupV1
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, ContainerDMountInfoContainerIdProvider>());    // Then ContainerD
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, DockerEngineMountInfoContainerIdProvider>());  // Then DockerEngine
-
-                serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpClientSettingsProvider>();
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Notes: pay attention to the order. Injecting uses the order of registering in this case.
                 // For example, EnvironmentVariableContainerIdProvider will take precedence, then EmptyContainerIdProvider on Windows.
                 serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IContainerIdProvider, EmptyContainerIdProvider>());
-                serviceCollection.AddSingleton<IKubeHttpClientSettingsProvider, KubeHttpSettingsWinContainerProvider>();
             }
             else
             {
@@ -105,8 +104,6 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, UserSetPodNameProvider>());
             // $Hostname will be overwritten by Kubernetes to reveal pod name: https://kubernetes.io/docs/concepts/containers/container-environment/#container-information.
             serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, HostNamePodNameProvider>());
-
-            serviceCollection.AddSingleton<IPodInfoManager, PodInfoManager>();
         }
 
         /// <summary>

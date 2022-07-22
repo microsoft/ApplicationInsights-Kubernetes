@@ -1,15 +1,10 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using k8s;
+using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.ApplicationInsights.Kubernetes.Entities;
-using Newtonsoft.Json;
-using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
@@ -17,174 +12,52 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     /// <summary>
     /// High level query client for K8s concepts.
     /// </summary>
-    internal class K8sQueryClient : IDisposable, IK8sQueryClient
+    internal class K8sQueryClient : IK8sQueryClient
     {
-        internal bool _disposed = false;
-        private readonly IKubeHttpClient _kubeHttpClient;
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+        private readonly IK8sClientService _k8sClientService;
 
-        internal IKubeHttpClient KubeHttpClient
+        public K8sQueryClient(IK8sClientService k8sClientService)
         {
-            get
-            {
-                EnsureNotDisposed();
-                return _kubeHttpClient;
-            }
+            _k8sClientService = k8sClientService ?? throw new ArgumentNullException(nameof(_k8sClientService));
         }
-
-        public K8sQueryClient(IKubeHttpClient kubeHttpClient)
-        {
-            _kubeHttpClient = Arguments.IsNotNull(kubeHttpClient, nameof(kubeHttpClient));
-        }
-
 
         #region Pods
         /// <summary>
         /// Gets all pods in this cluster
         /// </summary>
         /// <returns></returns>
-        public Task<IEnumerable<K8sPod>> GetPodsAsync(CancellationToken cancellationToken)
-        {
-            EnsureNotDisposed();
-            string url = Invariant($"api/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/pods");
-            return GetAllItemsAsync<K8sPod>(url, cancellationToken);
-        }
+        public async Task<IEnumerable<V1Pod>> GetPodsAsync(CancellationToken cancellationToken)
+            => (await _k8sClientService.Client.CoreV1.ListNamespacedPodAsync(_k8sClientService.Namespace, cancellationToken: cancellationToken).ConfigureAwait(false)).Items;
 
         /// <summary>
-        /// Gets a pod by name
+        /// Gets a pod by name or null in case of no match.
         /// </summary>
-        /// <param name="podName"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task<K8sPod?> GetPodAsync(string podName, CancellationToken cancellationToken)
+        public async Task<V1Pod?> GetPodAsync(string podName, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(podName))
             {
                 throw new ArgumentException($"'{nameof(podName)}' cannot be null or whitespace.", nameof(podName));
             }
 
-            EnsureNotDisposed();
-            string url = Invariant($"api/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/pods/{podName}");
-
-            return GetItemAsync<K8sPod>(url, cancellationToken);
+            V1Pod? pod = await _k8sClientService.Client.CoreV1.ReadNamespacedPodAsync(podName, _k8sClientService.Namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
+            return pod;
         }
         #endregion
 
         #region Replica Sets
-        public Task<IEnumerable<K8sReplicaSet>> GetReplicasAsync(CancellationToken cancellationToken)
-        {
-            EnsureNotDisposed();
-
-            string url = Invariant($"apis/apps/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/replicasets");
-            return GetAllItemsAsync<K8sReplicaSet>(url, cancellationToken);
-        }
+        public async Task<IEnumerable<V1ReplicaSet>> GetReplicasAsync(CancellationToken cancellationToken)
+            => (await _k8sClientService.Client.AppsV1.ListNamespacedReplicaSetAsync(_k8sClientService.Namespace, cancellationToken: cancellationToken).ConfigureAwait(false)).Items;
         #endregion
 
         #region Deployment
-        public Task<IEnumerable<K8sDeployment>> GetDeploymentsAsync(CancellationToken cancellationToken)
-        {
-            EnsureNotDisposed();
-
-            string url = Invariant($"apis/apps/v1/namespaces/{KubeHttpClient.Settings.QueryNamespace}/deployments");
-            return GetAllItemsAsync<K8sDeployment>(url, cancellationToken);
-        }
+        public async Task<IEnumerable<V1Deployment>> GetDeploymentsAsync(CancellationToken cancellationToken)
+            => (await _k8sClientService.Client.AppsV1.ListNamespacedDeploymentAsync(_k8sClientService.Namespace, cancellationToken: cancellationToken).ConfigureAwait(false)).Items;
         #endregion
 
         #region Node
-        public Task<IEnumerable<K8sNode>> GetNodesAsync(CancellationToken cancellationToken)
-        {
-            EnsureNotDisposed();
-
-            string url = Invariant($"api/v1/nodes");
-            return GetAllItemsAsync<K8sNode>(url, cancellationToken);
-        }
+        public async Task<IEnumerable<V1Node>> GetNodesAsync(CancellationToken cancellationToken)
+            => (await _k8sClientService.Client.CoreV1.ListNodeAsync(cancellationToken: cancellationToken)).Items;
         #endregion
-
-        private async Task<IEnumerable<TEntity>> GetAllItemsAsync<TEntity>(string relativeUrl, CancellationToken cancellationToken)
-        {
-            Uri requestUri = GetQueryUri(relativeUrl);
-            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            _logger.LogTrace("Default Header: {0}", KubeHttpClient.DefaultRequestHeaders);
-
-            using HttpResponseMessage response = await KubeHttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            if (response.IsSuccessStatusCode)
-            {
-                _logger.LogTrace("Query succeeded.");
-                string resultString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                K8sEntityList<TEntity>? resultList = JsonConvert.DeserializeObject<K8sEntityList<TEntity>>(resultString);
-                return resultList?.Items ?? Enumerable.Empty<TEntity>();
-            }
-            else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
-            {
-                throw new UnauthorizedAccessException(response.ReasonPhrase);
-            }
-            else
-            {
-                _logger.LogDebug("Query Failed. Request Message: {0}. Status Code: {1}. Phase: {2}", response.RequestMessage, response.StatusCode, response.ReasonPhrase);
-                return Enumerable.Empty<TEntity>();
-            }
-        }
-
-        private async Task<TEntity?> GetItemAsync<TEntity>(string relativeUrl, CancellationToken cancellationToken)
-        {
-            Uri requestUri = GetQueryUri(relativeUrl);
-            using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            _logger.LogTrace("Default Header: {0}", KubeHttpClient.DefaultRequestHeaders);
-
-            using HttpResponseMessage response = await KubeHttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-
-            if (response.IsSuccessStatusCode)
-            {
-                _logger.LogTrace("Query succeeded.");
-                string resultString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                TEntity? result = JsonConvert.DeserializeObject<TEntity>(resultString);
-                return result;
-            }
-            else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
-            {
-                throw new UnauthorizedAccessException(response.ReasonPhrase);
-            }
-            else
-            {
-                _logger.LogDebug("Query Failed. Request Message: {0}. Status Code: {1}. Phase: {2}", response.RequestMessage, response.StatusCode, response.ReasonPhrase);
-                return default;
-            }
-        }
-
-        private Uri GetQueryUri(string relativeUrl)
-        {
-            return new Uri(this.KubeHttpClient.Settings.ServiceBaseAddress, relativeUrl);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (_disposed)
-            {
-                return;
-            }
-            _disposed = true;
-
-            if (disposing)
-            {
-                if (_kubeHttpClient != null)
-                {
-                    _kubeHttpClient.Dispose();
-                }
-            }
-        }
-
-        private void EnsureNotDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(_kubeHttpClient));
-            }
-        }
     }
 }

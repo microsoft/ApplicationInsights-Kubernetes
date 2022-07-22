@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
@@ -52,8 +51,8 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The service collection for chaining the next operation.</returns>
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services,
-            Action<AppInsightsForKubernetesOptions> applyOptions,
-            LogLevel diagnosticLogLevel = LogLevel.None)
+            Action<AppInsightsForKubernetesOptions>? applyOptions,
+            LogLevel? diagnosticLogLevel = LogLevel.None)
         {
             return services.AddApplicationInsightsKubernetesEnricher(
                 applyOptions,
@@ -74,11 +73,12 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The service collection for chaining the next operation.</returns>
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services,
-            Action<AppInsightsForKubernetesOptions> applyOptions,
-            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
-            Func<bool> detectKubernetes,
-            LogLevel diagnosticLogLevel)
+            Action<AppInsightsForKubernetesOptions>? applyOptions,
+            IKubernetesServiceCollectionBuilder? kubernetesServiceCollectionBuilder,
+            Func<bool>? detectKubernetes,
+            LogLevel? diagnosticLogLevel)
         {
+            diagnosticLogLevel ??= LogLevel.None;   // Default to None.
             if (diagnosticLogLevel != LogLevel.None)
             {
                 ApplicationInsightsKubernetesDiagnosticObserver observer = new ApplicationInsightsKubernetesDiagnosticObserver((DiagnosticLogLevel)diagnosticLogLevel);
@@ -102,10 +102,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Configure the KubernetesTelemetryInitializer and its dependencies.
         /// </summary>
-        internal static void ConfigureKubernetesTelemetryInitializer(IServiceCollection serviceCollection,
-            Func<bool> detectKubernetes,
-            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder,
-            Action<AppInsightsForKubernetesOptions> applyOptions)
+        internal static void ConfigureKubernetesTelemetryInitializer(
+            IServiceCollection serviceCollection,
+            Func<bool>? detectKubernetes,
+            IKubernetesServiceCollectionBuilder? kubernetesServiceCollectionBuilder,
+            Action<AppInsightsForKubernetesOptions>? applyOptions)
         {
             InitializeServiceCollection(serviceCollection, applyOptions);
             BuildK8sServiceCollection(
@@ -116,7 +117,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void InitializeServiceCollection(
             IServiceCollection serviceCollection,
-            Action<AppInsightsForKubernetesOptions> applyOptions)
+            Action<AppInsightsForKubernetesOptions>? applyOptions)
         {
             serviceCollection.AddOptions();
             serviceCollection.AddOptions<AppInsightsForKubernetesOptions>().Configure<IConfiguration>((opt, configuration) =>
@@ -128,14 +129,14 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void BuildK8sServiceCollection(
             IServiceCollection services,
-            Func<bool> detectKubernetes,
-            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = null)
+            Func<bool>? detectKubernetes,
+            IKubernetesServiceCollectionBuilder? kubernetesServiceCollectionBuilder = null)
         {
-            detectKubernetes ??= IsRunningInKubernetes;
-            kubernetesServiceCollectionBuilder ??= new KubernetesServiceCollectionBuilder(detectKubernetes);
+            detectKubernetes ??= IsRunningInKubernetes; // Default method
+            kubernetesServiceCollectionBuilder ??= new KubernetesServiceCollectionBuilder(detectKubernetes);    // Default builder
             kubernetesServiceCollectionBuilder.RegisterServices(services);
         }
 
-        private static bool IsRunningInKubernetes() => Directory.Exists(@"/var/run/secrets/kubernetes.io") || Directory.Exists(@"C:\var\run\secrets\kubernetes.io");
+        private static bool IsRunningInKubernetes() => k8s.KubernetesClientConfiguration.IsInCluster();
     }
 }
