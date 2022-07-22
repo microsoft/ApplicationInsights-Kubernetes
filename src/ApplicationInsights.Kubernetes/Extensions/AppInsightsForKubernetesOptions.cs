@@ -24,6 +24,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Gets or sets the processor for telemetry key. This is introduced to allow customization of
         /// telemetry keys.
         /// </summary>
-        public Func<string, string> TelemetryKeyProcessor { get; set; }
+        public Func<string, string>? TelemetryKeyProcessor { get; set; }
     }
 }

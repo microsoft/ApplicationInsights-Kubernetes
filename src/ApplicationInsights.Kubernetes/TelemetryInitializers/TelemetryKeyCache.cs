@@ -8,14 +8,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     internal class TelemetryKeyCache : ITelemetryKeyCache
     {
         private readonly AppInsightsForKubernetesOptions _options;
-
-        private ConcurrentDictionary<string, string> _telemetryKeyCache;
+        private readonly ConcurrentDictionary<string, string> _telemetryKeyCache = new ConcurrentDictionary<string, string>();
 
         public TelemetryKeyCache(IOptions<AppInsightsForKubernetesOptions> options)
         {
             _options = options?.Value ?? throw new System.ArgumentNullException(nameof(options));
 
-            if (_options.TelemetryKeyProcessor != null)
+            if (_options.TelemetryKeyProcessor is not null)
             {
                 _telemetryKeyCache = new ConcurrentDictionary<string, string>();
             }
@@ -23,10 +22,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         public string GetProcessedKey(string originalKey)
         {
-            if (_options.TelemetryKeyProcessor == null)
+            Func<string, string>? telemetryKeyProcessor = _options.TelemetryKeyProcessor;
+            if (telemetryKeyProcessor is null)
             {
                 return originalKey;
             }
+
             return _telemetryKeyCache.GetOrAdd(originalKey, valueFactory: _options.TelemetryKeyProcessor);
         }
     }

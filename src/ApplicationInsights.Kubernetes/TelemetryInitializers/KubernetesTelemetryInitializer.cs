@@ -24,40 +24,40 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private readonly SDKVersionUtils _sdkVersionUtils;
         private readonly DateTime _timeoutAt;
-        internal readonly IK8sEnvironmentFactory _k8sEnvFactory;
-        internal readonly AppInsightsForKubernetesOptions _options;
-        internal readonly ITelemetryKeyCache _telemetryKeyCache;
-        internal IK8sEnvironment _k8sEnvironment { get; private set; }
+        private readonly IK8sEnvironmentFactory _k8sEnvFactory;
+        private readonly AppInsightsForKubernetesOptions _options;
+        private readonly ITelemetryKeyCache _telemetryKeyCache;
 
-        internal bool _isK8sQueryTimeout = false;
+        private bool _isK8sQueryTimeout = false;
         private bool _isK8sQueryTimeoutReported = false;
 
+        internal IK8sEnvironment? K8sEnvironment { get; private set; }
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
             IOptions<AppInsightsForKubernetesOptions> options,
             SDKVersionUtils sdkVersionUtils,
             ITelemetryKeyCache telemetryKeyCache)
         {
-            _k8sEnvironment = null;
+            K8sEnvironment = null;
 
             // Options can't be null.
             Debug.Assert(options != null, "Options can't be null.");
-            _options = Arguments.IsNotNull(options?.Value, nameof(options));
+            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
             _logger.LogDebug(@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
 {0}", JsonConvert.SerializeObject(_options));
 
             _telemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
-            _sdkVersionUtils = Arguments.IsNotNull(sdkVersionUtils, nameof(sdkVersionUtils));
+            _sdkVersionUtils = sdkVersionUtils ?? throw new ArgumentNullException(nameof(sdkVersionUtils));
             _timeoutAt = DateTime.Now.Add(_options.InitializationTimeout);
-            _k8sEnvFactory = Arguments.IsNotNull(k8sEnvFactory, nameof(k8sEnvFactory));
+            _k8sEnvFactory = k8sEnvFactory ?? throw new ArgumentNullException(nameof(k8sEnvFactory));
 
             _ = SetK8sEnvironment(default);
         }
 
         public void Initialize(ITelemetry telemetry)
         {
-            IK8sEnvironment k8sEnv = _k8sEnvironment;
+            IK8sEnvironment? k8sEnv = K8sEnvironment;
             if (k8sEnv != null)
             {
                 _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is invoked.", k8sEnv.PodName);
@@ -99,7 +99,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             if (telemetry is ISupportProperties propertySetter)
             {
-                SetCustomDimensions(propertySetter);
+                SetCustomDimensions(propertySetter, k8sEnv);
             }
             else
             {
@@ -112,7 +112,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             try
             {
-                Task<IK8sEnvironment> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt, cancellationToken);
+                Task<IK8sEnvironment?> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt, cancellationToken);
                 await Task.WhenAny(
                     createK8sEnvTask,
                     Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
@@ -120,12 +120,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 if (createK8sEnvTask.IsCompleted)
                 {
                     _logger.LogDebug("Application Insights for Kubernetes environment initialized.");
-                    _k8sEnvironment = createK8sEnvTask.Result;
+                    K8sEnvironment = createK8sEnvTask.Result;
                 }
                 else
                 {
                     _isK8sQueryTimeout = true;
-                    _k8sEnvironment = null;
+                    K8sEnvironment = null;
                     _logger.LogError("Application Insights for Kubernetes environment initialization timed out.");
                 }
             }
@@ -139,31 +139,31 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 #pragma warning restore CA1031 // Do not catch general exception types
         }
 
-        private void SetCustomDimensions(ISupportProperties telemetry)
+        private void SetCustomDimensions(ISupportProperties telemetry, IK8sEnvironment k8sEnvironment)
         {
             // Container 
-            SetCustomDimension(telemetry, Container.ID, this._k8sEnvironment.ContainerID, isValueOptional: true);
-            SetCustomDimension(telemetry, Container.Name, this._k8sEnvironment.ContainerName, isValueOptional: true);
+            SetCustomDimension(telemetry, Container.ID, k8sEnvironment.ContainerID, isValueOptional: true);
+            SetCustomDimension(telemetry, Container.Name, k8sEnvironment.ContainerName, isValueOptional: true);
 
             // Pod
-            SetCustomDimension(telemetry, Pod.ID, this._k8sEnvironment.PodID);
-            SetCustomDimension(telemetry, Pod.Name, this._k8sEnvironment.PodName);
-            SetCustomDimension(telemetry, Pod.Labels, this._k8sEnvironment.PodLabels);
-            SetCustomDimension(telemetry, Pod.Namespace, this._k8sEnvironment.PodNamespace, isValueOptional: true);
+            SetCustomDimension(telemetry, Pod.ID, k8sEnvironment.PodID);
+            SetCustomDimension(telemetry, Pod.Name, k8sEnvironment.PodName);
+            SetCustomDimension(telemetry, Pod.Labels, k8sEnvironment.PodLabels, isValueOptional: true);
+            SetCustomDimension(telemetry, Pod.Namespace, k8sEnvironment.PodNamespace, isValueOptional: true);
 
             // Pod will have no replica name or deployment when deployed through other means. For example, as a daemonset.
             // Replica Set
-            SetCustomDimension(telemetry, ReplicaSet.Name, this._k8sEnvironment.ReplicaSetName, isValueOptional: true);
+            SetCustomDimension(telemetry, ReplicaSet.Name, k8sEnvironment.ReplicaSetName, isValueOptional: true);
 
             // Deployment
-            SetCustomDimension(telemetry, Deployment.Name, this._k8sEnvironment.DeploymentName, isValueOptional: true);
+            SetCustomDimension(telemetry, Deployment.Name, k8sEnvironment.DeploymentName, isValueOptional: true);
 
             // Node
-            SetCustomDimension(telemetry, Node.ID, this._k8sEnvironment.NodeUid);
-            SetCustomDimension(telemetry, Node.Name, this._k8sEnvironment.NodeName);
+            SetCustomDimension(telemetry, Node.ID, k8sEnvironment.NodeUid, isValueOptional: true);
+            SetCustomDimension(telemetry, Node.Name, k8sEnvironment.NodeName, isValueOptional: true);
         }
 
-        private void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)
+        private void SetCustomDimension(ISupportProperties telemetry, string key, string? value, bool isValueOptional = false)
         {
             key = _telemetryKeyCache.GetProcessedKey(key);
 
