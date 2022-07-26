@@ -6,6 +6,7 @@ using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -13,19 +14,25 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// Builder of Service Collection for Application Insights for Kubernetes.
     /// </summary>
-    public class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
+    internal class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
-        private readonly Func<bool> _isRunningInKubernetes;
+        private readonly IClusterCheck _clusterCheck;
+        private readonly Action<AppInsightsForKubernetesOptions>? _customizeOptions;
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         /// <summary>
         /// Construction for <see cref="KubernetesServiceCollectionBuilder"/>.
         /// </summary>
-        /// <param name="isRunningInKubernetes">A function that returns true when running inside Kubernetes.</param>
+        /// <param name="customizeOptions">An optional delegate to overwrite app insights for kubernetes options.</param>
+        /// <param name="clusterCheck">A service to check if the current process is inside a K8s cluster. This is intended to be used by tests. 
+        /// A default checker will be provided when null.
+        /// </param>
         public KubernetesServiceCollectionBuilder(
-            Func<bool> isRunningInKubernetes)
+            Action<AppInsightsForKubernetesOptions>? customizeOptions,
+            IClusterCheck? clusterCheck)
         {
-            _isRunningInKubernetes = isRunningInKubernetes ?? throw new ArgumentNullException(nameof(isRunningInKubernetes));
+            _customizeOptions = customizeOptions;
+            _clusterCheck = clusterCheck ?? new ClusterCheck();
         }
 
         /// <summary>
@@ -35,12 +42,15 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>Returns the service collector with services injected.</returns>
         public IServiceCollection RegisterServices(IServiceCollection serviceCollection)
         {
-            if (_isRunningInKubernetes())
+            if (_clusterCheck.IsInCluster())
             {
                 if (serviceCollection == null)
                 {
                     throw new ArgumentNullException(nameof(serviceCollection));
                 }
+                serviceCollection.AddTransient<IClusterCheck, ClusterCheck>();
+                ConfigureOptions(serviceCollection);
+
                 RegisterCommonServices(serviceCollection);
                 RegisterSettingsProvider(serviceCollection);
                 RegisterK8sEnvironmentFactory(serviceCollection);
@@ -54,6 +64,16 @@ namespace Microsoft.Extensions.DependencyInjection
                 _logger.LogError("Application is not running inside a Kubernetes cluster.");
                 return serviceCollection;
             }
+        }
+
+        private void ConfigureOptions(IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddOptions();
+            serviceCollection.AddOptions<AppInsightsForKubernetesOptions>().Configure<IConfiguration>((opt, configuration) =>
+            {
+                configuration.GetSection(AppInsightsForKubernetesOptions.SectionName).Bind(opt);
+                _customizeOptions?.Invoke(opt);
+            });
         }
 
         private static void RegisterCommonServices(IServiceCollection serviceCollection)
