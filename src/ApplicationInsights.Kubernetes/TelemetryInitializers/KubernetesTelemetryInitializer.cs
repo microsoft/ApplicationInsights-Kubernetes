@@ -24,14 +24,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private readonly SDKVersionUtils _sdkVersionUtils;
         private readonly DateTime _timeoutAt;
-        private readonly IK8sEnvironmentFactory _k8sEnvFactory;
         private readonly AppInsightsForKubernetesOptions _options;
-        private readonly ITelemetryKeyCache _telemetryKeyCache;
-
-        private bool _isK8sQueryTimeout = false;
         private bool _isK8sQueryTimeoutReported = false;
 
+        internal ITelemetryKeyCache TelemetryKeyCache { get; }
+        internal IK8sEnvironmentFactory K8sEnvFactory { get; }
+        internal bool IsK8sQueryTimeout { get; private set; } = false;
         internal IK8sEnvironment? K8sEnvironment { get; private set; }
+
         public KubernetesTelemetryInitializer(
             IK8sEnvironmentFactory k8sEnvFactory,
             IOptions<AppInsightsForKubernetesOptions> options,
@@ -47,10 +47,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             _logger.LogDebug(@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
 {0}", JsonConvert.SerializeObject(_options));
 
-            _telemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
+            TelemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
             _sdkVersionUtils = sdkVersionUtils ?? throw new ArgumentNullException(nameof(sdkVersionUtils));
             _timeoutAt = DateTime.Now.Add(_options.InitializationTimeout);
-            _k8sEnvFactory = k8sEnvFactory ?? throw new ArgumentNullException(nameof(k8sEnvFactory));
+            K8sEnvFactory = k8sEnvFactory ?? throw new ArgumentNullException(nameof(k8sEnvFactory));
 
             _ = SetK8sEnvironment(default);
         }
@@ -76,7 +76,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is used but the content has not ready yet.");
 
-                if (_isK8sQueryTimeout)
+                if (IsK8sQueryTimeout)
                 {
                     if (!_isK8sQueryTimeoutReported)
                     {
@@ -112,7 +112,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             try
             {
-                Task<IK8sEnvironment?> createK8sEnvTask = _k8sEnvFactory.CreateAsync(_timeoutAt, cancellationToken);
+                Task<IK8sEnvironment?> createK8sEnvTask = K8sEnvFactory.CreateAsync(_timeoutAt, cancellationToken);
                 await Task.WhenAny(
                     createK8sEnvTask,
                     Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
@@ -124,7 +124,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
                 else
                 {
-                    _isK8sQueryTimeout = true;
+                    IsK8sQueryTimeout = true;
                     K8sEnvironment = null;
                     _logger.LogError("Application Insights for Kubernetes environment initialization timed out.");
                 }
@@ -165,7 +165,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private void SetCustomDimension(ISupportProperties telemetry, string key, string? value, bool isValueOptional = false)
         {
-            key = _telemetryKeyCache.GetProcessedKey(key);
+            key = TelemetryKeyCache.GetProcessedKey(key);
 
             if (telemetry == null)
             {
