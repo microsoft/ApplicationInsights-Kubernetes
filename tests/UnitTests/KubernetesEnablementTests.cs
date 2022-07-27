@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.ApplicationInsights.Extensibility;
+﻿using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -26,11 +20,5 @@ public class KubernetesEnablementTest
         target.RegisterServices(services);
 
         Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
-
-        using (ServiceProvider serviceProvider = services.BuildServiceProvider())
-        {
-            ITelemetryInitializer targetTelemetryInitializer = serviceProvider.GetServices<ITelemetryInitializer>().First(ti => ti is KubernetesTelemetryInitializer);
-            Assert.NotNull(targetTelemetryInitializer);
-        }
     }
 }
