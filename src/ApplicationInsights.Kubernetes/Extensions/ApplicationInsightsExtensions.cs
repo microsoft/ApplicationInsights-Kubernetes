@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (!KubernetesTelemetryInitializerExists(services))
             {
-                ConfigureKubernetesTelemetryInitializer(services, applyOptions, clusterCheck: default);
+                services.ConfigureKubernetesTelemetryInitializer(applyOptions, clusterCheck: default);
             }
             return services;
         }
@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Configure the KubernetesTelemetryInitializer and its dependencies.
         /// </summary>
         internal static void ConfigureKubernetesTelemetryInitializer(
-            IServiceCollection services,
+            this IServiceCollection services,
             Action<AppInsightsForKubernetesOptions>? overwriteOptions,
             IClusterCheck? clusterCheck)
         {

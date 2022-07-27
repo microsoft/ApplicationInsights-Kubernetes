@@ -24,9 +24,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         private readonly SDKVersionUtils _sdkVersionUtils;
         private readonly DateTime _timeoutAt;
-        private readonly AppInsightsForKubernetesOptions _options;
         private bool _isK8sQueryTimeoutReported = false;
 
+        internal AppInsightsForKubernetesOptions Options { get; }
         internal ITelemetryKeyCache TelemetryKeyCache { get; }
         internal IK8sEnvironmentFactory K8sEnvFactory { get; }
         internal bool IsK8sQueryTimeout { get; private set; } = false;
@@ -42,14 +42,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             // Options can't be null.
             Debug.Assert(options != null, "Options can't be null.");
-            _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+            Options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
             _logger.LogDebug(@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
-{0}", JsonConvert.SerializeObject(_options));
+{0}", JsonConvert.SerializeObject(Options));
 
             TelemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
             _sdkVersionUtils = sdkVersionUtils ?? throw new ArgumentNullException(nameof(sdkVersionUtils));
-            _timeoutAt = DateTime.Now.Add(_options.InitializationTimeout);
+            _timeoutAt = DateTime.Now.Add(Options.InitializationTimeout);
             K8sEnvFactory = k8sEnvFactory ?? throw new ArgumentNullException(nameof(k8sEnvFactory));
 
             _ = SetK8sEnvironment(default);
