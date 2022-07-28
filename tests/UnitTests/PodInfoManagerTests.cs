@@ -14,7 +14,7 @@ public class PodInfoManagerTests
     [Fact(DisplayName = $"{nameof(PodInfoManager.GetMyPodAsync)} should get my pod correctly")]
     public async Task GetMyPodAsyncShouldGetCorrectPod()
     {
-        Mock<IK8sQueryClient> k8sQueryClientMock = new();
+        Mock<IK8sClientService> k8sQueryClientMock = new();
         Mock<IContainerIdHolder> containerIdHolderMock = new();
         Mock<IPodNameProvider> podNameProviderMock = new();
 
@@ -42,7 +42,7 @@ public class PodInfoManagerTests
     {
         string providerPodName = "podNameByProvider";
 
-        Mock<IK8sQueryClient> k8sQueryClientMock = new();
+        Mock<IK8sClientService> k8sQueryClientMock = new();
         Mock<IContainerIdHolder> containerIdHolderMock = new();
         Mock<IPodNameProvider> podNameProviderMock = new();
 
@@ -54,7 +54,7 @@ public class PodInfoManagerTests
 
         k8sQueryClientMock.Setup(c => c.GetPodsAsync(It.IsAny<CancellationToken>())).Returns(() => Task.FromResult<IEnumerable<V1Pod>>(podsArray));
         podNameProviderMock.Setup(p => p.TryGetPodName(out providerPodName)).Returns(true);
-        k8sQueryClientMock.Setup(c => c.GetPodAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(podsArray.FirstOrDefault(item => item.Metadata.Name == providerPodName)));
+        k8sQueryClientMock.Setup(c => c.GetPodByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(podsArray.FirstOrDefault(item => item.Metadata.Name == providerPodName)));
 
         PodInfoManager target = new PodInfoManager(k8sQueryClientMock.Object, containerIdHolderMock.Object, new IPodNameProvider[] { podNameProviderMock.Object });
         V1Pod result = await target.GetMyPodAsync(default).ConfigureAwait(false);
@@ -71,7 +71,7 @@ public class PodInfoManagerTests
         string providerPodName = "podNameByProvider";
         const string targetContainerId = "containerId";
 
-        Mock<IK8sQueryClient> k8sQueryClientMock = new();
+        Mock<IK8sClientService> k8sQueryClientMock = new();
         Mock<IContainerIdHolder> containerIdHolderMock = new();
         Mock<IPodNameProvider> podNameProviderMock = new();
 
@@ -83,7 +83,7 @@ public class PodInfoManagerTests
 
         k8sQueryClientMock.Setup(c => c.GetPodsAsync(It.IsAny<CancellationToken>())).Returns(() => Task.FromResult<IEnumerable<V1Pod>>(podsArray));
         podNameProviderMock.Setup(p => p.TryGetPodName(out providerPodName)).Returns(true);
-        k8sQueryClientMock.Setup(c => c.GetPodAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<V1Pod>(null)); // Always no hit.
+        k8sQueryClientMock.Setup(c => c.GetPodByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<V1Pod>(null)); // Always no hit.
         containerIdHolderMock.Setup(c => c.ContainerId).Returns(targetContainerId);
 
         PodInfoManager target = new PodInfoManager(k8sQueryClientMock.Object, containerIdHolderMock.Object, new IPodNameProvider[] { podNameProviderMock.Object });
@@ -108,12 +108,12 @@ public class PodInfoManagerTests
 
         Mock<IPodNameProvider> podNameProviderMock = new();
         Mock<IPodNameProvider> podNameProviderMock2 = new();
-        Mock<IK8sQueryClient> k8sQueryClientMock = new();
+        Mock<IK8sClientService> k8sQueryClientMock = new();
         Mock<IContainerIdHolder> containerIdHolderMock = new();
 
         k8sQueryClientMock.Setup(c => c.GetPodsAsync(It.IsAny<CancellationToken>())).Returns(() => Task.FromResult<IEnumerable<V1Pod>>(podsArray));
         podNameProviderMock.Setup(p => p.TryGetPodName(out providerPodName)).Returns(true);
-        k8sQueryClientMock.Setup(c => c.GetPodAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(podsArray.FirstOrDefault(item => item.Metadata.Name == providerPodName2)));
+        k8sQueryClientMock.Setup(c => c.GetPodByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(podsArray.FirstOrDefault(item => item.Metadata.Name == providerPodName2)));
         podNameProviderMock.Setup(p => p.TryGetPodName(out providerPodName)).Returns(false); // the provider returns true with pod name.
         podNameProviderMock2.Setup(p => p.TryGetPodName(out providerPodName2)).Returns(true); // the provider returns true with pod name.
 

@@ -11,13 +11,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 /// </summary>
 internal interface IK8sClientService
 {
-    Task<IEnumerable<V1Pod>> ListPodsAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<V1Pod>> GetPodsAsync(CancellationToken cancellationToken);
 
     Task<V1Pod?> GetPodByNameAsync(string podName, CancellationToken cancellationToken);
 
-    Task<IEnumerable<V1ReplicaSet>> ListReplicaSetsAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<V1ReplicaSet>> GetReplicaSetsAsync(CancellationToken cancellationToken);
 
-    Task<IEnumerable<V1Deployment>> ListDeploymentsAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<V1Deployment>> GetDeploymentsAsync(CancellationToken cancellationToken);
 
-    Task<IEnumerable<V1Node>> ListNodesAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<V1Node>> GetNodesAsync(CancellationToken cancellationToken);
 }

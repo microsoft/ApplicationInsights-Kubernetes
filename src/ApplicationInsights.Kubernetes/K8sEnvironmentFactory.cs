@@ -17,16 +17,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
         private readonly IContainerIdHolder _containerIdHolder;
         private readonly IPodInfoManager _podInfoManager;
-        private readonly IK8sQueryClient _queryClient;
+        private readonly IK8sClientService _k8sClient;
 
         public K8sEnvironmentFactory(
             IContainerIdHolder containerIdHolder,
             IPodInfoManager podInfoManager,
-            IK8sQueryClient queryClient)
+            IK8sClientService k8sClient)
         {
             _containerIdHolder = containerIdHolder ?? throw new ArgumentNullException(nameof(containerIdHolder));
             _podInfoManager = podInfoManager ?? throw new ArgumentNullException(nameof(podInfoManager));
-            _queryClient = queryClient ?? throw new ArgumentNullException(nameof(queryClient));
+            _k8sClient = k8sClient ?? throw new ArgumentNullException(nameof(k8sClient));
         }
 
         /// <summary>
@@ -77,16 +77,16 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     containerStatus = myPod.GetContainerStatus(containerId);
                 }
                 // Fetch replica set info
-                IEnumerable<V1ReplicaSet> allReplicaSet = await _queryClient.GetReplicasAsync(cancellationToken).ConfigureAwait(false);
+                IEnumerable<V1ReplicaSet> allReplicaSet = await _k8sClient.GetReplicaSetsAsync(cancellationToken).ConfigureAwait(false);
                 V1ReplicaSet? replicaSet = myPod.GetMyReplicaSet(allReplicaSet);
 
                 // Fetch deployment info
-                IEnumerable<V1Deployment> allDeployment = await _queryClient.GetDeploymentsAsync(cancellationToken).ConfigureAwait(false);
+                IEnumerable<V1Deployment> allDeployment = await _k8sClient.GetDeploymentsAsync(cancellationToken).ConfigureAwait(false);
                 V1Deployment? deployment = replicaSet?.GetMyDeployment(allDeployment);
 
                 // Fetch node info
                 string nodeName = myPod.Spec.NodeName;
-                IEnumerable<V1Node> allNodes = await _queryClient.GetNodesAsync(cancellationToken).ConfigureAwait(false);
+                IEnumerable<V1Node> allNodes = await _k8sClient.GetNodesAsync(cancellationToken).ConfigureAwait(false);
                 V1Node? node = allNodes.FirstOrDefault(n => string.Equals(n.Metadata.Name, nodeName, StringComparison.Ordinal));
 
                 return new K8sEnvironment(containerStatus, myPod, replicaSet, deployment, node);

@@ -10,17 +10,17 @@ namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 
 internal class PodInfoManager : IPodInfoManager
 {
-    private readonly IK8sQueryClient _k8SQueryClient;
+    private readonly IK8sClientService _k8SClient;
     private readonly IContainerIdHolder _containerIdHolder;
     private readonly IEnumerable<IPodNameProvider> _podNameProviders;
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
     public PodInfoManager(
-        IK8sQueryClient k8sQueryClient,
+        IK8sClientService k8sClient,
         IContainerIdHolder containerIdHolder,
         IEnumerable<IPodNameProvider> podNameProviders)
     {
-        _k8SQueryClient = k8sQueryClient ?? throw new ArgumentNullException(nameof(k8sQueryClient));
+        _k8SClient = k8sClient ?? throw new ArgumentNullException(nameof(k8sClient));
         _containerIdHolder = containerIdHolder ?? throw new ArgumentNullException(nameof(containerIdHolder));
         _podNameProviders = podNameProviders ?? throw new System.ArgumentNullException(nameof(podNameProviders));
     }
@@ -62,7 +62,7 @@ internal class PodInfoManager : IPodInfoManager
         if (!string.IsNullOrEmpty(myContainerId))
         {
             V1Pod? targetPod = null;
-            IEnumerable<V1Pod> allPods = await _k8SQueryClient.GetPodsAsync(cancellationToken: cancellationToken);
+            IEnumerable<V1Pod> allPods = await _k8SClient.GetPodsAsync(cancellationToken: cancellationToken);
             targetPod = allPods.FirstOrDefault(pod => pod.GetContainerStatus(myContainerId) != null);
 
             if (targetPod is not null)
@@ -82,5 +82,5 @@ internal class PodInfoManager : IPodInfoManager
 
     /// <inheritdoc />
     public Task<V1Pod?> GetPodByNameAsync(string podName, CancellationToken cancellationToken)
-        => _k8SQueryClient.GetPodAsync(podName, cancellationToken);
+        => _k8SClient.GetPodByNameAsync(podName, cancellationToken);
 }

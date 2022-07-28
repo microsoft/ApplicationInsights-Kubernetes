@@ -81,7 +81,6 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.AddSingleton<ITelemetryKeyCache, TelemetryKeyCache>();
             serviceCollection.AddSingleton<SDKVersionUtils>(p => SDKVersionUtils.Instance);
             serviceCollection.AddSingleton<IK8sClientService>(p => K8sClientService.Instance);
-            serviceCollection.AddSingleton<IK8sQueryClient, K8sQueryClient>();
             serviceCollection.AddSingleton<IContainerIdHolder, ContainerIdHolder>();
             serviceCollection.AddSingleton<IPodInfoManager, PodInfoManager>();
         }
