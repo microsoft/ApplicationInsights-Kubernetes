@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.DependencyInjection
         internal static void ConfigureKubernetesTelemetryInitializer(
             this IServiceCollection services,
             Action<AppInsightsForKubernetesOptions>? overwriteOptions,
-            IClusterCheck? clusterCheck)
+            IClusterEnvironmentCheck? clusterCheck)
         {
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = new KubernetesServiceCollectionBuilder(overwriteOptions, clusterCheck);
             kubernetesServiceCollectionBuilder.RegisterServices(services);

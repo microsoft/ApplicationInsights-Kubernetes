@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     internal class KubernetesServiceCollectionBuilder : IKubernetesServiceCollectionBuilder
     {
-        private readonly IClusterCheck _clusterCheck;
+        private readonly IClusterEnvironmentCheck _clusterCheck;
         private readonly Action<AppInsightsForKubernetesOptions>? _customizeOptions;
         private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
@@ -29,10 +29,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </param>
         public KubernetesServiceCollectionBuilder(
             Action<AppInsightsForKubernetesOptions>? customizeOptions,
-            IClusterCheck? clusterCheck)
+            IClusterEnvironmentCheck? clusterCheck)
         {
             _customizeOptions = customizeOptions;
-            _clusterCheck = clusterCheck ?? new ClusterCheck();
+            _clusterCheck = clusterCheck ?? new ClusterEnvironmentCheck();
         }
 
         /// <summary>
@@ -42,13 +42,13 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>Returns the service collector with services injected.</returns>
         public IServiceCollection RegisterServices(IServiceCollection serviceCollection)
         {
-            if (_clusterCheck.IsInCluster())
+            if (_clusterCheck.IsInCluster)
             {
                 if (serviceCollection == null)
                 {
                     throw new ArgumentNullException(nameof(serviceCollection));
                 }
-                serviceCollection.AddTransient<IClusterCheck, ClusterCheck>();
+                serviceCollection.AddTransient<IClusterEnvironmentCheck, ClusterEnvironmentCheck>();
                 ConfigureOptions(serviceCollection);
 
                 RegisterCommonServices(serviceCollection);

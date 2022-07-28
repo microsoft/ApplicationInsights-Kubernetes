@@ -15,11 +15,11 @@ public class KubernetesEnablementTest
     [Fact(DisplayName = "The required services are properly registered")]
     public void ServicesRegistered()
     {
-        Mock<IClusterCheck> clusterCheckMock = new();
+        Mock<IClusterEnvironmentCheck> clusterCheckMock = new();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
 
-        clusterCheckMock.Setup(c => c.IsInCluster()).Returns(true);
+        clusterCheckMock.Setup(c => c.IsInCluster).Returns(true);
 
         KubernetesServiceCollectionBuilder target = new KubernetesServiceCollectionBuilder(customizeOptions: null, clusterCheckMock.Object);
         target.RegisterServices(services);
@@ -38,11 +38,11 @@ public class KubernetesEnablementTest
     [Fact(DisplayName = "Default timeout for waiting container to spin us is 2 minutes")]
     public void EnableAppInsightsForKubernetesWithDefaultTimeOut()
     {
-        Mock<IClusterCheck> clusterCheckMock = new();
+        Mock<IClusterEnvironmentCheck> clusterCheckMock = new();
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
 
-        clusterCheckMock.Setup(c => c.IsInCluster()).Returns(true);
+        clusterCheckMock.Setup(c => c.IsInCluster).Returns(true);
 
         KubernetesServiceCollectionBuilder target = new KubernetesServiceCollectionBuilder(customizeOptions: null, clusterCheckMock.Object);
         target.RegisterServices(services);
@@ -59,8 +59,8 @@ public class KubernetesEnablementTest
     [Fact(DisplayName = "Set timeout through options works for telemetry initializer.")]
     public void EnableAppInsightsForKubernetesWithTimeOutSetThroughOptions()
     {
-        Mock<IClusterCheck> clusterCheckMock = new();
-        clusterCheckMock.Setup(c => c.IsInCluster()).Returns(true);
+        Mock<IClusterEnvironmentCheck> clusterCheckMock = new();
+        clusterCheckMock.Setup(c => c.IsInCluster).Returns(true);
 
         IServiceCollection services = new ServiceCollection();
         services.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
@@ -89,8 +89,8 @@ public class KubernetesEnablementTest
     [Fact(DisplayName = "Set timeout through configuration works for telemetry initializer.")]
     public void EnableAppInsightsForKubernetesWithTimeOutSetThroughConfiguration()
     {
-        Mock<IClusterCheck> clusterCheckMock = new();
-        clusterCheckMock.Setup(c => c.IsInCluster()).Returns(true);
+        Mock<IClusterEnvironmentCheck> clusterCheckMock = new();
+        clusterCheckMock.Setup(c => c.IsInCluster).Returns(true);
 
         IServiceCollection services = new ServiceCollection();
         IConfiguration config = new ConfigurationBuilder().AddInMemoryCollection(

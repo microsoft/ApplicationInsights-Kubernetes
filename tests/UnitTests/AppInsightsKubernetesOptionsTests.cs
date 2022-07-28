@@ -13,9 +13,9 @@ public class AppInsightsKubernetesOptionsTests
     [Fact]
     public void ShouldHaveDefaultOptions()
     {
-        Mock<IClusterCheck> clusterCheck = new();
+        Mock<IClusterEnvironmentCheck> clusterCheck = new();
 
-        clusterCheck.Setup(c => c.IsInCluster()).Returns(true);
+        clusterCheck.Setup(c => c.IsInCluster).Returns(true);
 
         KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: default, clusterCheck.Object);
 
@@ -39,9 +39,9 @@ public class AppInsightsKubernetesOptionsTests
     [Fact]
     public void ShouldTakeOptionFromIConfiguration()
     {
-        Mock<IClusterCheck> clusterCheck = new();
+        Mock<IClusterEnvironmentCheck> clusterCheck = new();
 
-        clusterCheck.Setup(c => c.IsInCluster()).Returns(true);
+        clusterCheck.Setup(c => c.IsInCluster).Returns(true);
 
         KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: default, clusterCheck.Object);
 
@@ -64,8 +64,8 @@ public class AppInsightsKubernetesOptionsTests
     [Fact]
     public void ShouldTakeDelegateOverwriteForSettings()
     {
-        Mock<IClusterCheck> clusterCheck = new();
-        clusterCheck.Setup(c => c.IsInCluster()).Returns(true);
+        Mock<IClusterEnvironmentCheck> clusterCheck = new();
+        clusterCheck.Setup(c => c.IsInCluster).Returns(true);
 
         KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: opt =>
         {
@@ -91,9 +91,9 @@ public class AppInsightsKubernetesOptionsTests
     [Fact]
     public void ShouldAllowSetTelemetryKeyProcessorByCode()
     {
-        Mock<IClusterCheck> clusterCheck = new();
+        Mock<IClusterEnvironmentCheck> clusterCheck = new();
 
-        clusterCheck.Setup(c => c.IsInCluster()).Returns(true);
+        clusterCheck.Setup(c => c.IsInCluster).Returns(true);
 
         Func<string, string> keyTransformer = (input) => "c_" + input;
 
