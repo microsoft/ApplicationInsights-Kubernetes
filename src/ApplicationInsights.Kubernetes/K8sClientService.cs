@@ -44,28 +44,28 @@ internal sealed class K8sClientService : IDisposable, IK8sClientService
 
     public async Task<IEnumerable<V1Pod>> ListPodsAsync(CancellationToken cancellationToken)
     {
-        V1PodList? list = await _kubernetesClient.CoreV1.ListNamespacedPodAsync(_namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
+        V1PodList? list = await _kubernetesClient.ListNamespacedPodAsync(_namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
         return list.AsEnumerable();
     }
 
     public Task<V1Pod?> GetPodByNameAsync(string podName, CancellationToken cancellationToken)
-        => _kubernetesClient.CoreV1.ReadNamespacedPodAsync(podName, _namespace, cancellationToken: cancellationToken);
+        => _kubernetesClient.ReadNamespacedPodAsync(podName, _namespace, cancellationToken: cancellationToken);
 
     public async Task<IEnumerable<V1ReplicaSet>> ListReplicaSetsAsync(CancellationToken cancellationToken)
     {
-        V1ReplicaSetList? replicaSetList = await _kubernetesClient.AppsV1.ListNamespacedReplicaSetAsync(_namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
+        V1ReplicaSetList? replicaSetList = await _kubernetesClient.ListNamespacedReplicaSetAsync(_namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
         return replicaSetList.AsEnumerable();
     }
 
     public async Task<IEnumerable<V1Deployment>> ListDeploymentsAsync(CancellationToken cancellationToken)
     {
-        V1DeploymentList? deploymentList = await _kubernetesClient.AppsV1.ListNamespacedDeploymentAsync(_namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
+        V1DeploymentList? deploymentList = await _kubernetesClient.ListNamespacedDeploymentAsync(_namespace, cancellationToken: cancellationToken).ConfigureAwait(false);
         return deploymentList.AsEnumerable();
     }
 
     public async Task<IEnumerable<V1Node>> ListNodesAsync(CancellationToken cancellationToken)
     {
-        V1NodeList? nodeList = await _kubernetesClient.CoreV1.ListNodeAsync();
+        V1NodeList? nodeList = await _kubernetesClient.ListNodeAsync();
         return nodeList.AsEnumerable();
     }
 }
