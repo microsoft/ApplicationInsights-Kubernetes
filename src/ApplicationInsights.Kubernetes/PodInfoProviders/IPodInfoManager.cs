@@ -18,4 +18,9 @@ internal interface IPodInfoManager
     /// <param name="podName">The target pod name.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     Task<V1Pod?> GetPodByNameAsync(string podName, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Tries to get container status from a pod by given container id.
+    /// </summary>
+    bool TryGetContainerStatus(V1Pod pod, string? containerId, out V1ContainerStatus? containerStatus);
 }

@@ -62,8 +62,8 @@ internal class PodInfoManager : IPodInfoManager
         if (!string.IsNullOrEmpty(myContainerId))
         {
             V1Pod? targetPod = null;
-            IEnumerable<V1Pod> allPods = await _k8SClient.GetPodsAsync(cancellationToken: cancellationToken);
-            targetPod = allPods.FirstOrDefault(pod => pod.GetContainerStatus(myContainerId) != null);
+            IEnumerable<V1Pod> allPods = await _k8SClient.GetPodsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            targetPod = allPods.FirstOrDefault(pod => TryGetContainerStatus(pod, myContainerId, out _));
 
             if (targetPod is not null)
             {
@@ -83,4 +83,14 @@ internal class PodInfoManager : IPodInfoManager
     /// <inheritdoc />
     public Task<V1Pod?> GetPodByNameAsync(string podName, CancellationToken cancellationToken)
         => _k8SClient.GetPodByNameAsync(podName, cancellationToken);
+
+    public bool TryGetContainerStatus(V1Pod pod, string? containerId, out V1ContainerStatus? containerStatus)
+    {
+        containerStatus = string.IsNullOrEmpty(containerId) ? null // Special case when container id is an empty string,
+                    : pod.Status?.ContainerStatuses?.FirstOrDefault(
+                        // Notice, we are using partial matching because there could be prefix of container ids like: docker://b1bf9cd89b57ba86c20e17bfd474638110e489da784a5e388983294d94ae9fc4
+                        status => !string.IsNullOrEmpty(status.ContainerID) && status.ContainerID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1);
+
+        return containerStatus is not null;
+    }
 }
