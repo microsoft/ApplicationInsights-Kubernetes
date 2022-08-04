@@ -126,9 +126,12 @@ public class PodInfoManagerTests
         Assert.Equal(providerPodName2, result.Metadata?.Name);
     }
 
-        [Fact]
-    public void GetContainerStatusShallReturnTheStatusOnMatch()
+    [Fact]
+    public void TryGetContainerStatusShallReturnTheStatusOnMatch()
     {
+        Mock<IK8sClientService> k8sQueryClientMock = new();
+        Mock<IContainerIdHolder> containerIdHolderMock = new();
+
         string containerId = "b1bf9cd89b57ba86c20e17bfd474638110e489da784a5e388983294d94ae9fc4";
         string containerName = "testContainerName";
         V1Pod pod = new V1Pod();
@@ -142,14 +145,20 @@ public class PodInfoManagerTests
             },
         };
 
-        V1ContainerStatus result = pod.GetContainerStatus(containerId);
-        Assert.NotNull(result);
-        Assert.Equal(containerName, result.Name);
+        PodInfoManager target = new PodInfoManager(k8sQueryClientMock.Object, containerIdHolderMock.Object, new IPodNameProvider[] { });
+
+        bool result = target.TryGetContainerStatus(pod, containerId, out V1ContainerStatus containerStatus);
+        Assert.True(result);
+        Assert.NotNull(containerStatus);
+        Assert.Equal(containerName, containerStatus.Name);
     }
 
     [Fact]
-    public void GetContainerStatusShallReturnNullWhenContainerIdNullOrEmpty()
+    public void TryGetContainerStatusShallReturnNullWhenContainerIdNullOrEmpty()
     {
+        Mock<IK8sClientService> k8sQueryClientMock = new();
+        Mock<IContainerIdHolder> containerIdHolderMock = new();
+
         V1Pod pod = new V1Pod();
         pod.Status = new V1PodStatus()
         {
@@ -161,13 +170,21 @@ public class PodInfoManagerTests
             },
         };
 
-        V1ContainerStatus result = pod.GetContainerStatus(null);
-        Assert.Null(result);
+        PodInfoManager target = new PodInfoManager(k8sQueryClientMock.Object, containerIdHolderMock.Object, new IPodNameProvider[] { });
 
-        V1ContainerStatus result2 = pod.GetContainerStatus(string.Empty);
-        Assert.Null(result2);
+        // Container id is null
+        bool result = target.TryGetContainerStatus(pod, containerId: null, out V1ContainerStatus nullContainerIdContainerStatus);
+        Assert.False(result);
+        Assert.Null(nullContainerIdContainerStatus);
 
-        V1ContainerStatus result3 = pod.GetContainerStatus("");
-        Assert.Null(result3);
+        // Container id is String.Empty
+        bool result2 = target.TryGetContainerStatus(pod, containerId: string.Empty, out V1ContainerStatus emptyStringContainerIdStatus);
+        Assert.False(result);
+        Assert.Null(emptyStringContainerIdStatus);
+
+        // Container id is ""
+        bool result3 = target.TryGetContainerStatus(pod, containerId: "", out V1ContainerStatus literalEmptyStringContainerIdStatus);
+        Assert.False(result3);
+        Assert.Null(literalEmptyStringContainerIdStatus);
     }
 }
