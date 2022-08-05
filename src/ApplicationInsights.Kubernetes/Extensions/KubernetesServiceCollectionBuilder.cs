@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
@@ -83,6 +84,7 @@ namespace Microsoft.Extensions.DependencyInjection
             serviceCollection.AddSingleton<IK8sClientService>(p => K8sClientService.Instance);
             serviceCollection.AddSingleton<IContainerIdHolder, ContainerIdHolder>();
             serviceCollection.AddSingleton<IPodInfoManager, PodInfoManager>();
+            serviceCollection.AddSingleton<IContainerStatusManager, ContainerStatusManager>();
         }
 
         /// <summary>
