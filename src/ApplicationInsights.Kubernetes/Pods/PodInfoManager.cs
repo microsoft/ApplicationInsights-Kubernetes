@@ -89,10 +89,7 @@ internal class PodInfoManager : IPodInfoManager
         containerStatus = string.IsNullOrEmpty(containerId) ? null // Special case when container id is an empty string,
                     : pod.Status?.ContainerStatuses?.FirstOrDefault(
                         // Notice, we are using partial matching because there could be prefix of container ids like: docker://b1bf9cd89b57ba86c20e17bfd474638110e489da784a5e388983294d94ae9fc4
-                        status =>
-                            (!string.IsNullOrEmpty(status.ContainerID) && status.ContainerID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1) ||
-                            (!string.IsNullOrEmpty(status.ImageID) && status.ImageID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1)    // In some environment, the id is ImageID rather than ContainerId
-                        );
+                        status => !string.IsNullOrEmpty(status.ContainerID) && status.ContainerID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1);
 
         return containerStatus is not null;
     }

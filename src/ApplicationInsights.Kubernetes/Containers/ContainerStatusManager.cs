@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,12 +48,6 @@ internal class ContainerStatusManager : IContainerStatusManager
         {
             if (_podInfoManager.TryGetContainerStatus(myPod, containerId, out V1ContainerStatus? foundContainerStatus))
             {
-                if (!string.Equals(foundContainerStatus?.ContainerID, containerId, StringComparison.OrdinalIgnoreCase))
-                {
-                    _logger.LogDebug("Container ID fetched doesn't match the container id on container status. Probably matched with the image id.");
-                    _containerIdHolder.TryBackFillContainerId(foundContainerStatus!);
-                }
-
                 return foundContainerStatus;
             }
         }
