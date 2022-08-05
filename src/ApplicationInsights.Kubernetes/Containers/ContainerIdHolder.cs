@@ -47,10 +47,15 @@ internal class ContainerIdHolder : IContainerIdHolder
         {
             containerStatus = containerStatuses[0];
             _logger.LogInformation(FormattableString.Invariant($"Use the only container inside the pod for container id: {containerStatus.ContainerID}"));
-            _containerId = containerStatus.ContainerID;
-            return true;
+            return TryBackFillContainerId(containerStatus);
         }
         return false;
+    }
+
+    public bool TryBackFillContainerId(V1ContainerStatus containerStatus)
+    {
+        _containerId = containerStatus.ContainerID;
+        return !string.IsNullOrEmpty(_containerId);
     }
 
     private string? TryGetContainerId()
