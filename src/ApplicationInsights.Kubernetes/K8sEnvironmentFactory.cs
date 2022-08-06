@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
+using Microsoft.Rest;
 using static Microsoft.ApplicationInsights.Kubernetes.StringUtils;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
@@ -61,7 +63,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
                 return new K8sEnvironment(containerStatus, myPod, replicaSet, deployment, node);
             }
-            catch (UnauthorizedAccessException ex)
+            catch (HttpOperationException ex) when (ex.Response.StatusCode == HttpStatusCode.Forbidden)
             {
                 HandleUnauthorizedAccess(ex);
                 return null;
@@ -86,15 +88,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 {
                     myPod = await _podInfoManager.GetMyPodAsync(cancellationToken).ConfigureAwait(false);
                 }
-                catch (Exception ex) when (ex is not UnauthorizedAccessException)
+                catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode == HttpStatusCode.Forbidden))
                 {
                     _logger.LogWarning($"Query exception while trying to get pod info: {ex.Message}");
                     _logger.LogDebug(ex.ToString());
                 }
+                finally
+                {
+                    stopwatch.Stop();
+                }
 
                 if (myPod is not null)
                 {
-                    stopwatch.Stop();
                     _logger.LogDebug(Invariant($"K8s pod info available in: {stopwatch.ElapsedMilliseconds} ms."));
                     return myPod;
                 }
@@ -135,11 +140,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                         return await _containerStatusManager.TryGetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
-                catch (Exception ex) when (ex is not UnauthorizedAccessException)
+                catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode == HttpStatusCode.Forbidden))
                 {
                     _logger.LogWarning($"Query exception while trying to get container info: {ex.Message}");
                     _logger.LogDebug(ex.ToString());
-                    throw;
                 }
 
                 // The time to get the container ready depends on how much time will a container to be initialized.
@@ -152,8 +156,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             throw new InvalidOperationException("Container is not ready within the given period.");
         }
 
-        private void HandleUnauthorizedAccess(UnauthorizedAccessException exception)
+        private void HandleUnauthorizedAccess(HttpOperationException exception)
         {
+            Debug.Assert(exception.Response.StatusCode == HttpStatusCode.Forbidden, "Only handle Forbidden!");
             _logger.LogError(
                 "Unauthorized. Are you missing cluster role assignment? Refer to https://aka.ms/ai-k8s-rbac for more details. Message: {0}.",
                 exception.Message);
