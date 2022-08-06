@@ -88,16 +88,13 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 {
                     myPod = await _podInfoManager.GetMyPodAsync(cancellationToken).ConfigureAwait(false);
                 }
-                catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode == HttpStatusCode.Forbidden))
+                catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode != HttpStatusCode.Forbidden))
                 {
                     _logger.LogWarning($"Query exception while trying to get pod info: {ex.Message}");
                     _logger.LogDebug(ex.ToString());
                 }
-                finally
-                {
-                    stopwatch.Stop();
-                }
 
+                stopwatch.Stop();
                 if (myPod is not null)
                 {
                     _logger.LogDebug(Invariant($"K8s pod info available in: {stopwatch.ElapsedMilliseconds} ms."));
@@ -140,7 +137,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                         return await _containerStatusManager.TryGetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
-                catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode == HttpStatusCode.Forbidden))
+                catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode != HttpStatusCode.Forbidden))
                 {
                     _logger.LogWarning($"Query exception while trying to get container info: {ex.Message}");
                     _logger.LogDebug(ex.ToString());
