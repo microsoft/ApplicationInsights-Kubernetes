@@ -117,7 +117,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     createK8sEnvTask,
                     Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
 
-                if (createK8sEnvTask.IsCompleted)
+                if (createK8sEnvTask.IsCompleted && createK8sEnvTask.Result is not null)
                 {
                     _logger.LogDebug("Application Insights for Kubernetes environment initialized.");
                     K8sEnvironment = createK8sEnvTask.Result;
@@ -126,7 +126,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 {
                     IsK8sQueryTimeout = true;
                     K8sEnvironment = null;
-                    _logger.LogError("Application Insights for Kubernetes environment initialization timed out.");
+                    _logger.LogError("Application Insights for Kubernetes environment initialization failed. Please review the logs for details.");
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types
