@@ -14,17 +14,30 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 /// </summary>
 internal class ContainerIdNormalizer : IContainerIdNormalizer
 {
-    // Simple rule: 64-characters GUID/UUID.
-    private const string ContainerIdIdentifierPattern = @"[a-f0-9]{64}";
+    // Simple rule: First 64-characters GUID/UUID.
+    private const string ContainerIdIdentifierPattern = @"([a-f\d]{64})";
     private readonly Regex _matcher = new Regex(ContainerIdIdentifierPattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, matchTimeout: TimeSpan.FromSeconds(1));
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
-
+    /// <summary>
+    /// Gets normalized container id.
+    /// </summary>
+    /// <param name="input">The original container id. String.Empty yields string.Empty with true. Null is not accepted.</param>
+    /// <param name="normalized">The normalized container id.</param>
+    /// <returns>True when the normalized succeeded. False otherwise.</returns>
     public bool TryNormalize(string input, out string? normalized)
     {
-        if (string.IsNullOrEmpty(input))
+        // Should not happen. Put here just in case.
+        if (input is null)
         {
-            throw new ArgumentException($"'{nameof(input)}' cannot be null or empty.", nameof(input));
+            throw new ArgumentNullException(nameof(input));
+        }
+
+        // Special case: string.Empty in, string.Empty out.
+        if (input == string.Empty)
+        {
+            normalized = string.Empty;
+            return true;
         }
 
         _logger.LogDebug($"Normalize container id: {input}");
@@ -36,7 +49,7 @@ internal class ContainerIdNormalizer : IContainerIdNormalizer
             normalized = null;
             return false;
         }
-        normalized = match.Value;
+        normalized = match.Groups[1].Value;
         _logger.LogTrace($"Container id normalized to: {normalized}");
         return true;
     }
