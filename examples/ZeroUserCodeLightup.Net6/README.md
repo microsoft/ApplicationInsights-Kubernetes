@@ -2,7 +2,7 @@
 
 This example shows how to enable application insights for Kubernetes for ASP.NET Core 6.x WebAPI without code change for the existing project.
 
-There are 2 keys:
+It can be accomplished in 2 steps:
 
 * Add the proper NuGet Package
 * Add Environment Variables
@@ -60,7 +60,7 @@ Here's the the full [Dockerfile](./dockerfile) example.
 
 ## Upload the image to container registry
 
-Once verified, the image is ready to be uploaded. Here we use docker hub for example, it works with any docker image registry:
+Once verified, the image is ready to be uploaded. Here we use docker hub for example, it works with any Docker image registry:
 
 ```shell
 docker tag ai-k8s-app:latest dockeraccount/ai-k8s-app:latest
