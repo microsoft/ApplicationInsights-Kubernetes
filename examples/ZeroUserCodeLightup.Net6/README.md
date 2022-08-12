@@ -87,11 +87,11 @@ Now that the image is in the container registry, it is time to deploy it to Kube
     apiVersion: v1
     kind: Secret
     metadata:
-    name: app-env-secret
-    namespace: ai-k8s-demo # Update to your namespace
+      name: app-env-secret
+      namespace: ai-k8s-demo # Update to your namespace
     type: Opaque
     data:
-    appinsights-connection-string: eW91IGhhdmUgdG8gZG8gdGhpcywgZG9uJ3QgeW91Pw==   #Base64 encoded connection string.
+      appinsights-connection-string: eW91IGhhdmUgdG8gZG8gdGhpcywgZG9uJ3QgeW91Pw==   #Base64 encoded connection string.
     ```
     _Tips: Connection string can be fetched from the Azure Portal. See [connection strings](https://docs.microsoft.com/en-us/azure/azure-monitor/app/sdk-connection-string?tabs=net) for more details._
 
