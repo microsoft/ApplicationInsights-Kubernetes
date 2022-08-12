@@ -15,19 +15,20 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private readonly string _certFilePath;
         private readonly string _tokenFilePath;
 
-        public KubeHttpClientSettingsProvider(IEnumerable<IContainerIdProvider> containerIdProviders)
-            : this(containerIdProviders, kubernetesServiceHost: null)
+        public KubeHttpClientSettingsProvider(IEnumerable<IContainerIdProvider> containerIdProviders, IContainerIdNormalizer containerIdNormalizer)
+            : this(containerIdProviders, containerIdNormalizer, kubernetesServiceHost: null)
         {
         }
 
         public KubeHttpClientSettingsProvider(
             IEnumerable<IContainerIdProvider> containerIdProviders,
+            IContainerIdNormalizer containerIdNormalizer,
             string pathToToken = @"/var/run/secrets/kubernetes.io/serviceaccount/token",
             string pathToCert = @"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
             string pathToNamespace = @"/var/run/secrets/kubernetes.io/serviceaccount/namespace",
             string? kubernetesServiceHost = null,
             string? kubernetesServicePort = null)
-            : base(kubernetesServiceHost, kubernetesServicePort, containerIdProviders)
+            : base(kubernetesServiceHost, kubernetesServicePort, containerIdProviders, containerIdNormalizer)
         {
             _tokenFilePath = Arguments.IsNotNullOrEmpty(pathToToken, nameof(pathToToken));
             _certFilePath = Arguments.IsNotNullOrEmpty(pathToCert, nameof(pathToCert));
