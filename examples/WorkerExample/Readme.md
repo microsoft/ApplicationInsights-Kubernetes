@@ -8,7 +8,7 @@ This is what it looks like when `ApplicationInsights.Kubernetes` is turned on fo
 
 ![A image shows request telemetry with kubernetes properties](./images/RequestQuery.png)
 
-And this example will walk you through the key steps.
+And in this example, we will walk you through the key steps.
 
 ## Prerequisite
 
@@ -80,13 +80,13 @@ To finish the walk-through, there are some prerequisites.
     ```
 
     You will see logs like this:
-    
+
     ```shell
-    info: Microsoft.Hosting.Lifetime[0]
-    Application started. Press Ctrl+C to shut down.
-    info: Microsoft.Hosting.Lifetime[0]
-        Hosting environment: Production
-    info: Microsoft.Hosting.Lifetime[0]
+    info: Microsoft.Hosting.Lifetime[0]  
+    Application started. Press Ctrl+C to shut down.  
+    info: Microsoft.Hosting.Lifetime[0]  
+        Hosting environment: Production  
+    info: Microsoft.Hosting.Lifetime[0]  
         Content root path: /app
     ```
 
@@ -108,20 +108,41 @@ _Notes: we are using dockerhub here as an example. you could use any container r
 
 * Tag the image properly, for example:
     ```shell
-    docker tag workerapp dockerhub_account_name/ai-k8s-worker-example:0.0.1
+    docker tag workerapp dockerhub_account_name/ai-k8s-worker-example:latest
     ```
 
 * Push the image:
 
     ```shell
-    docker push dockerhub_account_name/ai-k8s-worker-example:0.0.1
+    docker push dockerhub_account_name/ai-k8s-worker-example:latest
     ```
 
 ## Deploy the container to K8s cluster
 
+* You could use default namespace, but it is recommended to put the test application in a dedicated namespace, for example 'ai-k8s-demo'. To deploy a namespace, use content in [k8s-namespace.yaml](../k8s-namespace.yaml):
+
+    ```
+    kubectl create -f k8s-namespace.yaml
+    ```
+
 * Build a deployment yaml file, refer to [k8s.yml](./k8s.yml).
 
-    * Update the image property to pointing to the one that you intend to use.
+    * Update the namespace and the image to pointing to the one that you intend to use.
+
+* Setup proper role binding for RBAC enabled clusters
+
+    If you have RBAC enabled for your cluster, permissions need to be granted to the service account to access the cluster info for telemetries. Refer to [Configure RBAC permissions](../../docs/configure-rbac-permissions.md) for details.
+
+    For example, deploy a role assignment in namespace of `ai-k8s-demo` by calling:
+
+    ```shell
+    kubectl create -f ..\..\docs\sa-role.yaml
+    ```
+
+    The output looks like this:
+
+    > clusterrole.rbac.authorization.k8s.io/appinsights-k8s-property-reader created  
+    clusterrolebinding.rbac.authorization.k8s.io/appinsights-k8s-property-reader-binding created
 
 * Deploy it:
 
