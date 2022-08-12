@@ -13,13 +13,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         public KubeHttpSettingsWinContainerProvider(
             IEnumerable<IContainerIdProvider> containerIdProviders,
+            IContainerIdNormalizer containerIdNormalizer,
             string serviceAccountFolder = @"C:\var\run\secrets\kubernetes.io\serviceaccount",
             string tokenFileName = "token",
             string certFileName = "ca.crt",
             string namespaceFileName = "namespace",
             string kubernetesServiceHost = null,
             string kubernetesServicePort = null)
-            : base(kubernetesServiceHost, kubernetesServicePort, containerIdProviders)
+            : base(kubernetesServiceHost, kubernetesServicePort, containerIdProviders, containerIdNormalizer)
         {
             // Container id won't be fetched for windows container.
             DirectoryInfo serviceAccountDirectory =
