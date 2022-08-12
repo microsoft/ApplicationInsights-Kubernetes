@@ -82,11 +82,11 @@ To finish the walk-through, there are some prerequisites.
     You will see logs like this:
 
     ```shell
-    info: Microsoft.Hosting.Lifetime[0]  
-    Application started. Press Ctrl+C to shut down.  
-    info: Microsoft.Hosting.Lifetime[0]  
-        Hosting environment: Production  
-    info: Microsoft.Hosting.Lifetime[0]  
+    info: Microsoft.Hosting.Lifetime[0]
+    Application started. Press Ctrl+C to shut down.
+    info: Microsoft.Hosting.Lifetime[0]
+        Hosting environment: Production
+    info: Microsoft.Hosting.Lifetime[0]
         Content root path: /app
     ```
 
