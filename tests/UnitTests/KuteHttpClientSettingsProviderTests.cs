@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+using Moq;
 using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
@@ -11,8 +12,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Base address is formed by constructor")]
         public void BaseAddressShouldBeFormed()
         {
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 GetConatinerIdProviders(),
+                containerIdNormalizer,
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
@@ -25,8 +28,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Base address is formed by constructor of windows kube settings provider")]
         public void BaseAddressShouldBeFormedWin()
         {
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
                 GetConatinerIdProviders(),
+                containerIdNormalizer,
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -39,8 +44,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Container id is set to string.Empty for windows container settings")]
         public void ContainerIdIsAlwaysNullForWinSettings()
         {
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
                 GetConatinerIdProviders(),
+                containerIdNormalizer,
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -52,8 +59,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
         public void TokenShoudBeFetched()
         {
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 GetConatinerIdProviders(),
+                containerIdNormalizer,
                 pathToNamespace: "namespace",
                 pathToToken: "token",
                 kubernetesServiceHost: "127.0.0.1",
@@ -64,8 +73,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Token can be fetched by windows settings provider")]
         public void TokenShouldBeFetchedForWin()
         {
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
                 GetConatinerIdProviders(),
+                containerIdNormalizer,
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
                 tokenFileName:"token",
@@ -78,8 +89,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Return true when certificate chain is valid")]
         public void TrueWhenValidCertificate()
         {
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 GetConatinerIdProviders(),
+                containerIdNormalizer,
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
@@ -95,8 +108,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Return false when certificate chain is invalid")]
         public void FalseWhenInvalidCertificate()
         {
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 GetConatinerIdProviders(),
+                containerIdNormalizer,
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
@@ -112,8 +127,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact(DisplayName = "Return false when certificate out of date")]
         public void FalseWhenOutOfDateCertificate()
         {
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
                 GetConatinerIdProviders(),
+                containerIdNormalizer,
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");

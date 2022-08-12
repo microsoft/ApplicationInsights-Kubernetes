@@ -15,12 +15,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     internal abstract class KubeHttpClientSettingsBase : IKubeHttpClientSettingsProvider
     {
         private readonly IEnumerable<IContainerIdProvider> _containerIdProviders;
+        private readonly IContainerIdNormalizer _containerIdNormalizer;
         protected readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
         public KubeHttpClientSettingsBase(
             string? kubernetesServiceHost,
             string? kubernetesServicePort,
-            IEnumerable<IContainerIdProvider> containerIdProviders)
+            IEnumerable<IContainerIdProvider> containerIdProviders,
+            IContainerIdNormalizer containerIdNormalizer)
         {
             kubernetesServiceHost = kubernetesServiceHost ?? Environment.GetEnvironmentVariable(@"KUBERNETES_SERVICE_HOST");
             if (string.IsNullOrEmpty(kubernetesServiceHost))
@@ -38,7 +40,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             _logger.LogDebug("Kubernetes base address: {0}", baseAddress);
             ServiceBaseAddress = new Uri(baseAddress, UriKind.Absolute);
             _containerIdProviders = containerIdProviders ?? throw new ArgumentNullException(nameof(containerIdProviders));
-
+            _containerIdNormalizer = containerIdNormalizer ?? throw new ArgumentNullException(nameof(containerIdNormalizer));
             ContainerId = GetContainerIdOrThrow();
         }
 
@@ -162,7 +164,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     {
                         throw new InvalidOperationException("Valid containerId can't be null.");
                     }
-                    return containerId;
+
+                    if (!_containerIdNormalizer.TryNormalize(containerId, out string? normalized))
+                    {
+                        throw new InvalidOperationException($"Container id format can't be recognized: {containerId}");
+                    }
+                    return normalized!;
                 }
             }
             throw new InvalidOperationException("Failed fetching container id.");
