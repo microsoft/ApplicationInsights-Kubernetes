@@ -4,7 +4,7 @@ using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
-namespace Microsoft.ApplicationInsights.Kubernetes;
+namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 
 /// <summary>
 /// A cache to hold the container id.
@@ -14,11 +14,15 @@ internal class ContainerIdHolder : IContainerIdHolder
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
 
     private readonly IEnumerable<IContainerIdProvider> _containerIdProviders;
+    private readonly IContainerIdNormalizer _containerIdNormalizer;
     private string? _containerId;
 
-    public ContainerIdHolder(IEnumerable<IContainerIdProvider> containerIdProviders)
+    public ContainerIdHolder(
+        IEnumerable<IContainerIdProvider> containerIdProviders,
+        IContainerIdNormalizer containerIdNormalizer)
     {
         _containerIdProviders = containerIdProviders ?? throw new System.ArgumentNullException(nameof(containerIdProviders));
+        _containerIdNormalizer = containerIdNormalizer ?? throw new ArgumentNullException(nameof(containerIdNormalizer));
     }
 
     public string? ContainerId
@@ -27,7 +31,7 @@ internal class ContainerIdHolder : IContainerIdHolder
         {
             if (string.IsNullOrEmpty(_containerId))
             {
-                _containerId = TryGetContainerId();
+                _ = TryGetContainerId(out _containerId) && _containerIdNormalizer.TryNormalize(_containerId!, out _containerId);
             }
             return _containerId;
         }
@@ -47,23 +51,30 @@ internal class ContainerIdHolder : IContainerIdHolder
         {
             containerStatus = containerStatuses[0];
             _logger.LogInformation(FormattableString.Invariant($"Use the only container inside the pod for container id: {containerStatus.ContainerID}"));
-            _containerId = containerStatus.ContainerID;
-            return true;
+
+            if (_containerIdNormalizer.TryNormalize(containerStatus.ContainerID, out string? normalizedContainerId))
+            {
+                _containerId = normalizedContainerId;
+                return true;
+            }
+
+            _logger.LogError(FormattableString.Invariant($"Normalization failed for container id: {containerStatus.ContainerID}"));
         }
         return false;
     }
 
-    private string? TryGetContainerId()
+    private bool TryGetContainerId(out string? containerId)
     {
+        containerId = null;
         foreach (IContainerIdProvider provider in _containerIdProviders)
         {
-            if (provider.TryGetMyContainerId(out string? containerId))
+            if (provider.TryGetMyContainerId(out containerId))
             {
                 _logger.LogInformation(FormattableString.Invariant($"Get container id by provider: {containerId}"));
-                return containerId;
+                return true;
             }
         }
-        return null;
+        return false;
     }
 }
 
