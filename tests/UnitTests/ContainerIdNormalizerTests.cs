@@ -25,16 +25,6 @@ public class ContainerIdNormalizerTests
         Assert.Equal(expected, actual);
     }
 
-    [Fact]
-    public void TryGetNormalizedShouldHandleStringEmpty()
-    {
-        ContainerIdNormalizer target = new ContainerIdNormalizer();
-        bool result = target.TryNormalize(string.Empty, out string actual);
-
-        Assert.True(result);
-        Assert.Equal(string.Empty, actual);
-    }
-
     [Theory]
     // Input has no container id
     [InlineData("Input has no container id")]
@@ -50,7 +40,17 @@ public class ContainerIdNormalizerTests
         bool result = target.TryNormalize(input, out string actual);
 
         Assert.False(result);
-        Assert.Equal(null, actual);
+        Assert.Null(actual);
+    }
+
+    [Fact]
+    public void TryGetNormalizedShouldHandleStringEmpty()
+    {
+        ContainerIdNormalizer target = new ContainerIdNormalizer();
+        bool result = target.TryNormalize(string.Empty, out string actual);
+
+        Assert.True(result);
+        Assert.Equal(string.Empty, actual);
     }
 
     [Fact]
