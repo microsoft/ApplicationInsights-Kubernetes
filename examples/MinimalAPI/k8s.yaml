@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-k8s-minimal-api-deployment
+  namespace: ai-k8s-demo
+  labels:
+    app: ai-k8s-minimal-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-k8s-minimal-api
+  template:
+    metadata:
+      labels:
+        app: ai-k8s-minimal-api
+    spec:
+      containers:
+      - name: ai-k8s-minimal-api-container
+        image: dockeraccount/ai-k8s-minimal-api:latest
+        ports:
+        - containerPort: 80
