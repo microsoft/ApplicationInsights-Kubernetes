@@ -106,15 +106,15 @@ To finish the walk-through, there are some prerequisites.
 
 _Notes: we are using dockerhub here as an example. you could use any container registry that deploys to your Kubernetes cluster._
 
-* Tag the image properly, for example:
+* Tag the image, bump up the version accordingly, for example:
     ```shell
-    docker tag workerapp dockerhub_account_name/ai-k8s-worker-example:latest
+    docker tag workerapp dockerhub_account_name/ai-k8s-worker-example:1.0.0
     ```
 
 * Push the image:
 
     ```shell
-    docker push dockerhub_account_name/ai-k8s-worker-example:latest
+    docker push dockerhub_account_name/ai-k8s-worker-example:1.0.0
     ```
 
 ## Deploy the container to K8s cluster
@@ -145,6 +145,8 @@ _Notes: we are using dockerhub here as an example. you could use any container r
     clusterrolebinding.rbac.authorization.k8s.io/appinsights-k8s-property-reader-binding created
 
 * Deploy it:
+
+    Making sure the `image` is up to date, including the version in [k8s.yml](./k8s.yml), and then:
 
     ```shell
     kubectl create -f .\k8s.yml

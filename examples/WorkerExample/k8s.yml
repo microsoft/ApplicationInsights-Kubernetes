@@ -17,4 +17,4 @@ spec:
     spec:
       containers:
       - name: ai-k8s-worker-example
-        image: docker_registry_account_name/ai-k8s-worker-example:latest
+        image: docker_registry_account_name/ai-k8s-worker-example:1.0.0
