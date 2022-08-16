@@ -106,6 +106,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 _logger.LogError("Unsupported OS.");
             }
 
+            serviceCollection.TryAddSingleton<IContainerIdNormalizer, ContainerIdNormalizer>();
+
             // Notes: pay attention to the order. Injecting uses the order of registering in this case.
             // For backward compatibility, $APPINSIGHTS_KUBERNETES_POD_NAME has been agreed upon to allow customize pod name with downward API.
             serviceCollection.TryAddEnumerable(ServiceDescriptor.Singleton<IPodNameProvider, UserSetPodNameProvider>());
