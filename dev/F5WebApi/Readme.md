@@ -49,7 +49,7 @@
     kubectl create -f ./k8s.yml
     ```
 
-1. Port forward for pod for local testing:
+1. Port forward to the pod for local testing:
 
     ```shell
     // Port forwarding from 127.0.0.1:8080 => 80
