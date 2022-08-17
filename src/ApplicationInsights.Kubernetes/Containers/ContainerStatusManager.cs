@@ -23,7 +23,7 @@ internal class ContainerStatusManager : IContainerStatusManager
 
     public async Task<bool> IsContainerReadyAsync(CancellationToken cancellationToken)
     {
-        V1ContainerStatus? myContainerStatus = await TryGetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
+        V1ContainerStatus? myContainerStatus = await GetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
         if (myContainerStatus is not null)
         {
             return IsContainerStatusReady(myContainerStatus);
@@ -32,7 +32,7 @@ internal class ContainerStatusManager : IContainerStatusManager
         return false;
     }
 
-    public async Task<V1ContainerStatus?> TryGetMyContainerStatusAsync(CancellationToken cancellationToken)
+    public async Task<V1ContainerStatus?> GetMyContainerStatusAsync(CancellationToken cancellationToken)
     {
         // Always get the latest status by querying the pod object
         V1Pod? myPod = await _podInfoManager.GetMyPodAsync(cancellationToken).ConfigureAwait(false);

@@ -134,7 +134,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
                     if (await _containerStatusManager.IsContainerReadyAsync(cancellationToken).ConfigureAwait(false))
                     {
-                        return await _containerStatusManager.TryGetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
+                        return await _containerStatusManager.GetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode != HttpStatusCode.Forbidden))

@@ -6,6 +6,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 
 internal interface IContainerStatusManager
 {
-    Task<V1ContainerStatus?> TryGetMyContainerStatusAsync(CancellationToken cancellationToken);
+    Task<V1ContainerStatus?> GetMyContainerStatusAsync(CancellationToken cancellationToken);
     Task<bool> IsContainerReadyAsync(CancellationToken cancellationToken);
 }
