@@ -7,7 +7,7 @@ namespace ApplicationInsights.Kubernetes.HostingStartup
     /// <summary>
     /// Hosting Startup point for Application Insights for Kubernetes.
     /// </summary>
-    public class K8sInjection : IHostingStartup
+    public class ApplicationInsightsForK8sHostingStartup : IHostingStartup
     {
         /// <summary>
         /// Configures the Application Insights for Kubernetes.
