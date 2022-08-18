@@ -46,10 +46,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 SDKVersionUtils.Instance,
                 keyCacheMock.Object);
 
-            Assert.NotNull(target._k8sEnvironment);
-            Assert.Equal(factoryMock.Object, target._k8sEnvFactory);
-            Assert.Equal(envMock.Object, target._k8sEnvironment);
-            Assert.Equal(keyCacheMock.Object, target._telemetryKeyCache);
+            Assert.NotNull(target.K8sEnvironment);
+            Assert.Equal(factoryMock.Object, target.K8sEnvFactory);
+            Assert.Equal(envMock.Object, target.K8sEnvironment);
+            Assert.Equal(keyCacheMock.Object, target.TelemetryKeyCache);
         }
 
         [Fact(DisplayName = "K8sTelemetryInitializer sets the cloud_RoleName")]
@@ -146,17 +146,17 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             envMock.Setup(env => env.ContainerID).Returns("Cid");
             envMock.Setup(env => env.ContainerName).Returns("CName");
-            envMock.Setup(env => env.PodID).Returns("Pid");
-            envMock.Setup(env => env.PodName).Returns("PName");
             envMock.Setup(env => env.PodLabels).Returns("PLabels");
             envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
             envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
             envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
             envMock.Setup(env => env.DeploymentName).Returns<string>(null);
             envMock.Setup(env => env.PodNamespace).Returns<string>(null);
-            // These 2 properties are required.
             envMock.Setup(env => env.NodeUid).Returns<string>(null);
             envMock.Setup(env => env.NodeName).Returns<string>(null);
+            // These 2 properties are required.
+            envMock.Setup(env => env.PodID).Returns<string>(null);
+            envMock.Setup(env => env.PodName).Returns<string>(null);
 
             var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
             envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
@@ -293,9 +293,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 GetOptions(TimeSpan.FromSeconds(1)),
                 SDKVersionUtils.Instance,
                 keyCacheMock.Object);
-            Assert.False(target._isK8sQueryTimeout);
+            Assert.False(target.IsK8sQueryTimeout);
             await Task.Delay(TimeSpan.FromSeconds(1));
-            Assert.True(target._isK8sQueryTimeout);
+            Assert.True(target.IsK8sQueryTimeout);
         }
 
         [Fact(DisplayName = "Slow K8s Env will not block the TelemetryInitializer")]
@@ -315,9 +315,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 keyCacheMock.Object);
 
             // K8s Environment is still null.
-            Assert.Null(target._k8sEnvironment);
+            Assert.Null(target.K8sEnvironment);
             // And is not yet timed out.
-            Assert.False(target._isK8sQueryTimeout);
+            Assert.False(target.IsK8sQueryTimeout);
         }
 
         [Fact(DisplayName = "K8sTelemetryInitializer make use of the key by the processor provided in the options.")]

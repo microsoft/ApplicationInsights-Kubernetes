@@ -3,6 +3,7 @@
     <!--Build-->
     <PropertyGroup>
         <LangVersion>10.0</LangVersion>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <OutputPath>$(MSBuildThisFileDirectory)..\bin\Debug\</OutputPath>
@@ -18,8 +19,8 @@
         <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)PublicKey.snk</AssemblyOriginatorKeyFile>
         <!--Package-->
         <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
-        <Version Condition=" '$(Version)' == '' ">2.0.0-private-$(VersionSuffix)</Version>
-        <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' " >2.0.0.0</AssemblyVersion>
+        <Version Condition=" '$(Version)' == '' ">3.0.0-private-$(VersionSuffix)</Version>
+        <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' ">3.0.0.0</AssemblyVersion>
         <Authors>Microsoft</Authors>
         <Company>Microsoft</Company>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
@@ -42,7 +43,7 @@
         </FilesToSign>
     </ItemGroup>
     <ItemGroup>
-        <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath=""/>
+        <None Include="$(MSBuildThisFileDirectory)../LICENSE" Pack="true" PackagePath="" />
         <None Include="$(MSBuildThisFileDirectory)/icon.png" Pack="true" PackagePath="images/" />
     </ItemGroup>
 </Project>
