@@ -1,8 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Load configuration from appsettings.json, including application insights connection string.
-builder.Configuration.AddJsonFile("appsettings.json", optional: false);
-
 // Enable application insights
 builder.Services.AddApplicationInsightsTelemetry();
 

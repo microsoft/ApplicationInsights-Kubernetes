@@ -1,24 +1,26 @@
-# Application Insights for Kubernetes on Minimal WebAPI
+# Application Insights for Kubernetes on WebAPI
 
-There is nothing special to use Minimal WebAPI with Application Insights for Kubernetes are the same.
+This page is a walk-though to enable `Application Insights for Kubernetes` in WebAPI project, including traditional WebAPI (controller-based) and minimal WebAPIs. The example code is separated in [WebAPI](./WebAPI/) and [MinimalAPI](./MinimalAPI/) respectively.
 
-More about minimal API, refer to [Minimal APIs overview](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-6.0);
+_To learn more about minimal API, please refer to [Minimal APIs overview](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-6.0)._
 
 ## Prerequisite
 
 * .NET 6 SDK - <https://dot.net>
-    * Verify dotnet version by:
+    * Verify dotnet version. For example:
         ```shell
         dotnet --version
         6.0.302
         ```
+    _You might have a slightly different patch version and that should be fine._
+
 * A Kubernetes Cluster that you can manage with `kubectl`.
     * If you don't have any, there are several options:
         * [Azure AKS](https://docs.microsoft.com/en-us/azure/aks/)
         * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
         * [MiniKube](https://minikube.sigs.k8s.io/docs/start/)
         * ...
-    * Verify that the credential is properly set for `kubectl`, for example:
+    * Verify that the credential is properly setup for `kubectl`, for example:
 
         ```shell
         kubectl get nodes
@@ -26,16 +28,28 @@ More about minimal API, refer to [Minimal APIs overview](https://docs.microsoft.
         aks-nodepool1-10984277-0    Ready    agent           5d8h   v1.24.1
         ```
 
-* A container image repository
-  * The image built will be pushed into an image repository. Dockerhub is used in this example.
+* A container image registry
+  * The image built will be pushed into an image registry. Dockerhub is used in this example. It should work with any image registry.
 
 ## Prepare the project
 
-1. Create the project by running:
+1. Create the project from templates
+
+    <details>
+        <summary>Expand for Control-Based WebAPI</summary>
 
     ```shell
-    dotnet new web
+    dotnet new webapi           # Create a control-based webapi from the template
     ```
+    </details>
+
+    <details>
+        <summary>Or expand me for Minimal WebAPI</summary>
+
+    ```shell
+    dotnet new web             # Create a minimal webapi from the template
+    ```
+    </details>
 
 1. Add NuGet packages
 
@@ -46,7 +60,7 @@ More about minimal API, refer to [Minimal APIs overview](https://docs.microsoft.
 
 ## Enable Application Insights for Kubernetes
 
-To enable Application Insights for Kubernetes, the services need to be registered in [Program.cs](./Program.cs):
+To enable Application Insights for Kubernetes, the services need to be registered:
 
 ```csharp
 ...
@@ -58,17 +72,34 @@ builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Information);
 ...
 ```
 
+See a full example for [WebAPI](./WebAPI/Program.cs) or [Minimal WebAPI](./MinimalAPI/Program.cs).
+
 ## Prepare the image
+
+1. Setup some variables for the convenience
+
+    ```shell
+    $imageName='ai-k8s-web-api'                     # Choose your tag name
+    $imageVersion='1.0.0'                           # Update the version of the container accordingly
+    $testAppName='test-ai-k8s-web-api'              # Used as the container instance name for local testing
+    $imageRegistryAccount='your-registry-account'   # Used to push the image
+    ```
+    _Note: That's an example in PowerShell. Tweak it accordingly in other shell like bash. You don't have to have those variables either._
 
 1. Build the image
 
-    This is a shorthands for you to build docker image for this example:
+    This is a shorthands to build docker image for this example:
 
     ```shell
-    docker build -t ai-k8s-minimal-api .
-    docker container rm test-ai-k8s-minimal-api -f # Making sure any existing container with the same name is deleted
-    docker run -d -p 8080:80 --name test-ai-k8s-minimal-api ai-k8s-minimal-api
-    docker logs test-ai-k8s-minimal-api
+    docker build -t "$imageName`:$imageVersion" .   # For powershell, you need to escape the colon(:).
+    docker container rm $testAppName -f             # Making sure any existing container with the same name is deleted
+    docker run -d -p 8080:80 --name $testAppName "$imageName`:$imageVersion"
+    ```
+
+1. Check the logs
+
+    ```shell
+    docker logs $testAppName
     ```
 
     When you see this error at the beginning of the logs, it means the container is ready to be put into a Kubernetes cluster:
@@ -83,7 +114,7 @@ builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Information);
     docker container rm test-ai-k8s-minimal-api -f
     ```
 
-2. Tag and push the image
+1. Tag and push the image
 
     ```shell
     docker tag ai-k8s-minimal-api:latest registry_account/ai-k8s-minimal-api:latest
