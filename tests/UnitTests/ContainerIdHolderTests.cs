@@ -53,4 +53,24 @@ public class ContainerIdHolderTests
         // The container id returned is normalized.
         Assert.Equal(expect, target.ContainerId);
     }
+
+    [Fact]
+    // A regression test to https://github.com/microsoft/ApplicationInsights-Kubernetes/issues/297.
+    public void NoContainerIdShouldNotLeadToException()
+    {
+        Mock<IContainerIdProvider> containerIdProviderMock = new();
+        ContainerIdNormalizer normalizer = new ContainerIdNormalizer();
+
+        // No container id matched by the provider.
+        string noContainerId = string.Empty;
+        containerIdProviderMock.Setup(p => p.TryGetMyContainerId(out noContainerId)).Returns(false);
+
+        ContainerIdHolder target = new ContainerIdHolder(
+            new IContainerIdProvider[] { containerIdProviderMock.Object },
+            normalizer);
+
+        // Validate that no exception is thrown.
+        Assert.NotNull(target);
+        Assert.Equal(string.Empty, target.ContainerId);
+    }
 }

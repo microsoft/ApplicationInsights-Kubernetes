@@ -65,7 +65,7 @@ internal class ContainerIdHolder : IContainerIdHolder
 
     private bool TryGetContainerId(out string? containerId)
     {
-        containerId = null;
+        containerId = string.Empty;
         foreach (IContainerIdProvider provider in _containerIdProviders)
         {
             if (provider.TryGetMyContainerId(out containerId))
@@ -74,6 +74,9 @@ internal class ContainerIdHolder : IContainerIdHolder
                 return true;
             }
         }
+
+        _logger.LogInformation("No container id found by container id providers.");
+
         return false;
     }
 }
