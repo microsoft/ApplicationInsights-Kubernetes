@@ -45,7 +45,7 @@ internal class ContainerIdNormalizer : IContainerIdNormalizer
         Match match = _matcher.Match(input);
         if (!match.Success)
         {
-            _logger.LogDebug($"Failed match any container id by pattern: {ContainerIdIdentifierPattern}.");
+            _logger.LogDebug($"Failed match any container id by pattern: {ContainerIdIdentifierPattern.EscapeForLoggingMessage()}.");
             normalized = null;
             return false;
         }
