@@ -2,11 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Moq;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.Containers.Tests;
+namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 
+[Collection(FullLoggingCollection.Name)]
 public class ContainerIdHolderTests
 {
     [Theory]

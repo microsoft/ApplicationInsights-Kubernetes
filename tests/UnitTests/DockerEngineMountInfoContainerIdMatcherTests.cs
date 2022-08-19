@@ -3,8 +3,9 @@
 using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Kubernetes;
+namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 
+[Collection(FullLoggingCollection.Name)]
 public class DockerEngineMountInfoContainerIdMatcherTests
 {
     private const string expectedContainerId = "7a0144cee1256c539fab790199527b7051aff1b603ebcf7ed3fd436440ef3b3a";

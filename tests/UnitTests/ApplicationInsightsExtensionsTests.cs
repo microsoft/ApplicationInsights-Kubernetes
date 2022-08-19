@@ -9,6 +9,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 /// Test ApplicationInsightsExtensions. The goal for this unit test is to enforce there being
 /// proper overloads for the user to call on the IServiceCollection.
 /// </summary>
+[Collection(FullLoggingCollection.Name)]
 public class ApplicationInsightsExtensionsTests
 {
     [Fact]
