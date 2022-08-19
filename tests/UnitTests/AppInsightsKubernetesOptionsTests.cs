@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 
+[Collection(FullLoggingCollection.Name)]
 public class AppInsightsKubernetesOptionsTests
 {
     [Fact]

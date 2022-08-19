@@ -22,5 +22,14 @@
 
             return String.Format(CultureInfo.InvariantCulture, "{0:0.#}{1}", doubleBytes, sizes[order]);
         }
+
+        public static string EscapeForLoggingMessage(this string original)
+        {
+            if (string.IsNullOrEmpty(original))
+            {
+                return original;
+            }
+            return original.Replace("{", "{{", StringComparison.Ordinal).Replace("}", "}}", StringComparison.Ordinal);
+        }
     }
 }

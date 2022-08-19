@@ -2,8 +2,9 @@ using System;
 using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Kubernetes;
+namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 
+[Collection(FullLoggingCollection.Name)]
 public class EnvironmentVariableContainerIdProviderTests
 {
     [Fact]

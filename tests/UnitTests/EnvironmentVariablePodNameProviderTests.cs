@@ -2,8 +2,9 @@ using System;
 using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Kubernetes;
+namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 
+[Collection(FullLoggingCollection.Name)]
 public class EnvironmentVariablePodNameProviderTests
 {
     [Fact(DisplayName = $"{nameof(EnvironmentVariablePodNameProviderBase.TryGetPodName)} should get value back.")]

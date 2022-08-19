@@ -9,7 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Kubernetes;
+namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
+
+[Collection(FullLoggingCollection.Name)]
 public class KubernetesEnablementTest
 {
     [Fact(DisplayName = "The required services are properly registered")]
