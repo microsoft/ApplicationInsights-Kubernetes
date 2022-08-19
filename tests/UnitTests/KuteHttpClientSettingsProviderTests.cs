@@ -14,7 +14,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                GetConatinerIdProviders(),
+                GetContainerIdProviders(),
                 containerIdNormalizer,
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -30,7 +30,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
-                GetConatinerIdProviders(),
+                GetContainerIdProviders(),
                 containerIdNormalizer,
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
@@ -46,7 +46,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
-                GetConatinerIdProviders(),
+                GetContainerIdProviders(),
                 containerIdNormalizer,
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
@@ -61,7 +61,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                GetConatinerIdProviders(),
+                GetContainerIdProviders(),
                 containerIdNormalizer,
                 pathToNamespace: "namespace",
                 pathToToken: "token",
@@ -75,11 +75,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             IKubeHttpClientSettingsProvider target = new KubeHttpSettingsWinContainerProvider(
-                GetConatinerIdProviders(),
+                GetContainerIdProviders(),
                 containerIdNormalizer,
                 serviceAccountFolder: ".",
                 namespaceFileName: "namespace",
-                tokenFileName:"token",
+                tokenFileName: "token",
                 kubernetesServiceHost: "127.0.0.1",
                 kubernetesServicePort: "8001");
 
@@ -91,7 +91,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                GetConatinerIdProviders(),
+                GetContainerIdProviders(),
                 containerIdNormalizer,
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -110,7 +110,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                GetConatinerIdProviders(),
+                GetContainerIdProviders(),
                 containerIdNormalizer,
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -129,7 +129,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
             KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
-                GetConatinerIdProviders(),
+                GetContainerIdProviders(),
                 containerIdNormalizer,
                 pathToNamespace: "namespace",
                 kubernetesServiceHost: "127.0.0.1",
@@ -143,7 +143,30 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.False(result);
         }
 
-        private IEnumerable<IContainerIdProvider> GetConatinerIdProviders()
+        [Fact]
+        public void ShouldAllowEmptyContainerId()
+        {
+            Mock<IContainerIdProvider> containerIdProvider = new();
+            IContainerIdNormalizer containerIdNormalizer = new ContainerIdNormalizer();
+
+            // Set up a container id provider that can't detect container id.
+            string containerId = null;
+            containerIdProvider.Setup(p => p.TryGetMyContainerId(out containerId)).Returns(false);
+
+            KubeHttpClientSettingsProvider target = new KubeHttpClientSettingsProvider(
+                new IContainerIdProvider[] { containerIdProvider.Object },
+                containerIdNormalizer,
+                pathToNamespace: "namespace",
+                kubernetesServiceHost: "127.0.0.1",
+                kubernetesServicePort: "8001");
+
+            // Validation: No exception thrown from constructing the object.
+            Assert.NotNull(target);
+
+            Assert.Equal(string.Empty, target.ContainerId);
+        }
+
+        private IEnumerable<IContainerIdProvider> GetContainerIdProviders()
         {
             yield return new EmptyContainerIdProvider();
         }
