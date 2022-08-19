@@ -1,6 +1,4 @@
-﻿// using System.Diagnostics;
-// using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace ApplicationInsights.Kubernetes.Examples;
@@ -23,7 +21,7 @@ class Program
                 // ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
 
                 services.AddApplicationInsightsTelemetryWorkerService();
-                services.AddApplicationInsightsKubernetesEnricher();
+                services.AddApplicationInsightsKubernetesEnricher(diagnosticLogLevel: Microsoft.Extensions.Logging.LogLevel.Information);
                 services.AddHostedService<Worker>();
             });
 }
