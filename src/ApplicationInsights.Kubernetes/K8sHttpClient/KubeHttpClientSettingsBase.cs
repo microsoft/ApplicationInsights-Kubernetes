@@ -41,7 +41,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             ServiceBaseAddress = new Uri(baseAddress, UriKind.Absolute);
             _containerIdProviders = containerIdProviders ?? throw new ArgumentNullException(nameof(containerIdProviders));
             _containerIdNormalizer = containerIdNormalizer ?? throw new ArgumentNullException(nameof(containerIdNormalizer));
-            ContainerId = GetContainerIdOrThrow();
+            ContainerId = GetContainerIdOrEmpty();
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             return File.ReadAllText(pathToNamespace);
         }
 
-        private string GetContainerIdOrThrow()
+        private string GetContainerIdOrEmpty()
         {
             foreach (IContainerIdProvider provider in _containerIdProviders)
             {
@@ -172,7 +172,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     return normalized!;
                 }
             }
-            throw new InvalidOperationException("Failed fetching container id.");
+
+            _logger.LogWarning("Failed fetching container id.");
+            return string.Empty;
         }
     }
 }
