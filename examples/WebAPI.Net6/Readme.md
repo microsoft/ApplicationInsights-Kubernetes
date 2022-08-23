@@ -186,9 +186,9 @@ Now that the image is in the container registry, it is time to deploy it to Kube
 
 1. Test the endpoint
 
-    One way to hit the endpoint is by port forwarding. Check out the example in [Deploy the application in Kubernetes](https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/develop/examples/ZeroUserCodeLightup.Net6/README.md#deploy-the-application-in-kubernetes), looking for "Port forward for testing" section specifically.
+    One way to hit the endpoint is by port forwarding. Check out the example in [Deploy the application in Kubernetes](../ZeroUserCodeLightup.Net6/README.md#deploy-the-application-in-kubernetes), looking for "Port forward for testing" section specifically.
 
-1. Delete the cluster after the test
+2. Delete the cluster after the test
 
     ```
     PS > kubectl delete -f k8s.yaml
