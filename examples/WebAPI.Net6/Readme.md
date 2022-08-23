@@ -1,8 +1,8 @@
 # Application Insights for Kubernetes on WebAPI
 
-This page is a walk-though to enable `Application Insights for Kubernetes` in WebAPI project, including traditional WebAPI (controller-based) and minimal WebAPIs. The example code is separated in [WebAPI](./WebAPI/) and [MinimalAPI](./MinimalAPI/) respectively.
+This page is a walk-through to enable `Application Insights for Kubernetes` in WebAPI projects, including traditional WebAPI (controller-based) and minimal WebAPIs. The example code is separated in [WebAPI](./WebAPI/) and [MinimalAPI](./MinimalAPI/) respectively.
 
-_To learn more about minimal API, please refer to [Minimal APIs overview](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-6.0)._
+_To learn more about minimal API, please refer to the [Minimal APIs overview](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-6.0)._
 
 ## Prerequisite
 
@@ -20,7 +20,7 @@ _To learn more about minimal API, please refer to [Minimal APIs overview](https:
         * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
         * [MiniKube](https://minikube.sigs.k8s.io/docs/start/)
         * ...
-    * Verify that the credential is properly setup for `kubectl`, for example:
+    * Verify that the credential is properly set up for `kubectl`, for example:
 
         ```shell
         kubectl get nodes
@@ -72,7 +72,7 @@ See a full example for [WebAPI](./WebAPI/Program.cs) or [Minimal WebAPI](./Minim
 
 ## Prepare the image
 
-1. Get the **dockerfile** ready. For example, refer to [this](./WebAPI/dockerfile) for WebAPI or [this](./MinimalAPI/dockerfile) for Minimal Web API, remember to update the `ENTRYPOINT` to align with your assembly name. For more about containerize an ASP.NET application, refer to [Dockerize an ASP.NET Core application](https://docs.docker.com/samples/dotnetcore/).
+1. Get the **dockerfile** ready. For example, refer to [this](./WebAPI/dockerfile) for WebAPI or [this](./MinimalAPI/dockerfile) for Minimal Web API, remember to update the `ENTRYPOINT` to align with your assembly name. For more about containerizing an ASP.NET application, refer to [Dockerize an ASP.NET Core application](https://docs.docker.com/samples/dotnetcore/).
 
 1. Setup some variables for the convenience
 
@@ -82,12 +82,12 @@ See a full example for [WebAPI](./WebAPI/Program.cs) or [Minimal WebAPI](./Minim
     $testAppName='test-ai-k8s-web-api'              # Used as the container instance name for local testing
     $imageRegistryAccount='your-registry-account'   # Used to push the image
     ```
-    _Note: In this example, we use PowerShell. Tweak it accordingly in other shells. Also you don't have to have those variables if you prefer to use the value directly below._
+    _Note: In this example, we use PowerShell. Tweak it accordingly in other shells. Also, you don't have to have those variables if you prefer to use the value directly below._
 
 1. Build the image
 
     ```shell
-    docker build -t "$imageName`:$imageVersion" .   # For powershell, you need to escape the colon(:).
+    docker build -t "$imageName`:$imageVersion" .   # For PowerShell, you need to escape the colon(:) with (`).
     docker container rm $testAppName -f             # Making sure any existing container with the same name is deleted
     docker run -d -p 8080:80 --name $testAppName "$imageName`:$imageVersion"
     ```
@@ -123,17 +123,17 @@ Now that the image is in the container registry, it is time to deploy it to Kube
 
 1. Deploy to a dedicated namespace
 
-    You could use default namespace, but it is recommended to put the test application in a dedicated one, for example 'ai-k8s-demo'. To deploy a namespace, use content in [k8s-namespace.yaml](../k8s-namespace.yaml):
+    You could use the default namespace, but it is recommended to put the test application in a dedicated one, for example, 'ai-k8s-demo'. To deploy a namespace, use content in [k8s-namespace.yaml](../k8s-namespace.yaml):
 
     ```shell
     kubectl create -f ..\k8s-namespace.yaml # tweak the path accordingly
     ```
 
-1. Setup proper role binding for RBAC enabled clusters
+1. Setup proper role binding for RBAC-enabled clusters
 
     If you have RBAC enabled for your cluster, permissions need to be granted to the service account to access the cluster info for telemetries. Refer to [Configure RBAC permissions](../../docs/configure-rbac-permissions.md) for details.
 
-    For example, deploy a role assignment in namespace of `ai-k8s-demo` by using [sa-role.yaml](../../docs/sa-role.yaml):
+    For example, deploy a role assignment in the namespace of `ai-k8s-demo` by using [sa-role.yaml](../../docs/sa-role.yaml):
 
     ```shell
     kubectl create -f ..\..\docs\sa-role.yaml # tweak the path accordingly
@@ -143,7 +143,7 @@ Now that the image is in the container registry, it is time to deploy it to Kube
 
 1. Deploy the application
 
-    Create a Kubernetes deployment file. Reference [k8s.yaml](./k8s.yaml) as an example, pay attention to **namespace**, **image** and **environment variables**, making sure they are properly setup.
+    Create a Kubernetes deployment file. Reference [k8s.yaml](./k8s.yaml) as an example, pay attention to **namespace**, **image**, and **environment variables**, making sure they are properly set up.
 
     Then run the following command to deploy the app:
 
@@ -186,8 +186,7 @@ Now that the image is in the container registry, it is time to deploy it to Kube
 
 1. Test the endpoint
 
-    One way to hit the endpoint is by port forwarding. Check an example in [Deploy the application in Kubernetes
-](https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/develop/examples/ZeroUserCodeLightup.Net6/README.md#deploy-the-application-in-kubernetes), looking for "Port forward for testing" specifically.
+    One way to hit the endpoint is by port forwarding. Check out the example in [Deploy the application in Kubernetes](https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/develop/examples/ZeroUserCodeLightup.Net6/README.md#deploy-the-application-in-kubernetes), looking for "Port forward for testing" section specifically.
 
 1. Delete the cluster after the test
 
