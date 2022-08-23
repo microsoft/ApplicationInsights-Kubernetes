@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: ai-k8s-minimal-api-container
-        image: dockeraccount/ai-k8s-minimal-api:latest
+        image: dockeraccount/ai-k8s-minimal-api:1.0.0
         ports:
         - containerPort: 80

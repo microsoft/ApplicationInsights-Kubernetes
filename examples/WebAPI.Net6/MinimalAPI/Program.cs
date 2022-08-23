@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationInsightsTelemetry();
 
 // Enable application insights for Kubernetes
-builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Trace);
+builder.Services.AddApplicationInsightsKubernetesEnricher(diagnosticLogLevel: LogLevel.Information);
 
 var app = builder.Build();
 

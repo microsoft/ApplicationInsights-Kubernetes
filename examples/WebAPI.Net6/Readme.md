@@ -35,23 +35,19 @@ _To learn more about minimal API, please refer to [Minimal APIs overview](https:
 
 1. Create the project from templates
 
-    <details>
-        <summary>Expand for Control-Based WebAPI</summary>
+    * For Control-Based WebAPI:
 
-    ```shell
-    dotnet new webapi           # Create a control-based webapi from the template
-    ```
-    </details>
+        ```shell
+        dotnet new webapi           # Create a control-based webapi from the template
+        ```
 
-    <details>
-        <summary>Or expand me for Minimal WebAPI</summary>
+    * For Minimal WebAPI
 
-    ```shell
-    dotnet new web             # Create a minimal webapi from the template
-    ```
-    </details>
+        ```shell
+        dotnet new web             # Create a minimal webapi from the template
+        ```
 
-1. Add NuGet packages
+2. Add NuGet packages
 
     ```shell
     dotnet add package Microsoft.ApplicationInsights.AspNetCore
@@ -68,7 +64,7 @@ To enable Application Insights for Kubernetes, the services need to be registere
 builder.Services.AddApplicationInsightsTelemetry();
 
 // Enable application insights for Kubernetes
-builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Information);
+builder.Services.AddApplicationInsightsKubernetesEnricher(diagnosticLogLevel: LogLevel.Information);
 ...
 ```
 
@@ -76,19 +72,19 @@ See a full example for [WebAPI](./WebAPI/Program.cs) or [Minimal WebAPI](./Minim
 
 ## Prepare the image
 
+1. Get the **dockerfile** ready. For example, refer to [this](./WebAPI/dockerfile) for WebAPI or [this](./MinimalAPI/dockerfile) for Minimal Web API, remember to update the `ENTRYPOINT` to align with your assembly name. For more about containerize an ASP.NET application, refer to [Dockerize an ASP.NET Core application](https://docs.docker.com/samples/dotnetcore/).
+
 1. Setup some variables for the convenience
 
     ```shell
-    $imageName='ai-k8s-web-api'                     # Choose your tag name
+    $imageName='ai-k8s-web-api'                     # Choose your own tag name
     $imageVersion='1.0.0'                           # Update the version of the container accordingly
     $testAppName='test-ai-k8s-web-api'              # Used as the container instance name for local testing
     $imageRegistryAccount='your-registry-account'   # Used to push the image
     ```
-    _Note: That's an example in PowerShell. Tweak it accordingly in other shell like bash. You don't have to have those variables either._
+    _Note: In this example, we use PowerShell. Tweak it accordingly in other shells. Also you don't have to have those variables if you prefer to use the value directly below._
 
 1. Build the image
-
-    This is a shorthands to build docker image for this example:
 
     ```shell
     docker build -t "$imageName`:$imageVersion" .   # For powershell, you need to escape the colon(:).
@@ -111,38 +107,39 @@ See a full example for [WebAPI](./WebAPI/Program.cs) or [Minimal WebAPI](./Minim
 1. Remove the running container
 
     ```shell
-    docker container rm test-ai-k8s-minimal-api -f
+    docker container rm $testAppName -f
     ```
 
 1. Tag and push the image
 
     ```shell
-    docker tag ai-k8s-minimal-api:latest registry_account/ai-k8s-minimal-api:latest
-    docker push registry_account/ai-k8s-minimal-api:latest
+    docker tag "$imageName`:$imageVersion" "$imageRegistryAccount/$imageName`:$imageVersion"
+    docker push "$imageRegistryAccount/$imageName`:$imageVersion"
     ```
-
 
 ## Deploy to Kubernetes Cluster
 
 Now that the image is in the container registry, it is time to deploy it to Kubernetes.
 
-1. Deploy to dedicated namespace
+1. Deploy to a dedicated namespace
 
-    You could use default namespace, but it is recommended to put the test application in a dedicated namespace, for example 'ai-k8s-demo'. To deploy a namespace, use content in [k8s-namespace.yaml](../k8s-namespace.yaml):
+    You could use default namespace, but it is recommended to put the test application in a dedicated one, for example 'ai-k8s-demo'. To deploy a namespace, use content in [k8s-namespace.yaml](../k8s-namespace.yaml):
 
     ```shell
-    kubectl create -f ..\k8s-namespace.yaml
+    kubectl create -f ..\k8s-namespace.yaml # tweak the path accordingly
     ```
 
 1. Setup proper role binding for RBAC enabled clusters
 
     If you have RBAC enabled for your cluster, permissions need to be granted to the service account to access the cluster info for telemetries. Refer to [Configure RBAC permissions](../../docs/configure-rbac-permissions.md) for details.
 
-    For example, deploy a role assignment in namespace of `ai-k8s-demo` by calling:
+    For example, deploy a role assignment in namespace of `ai-k8s-demo` by using [sa-role.yaml](../../docs/sa-role.yaml):
 
     ```shell
-    kubectl create -f ..\..\docs\sa-role.yaml
+    kubectl create -f ..\..\docs\sa-role.yaml # tweak the path accordingly
     ```
+
+    _Notes: Check the namespace for the service account in the yaml file._
 
 1. Deploy the application
 
@@ -155,3 +152,46 @@ Now that the image is in the container registry, it is time to deploy it to Kube
     ```
 
     To learn more about Kubernetes deployment, please refer to [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/).
+
+1. Check out the pod deployed:
+
+    ```shell
+    kubectl get pods --namespace ai-k8s-demo    # Or whatever your namespace of choice.
+    ```
+
+    And you will see something like this:
+
+    ```
+    PS > kubectl get pods --namespace ai-k8s-demo
+    NAME                                             READY   STATUS    RESTARTS   AGE
+    some-other-pod-that-has-run-for-10-days-pmfdc    1/1     Running   0          10d
+    ai-k8s-web-api-deployment-97d688b46-7cxs5        1/1     Running   0          2m58s           <==== created ~3 minutes ago
+    ```
+
+    Check out the logs, for example:
+
+    ```shell
+    PS > kubectl logs ai-k8s-web-api-deployment-97d688b46-7cxs5 --namespace ai-k8s-demo
+    [Information] [2022-08-23T21:32:01.0135029Z] [CGroupContainerIdProvider] Got container id: 41a149977b4ea424947d54c59e7f63d32664e19503adda762004250f72db7687
+    [Information] [2022-08-23T21:32:01.2737318Z] Found pod by name providers: ai-k8s-web-api-deployment-97d688b46-7cxs5
+    info: Microsoft.Hosting.Lifetime[14]
+        Now listening on: http://[::]:80
+    info: Microsoft.Hosting.Lifetime[0]
+        Application started. Press Ctrl+C to shut down.
+    info: Microsoft.Hosting.Lifetime[0]
+        Hosting environment: Production
+    info: Microsoft.Hosting.Lifetime[0]
+        Content root path: /app/
+    ```
+
+1. Test the endpoint
+
+    One way to hit the endpoint is by port forwarding. Check an example in [Deploy the application in Kubernetes
+](https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/develop/examples/ZeroUserCodeLightup.Net6/README.md#deploy-the-application-in-kubernetes), looking for "Port forward for testing" specifically.
+
+1. Delete the cluster after the test
+
+    ```
+    PS > kubectl delete -f k8s.yaml
+    deployment.apps "ai-k8s-web-api-deployment" deleted
+    ```

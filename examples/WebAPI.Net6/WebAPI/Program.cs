@@ -11,7 +11,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationInsightsTelemetry();
 
 // Enable application insights for Kubernetes
-builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Information);
+builder.Services.AddApplicationInsightsKubernetesEnricher(diagnosticLogLevel: LogLevel.Information);
 
 var app = builder.Build();
 
