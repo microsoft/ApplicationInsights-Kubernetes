@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-k8s-web-api-deployment
+  namespace: ai-k8s-demo
+  labels:
+    app: ai-k8s-web-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-k8s-web-api
+  template:
+    metadata:
+      labels:
+        app: ai-k8s-web-api
+    spec:
+      containers:
+        - name: ai-k8s-web-api-container
+          image: dockeraccount/ai-k8s-web-api:1.0.0
+          ports:
+            - containerPort: 80

@@ -7,7 +7,7 @@ This repository has code for Application Insights for Kubernetes, which works on
 
 ![Screenshot for Application Insights for Kubernetes enhanced telemetry](./docs/TelemetryEnhancement.png)
 
-**Note:** `Microsoft Application Insights for Kubernetes` (this library) is an enhancement to the [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore). You can choose to run **Application Insights** without this library in Kubernetes cluster too. However, when using `Microsoft Application Insights for Kubernetes`, you will see Kubernetes related properties like *Pod-Name, Deployment ...* on all your telemetry entries. Proper values will also be set to make use of the rich features like enabling the Application Map to show the multiple micro services on the same map.
+**Note:** `Microsoft Application Insights for Kubernetes` (this library) is an enhancement to the [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore). You can choose to run **Application Insights** without this library in a Kubernetes cluster. However, when using `Microsoft Application Insights for Kubernetes`, you will see Kubernetes-related properties like *Pod-Name, Deployment ...* on all your telemetry entries. Proper values will also be set to make use of the rich features like enabling the Application Map to show the multiple microservices on the same map.
 
 ## Continuous Integration Status
 
@@ -17,7 +17,10 @@ This repository has code for Application Insights for Kubernetes, which works on
 
 ## Get Started
 
-This is a quick guide for ASP.NET Core project. For [Worker Services in .NET](https://docs.microsoft.com/en-us/dotnet/core/extensions/workers), refer to [Application Insights Kubernetes Example (Worker)](./examples/WorkerExample/Readme.md).
+This is a quick guide for ASP.NET Core project.
+
+* For [Worker Services in .NET](https://docs.microsoft.com/en-us/dotnet/core/extensions/workers), refer to the [Application Insights Kubernetes worker example](./examples/WorkerExample/Readme.md).
+* For ASP.NET Core WebAPI or ASP.NET Minimal Web API, refer to the [Application Insights for Kubernetes on WebAPI example](./examples/WebAPI.Net6/).
 
 ### Prerequisite
 
@@ -25,13 +28,13 @@ This is a quick guide for ASP.NET Core project. For [Worker Services in .NET](ht
 * [Docker Containers](https://www.docker.com/)
 * [Kubernetes](https://kubernetes.io/)
 
-* For RBAC enabled Kubernetes, making sure [permissions are configured](./docs/configure-rbac-permissions.md).
+* For RBAC-enabled Kubernetes, make sure [permissions are configured](./docs/configure-rbac-permissions.md).
 
 ### Instrument an ASP.NET Core application
 
 These are the basic steps to instrument an ASP.NET Core application to enable Application Insights for Kubernetes. You will need to run the application in containers managed by Kubernetes to see the change.
 
-1. Add reference to **Application Insights SDK** and **Application Insights for Kubernetes**:
+1. Add references to **Application Insights SDK** and **Application Insights for Kubernetes**:
 
     ```shell
     dotnet add package Microsoft.ApplicationInsights.AspNetCore
@@ -53,7 +56,8 @@ These are the basic steps to instrument an ASP.NET Core application to enable Ap
 
 1. Build the application in containers, then deploy the container with Kubernetes.
 
-**Notes:** Those steps are not considered the best practice to set the instrumentation key for application insights. Refer to [Enable Application Insights server-side telemetry](https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core#enable-application-insights-server-side-telemetry-without-visual-studio) for various options. Also, consider deploy Kubernetes Secrets to secure it.
+**Notes:** Those steps are not considered the best practice to set the instrumentation key for application insights. Refer to [Enable Application Insights server-side telemetry](https://docs.microsoft.com/en-us/azure/azure-monitor/app/asp-net-core#enable-application-insights-server-side-telemetry-without-visual-studio) for various options. Also, consider deploying [Kubernetes Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) to secure it. Refer to [Deploy the application in Kubernetes
+](examples/ZeroUserCodeLightup.Net6/README.md#deploy-the-application-in-kubernetes) for an example.
 
 ### Walk-through
 
@@ -112,7 +116,7 @@ Use the [troubleshooting image](https://github.com/Microsoft/ApplicationInsights
 
 ### Learn more
 
-* To build a container for Kubernetes that have Application Insights baked in for the existing applications, please refer the example of [Zero Code light up](https://github.com/Microsoft/ApplicationInsights-Kubernetes/tree/develop/examples/ZeroUserCodeLightup).
+* To build a container for Kubernetes that have Application Insights baked in for the existing applications, please refer to the example of [Zero Code light up](https://github.com/Microsoft/ApplicationInsights-Kubernetes/tree/develop/examples/ZeroUserCodeLightup).
 * To enable diagnostic logs when Application Insights for Kubernetes doesn't work as expected, reference [How to enable self diagnostics for ApplicationInsights.Kubernetes](docs/SelfDiagnostics.MD).
 * Still want more? Read the [Wikis](https://github.com/Microsoft/ApplicationInsights-Kubernetes/wiki).
 
