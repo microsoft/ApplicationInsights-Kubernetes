@@ -7,7 +7,7 @@ This repository has code for Application Insights for Kubernetes, which works on
 
 ![Screenshot for Application Insights for Kubernetes enhanced telemetry](./docs/TelemetryEnhancement.png)
 
-**Note:** `Microsoft Application Insights for Kubernetes` (this library) is an enhancement to the [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore). You can choose to run **Application Insights** without this library in Kubernetes cluster. However, when using `Microsoft Application Insights for Kubernetes`, you will see Kubernetes related properties like *Pod-Name, Deployment ...* on all your telemetry entries. Proper values will also be set to make use of the rich features like enabling the Application Map to show the multiple microservices on the same map.
+**Note:** `Microsoft Application Insights for Kubernetes` (this library) is an enhancement to the [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore). You can choose to run **Application Insights** without this library in a Kubernetes cluster. However, when using `Microsoft Application Insights for Kubernetes`, you will see Kubernetes-related properties like *Pod-Name, Deployment ...* on all your telemetry entries. Proper values will also be set to make use of the rich features like enabling the Application Map to show the multiple microservices on the same map.
 
 ## Continuous Integration Status
 
