@@ -17,7 +17,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
         private readonly K8sEnvironmentHolder _k8SEnvironmentHolder;
         private readonly SDKVersionUtils _sdkVersionUtils;
-        private bool _isK8sQueryTimeoutReported = false;
         internal ITelemetryKeyCache TelemetryKeyCache { get; }
         internal IK8sEnvironment? K8sEnvironment { get; private set; }
 
@@ -53,12 +52,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             else
             {
                 _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is used but the content has not ready yet.");
-
-                if (_k8SEnvironmentHolder?.IsQueryTimeout == true && !_isK8sQueryTimeoutReported)
-                {
-                    _isK8sQueryTimeoutReported = true;
-                    _logger.LogError("Query Kubernetes Environment timeout.");
-                }
             }
 
             telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;

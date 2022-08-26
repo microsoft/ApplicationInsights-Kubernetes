@@ -18,6 +18,8 @@ internal class K8sInfoBackgroundService : BackgroundService
     private readonly K8sEnvironmentHolder _k8SEnvironmentHolder;
     private readonly AppInsightsForKubernetesOptions _options;
 
+    // Notice: This is a background service, the service lifetime will be singleton.
+    // Do NOT inject services in scope of Scoped or Transient. Use the injected service provider instead.
     public K8sInfoBackgroundService(
         IServiceProvider serviceProvider,
         K8sEnvironmentHolder k8SEnvironmentHolder,
@@ -30,15 +32,17 @@ internal class K8sInfoBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        TimeSpan interval = _options.ClusterInfoRefreshInterval;
+        
         while (true)
         {
             try
             {
                 _logger.LogDebug($"Starting {nameof(UpdateK8sEnvironmentAsync)}");
-                await UpdateK8sEnvironmentAsync(stoppingToken).ConfigureAwait(false);
-                TimeSpan interval = _options.ClusterInfoRefreshInterval;
+                await UpdateK8sEnvironmentAsync(cancellationToken: stoppingToken).ConfigureAwait(false);
                 _logger.LogDebug($"Finished {nameof(UpdateK8sEnvironmentAsync)}, delay for {interval}");
-                await Task.Delay(interval);
+
+                await Task.Delay(interval, cancellationToken: stoppingToken);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -55,19 +59,19 @@ internal class K8sInfoBackgroundService : BackgroundService
     {
         await using (AsyncServiceScope scope = _serviceProvider.CreateAsyncScope())
         {
-            // Get scoped service ready
+            // Get scoped services ready
             IServiceProvider provider = scope.ServiceProvider;
             IK8sEnvironmentFactory factory = provider.GetRequiredService<IK8sEnvironmentFactory>();
 
             // Prepare cancellation token with timeout.
             using CancellationTokenSource timeoutSource = new CancellationTokenSource(_options.InitializationTimeout);
             CancellationToken timeoutToken = timeoutSource.Token;
-            
+
             try
             {
                 using (CancellationTokenSource linkedTokeSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutToken))
                 {
-
+                    // Build a new environment instance to replace the last one.
                     IK8sEnvironment? environment = await factory.CreateAsync(cancellationToken: linkedTokeSource.Token).ConfigureAwait(false);
                     _k8SEnvironmentHolder.K8sEnvironment = environment;
                 }
@@ -76,9 +80,8 @@ internal class K8sInfoBackgroundService : BackgroundService
             {
                 if (timeoutToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning("Querying Kubernetes cluster info timed out.");
+                    _logger.LogError("Querying Kubernetes cluster info timed out.");
                     _k8SEnvironmentHolder.K8sEnvironment = null;
-                    _k8SEnvironmentHolder.IsQueryTimeout = true;
                 }
                 else
                 {

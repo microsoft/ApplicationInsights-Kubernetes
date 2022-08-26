@@ -108,7 +108,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 // When there is no readiness probe, the minimum seems about 1000ms. 
                 // Try invoke a probe on readiness every 500ms until the container is ready
                 // Or it will timeout per the timeout settings.
-                await Task.Delay(500).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromMilliseconds(500), cancellationToken: cancellationToken).ConfigureAwait(false);
             } while (true);
         }
 
@@ -131,7 +131,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
                 try
                 {
-
                     if (await _containerStatusManager.IsContainerReadyAsync(cancellationToken).ConfigureAwait(false))
                     {
                         return await _containerStatusManager.GetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
@@ -148,7 +147,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 // When there is no readiness probe, the minimum seems about 1000ms. 
                 // Try invoke a probe on readiness every 500ms until the container is ready
                 // Or it will timeout per the timeout settings.
-                await Task.Delay(500).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromMilliseconds(500), cancellationToken: cancellationToken).ConfigureAwait(false);
             } while (true);
         }
 

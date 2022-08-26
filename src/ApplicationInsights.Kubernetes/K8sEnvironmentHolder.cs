@@ -5,11 +5,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 /// </summary>
 internal sealed class K8sEnvironmentHolder
 {
-    private K8sEnvironmentHolder()
-    {
-        IsQueryTimeout = false;
-    }
-    
+    private K8sEnvironmentHolder() { }
+
     public static K8sEnvironmentHolder Instance { get; } = new K8sEnvironmentHolder();
 
     /// <summary>
@@ -17,9 +14,4 @@ internal sealed class K8sEnvironmentHolder
     /// Returns null when the environment is info is not ready for consuming.
     /// </summary>
     public IK8sEnvironment? K8sEnvironment { get; internal set; }
-
-    /// <summary>
-    /// Gets whether the query for K8s cluster info timed out or not.
-    /// </summary>
-    public bool IsQueryTimeout { get; internal set; }
 }
