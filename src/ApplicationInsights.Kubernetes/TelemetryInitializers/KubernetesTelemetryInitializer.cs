@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using static Microsoft.ApplicationInsights.Kubernetes.TelemetryProperty;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
@@ -21,43 +15,27 @@ namespace Microsoft.ApplicationInsights.Kubernetes
     internal class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
         private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
-
+        private readonly K8sEnvironmentHolder _k8SEnvironmentHolder;
         private readonly SDKVersionUtils _sdkVersionUtils;
-        private readonly DateTime _timeoutAt;
         private bool _isK8sQueryTimeoutReported = false;
-
-        internal AppInsightsForKubernetesOptions Options { get; }
         internal ITelemetryKeyCache TelemetryKeyCache { get; }
-        internal IK8sEnvironmentFactory K8sEnvFactory { get; }
-        internal bool IsK8sQueryTimeout { get; private set; } = false;
         internal IK8sEnvironment? K8sEnvironment { get; private set; }
 
         public KubernetesTelemetryInitializer(
-            IK8sEnvironmentFactory k8sEnvFactory,
-            IOptions<AppInsightsForKubernetesOptions> options,
+            K8sEnvironmentHolder k8SEnvironmentHolder,
             SDKVersionUtils sdkVersionUtils,
             ITelemetryKeyCache telemetryKeyCache)
         {
             K8sEnvironment = null;
-
-            // Options can't be null.
-            Debug.Assert(options != null, "Options can't be null.");
-            Options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-
-            _logger.LogDebug(@"Initialize Application Insights for Kubernetes telemetry initializer with Options:
-{0}", JsonConvert.SerializeObject(Options));
-
             TelemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
+            _k8SEnvironmentHolder = k8SEnvironmentHolder ?? throw new ArgumentNullException(nameof(k8SEnvironmentHolder));
             _sdkVersionUtils = sdkVersionUtils ?? throw new ArgumentNullException(nameof(sdkVersionUtils));
-            _timeoutAt = DateTime.Now.Add(Options.InitializationTimeout);
-            K8sEnvFactory = k8sEnvFactory ?? throw new ArgumentNullException(nameof(k8sEnvFactory));
-
-            _ = SetK8sEnvironment(default);
         }
 
         public void Initialize(ITelemetry telemetry)
         {
-            IK8sEnvironment? k8sEnv = K8sEnvironment;
+            IK8sEnvironment? k8sEnv = K8sEnvironment = _k8SEnvironmentHolder.K8sEnvironment;
+
             if (k8sEnv != null)
             {
                 _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is invoked.", k8sEnv.PodName);
@@ -76,13 +54,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             {
                 _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is used but the content has not ready yet.");
 
-                if (IsK8sQueryTimeout)
+                if (_k8SEnvironmentHolder?.IsQueryTimeout == true && !_isK8sQueryTimeoutReported)
                 {
-                    if (!_isK8sQueryTimeoutReported)
-                    {
-                        _isK8sQueryTimeoutReported = true;
-                        _logger.LogError("Query Kubernetes Environment timeout.");
-                    }
+                    _isK8sQueryTimeoutReported = true;
+                    _logger.LogError("Query Kubernetes Environment timeout.");
                 }
             }
 
@@ -106,37 +81,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 _logger.LogTrace("This telemetry object doesn't implement ISupportProperties.");
             }
             _logger.LogTrace("Finish telemetry initializer.");
-        }
-
-        private async Task SetK8sEnvironment(CancellationToken cancellationToken)
-        {
-            try
-            {
-                Task<IK8sEnvironment?> createK8sEnvTask = K8sEnvFactory.CreateAsync(_timeoutAt, cancellationToken);
-                await Task.WhenAny(
-                    createK8sEnvTask,
-                    Task.Delay(_timeoutAt - DateTime.Now)).ConfigureAwait(false);
-
-                if (createK8sEnvTask.IsCompleted && createK8sEnvTask.Result is not null)
-                {
-                    _logger.LogDebug("Application Insights for Kubernetes environment initialized.");
-                    K8sEnvironment = createK8sEnvTask.Result;
-                }
-                else
-                {
-                    IsK8sQueryTimeout = true;
-                    K8sEnvironment = null;
-                    _logger.LogError("Application Insights for Kubernetes environment initialization failed. Please review the logs for details.");
-                }
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-            {
-                // In case of any unexpected exception, we shall log it than let it throw.
-                _logger.LogError("Unexpected error happened. Telemetry enhancement with Kubernetes info won't happen. Message: {0}", ex.Message);
-                _logger.LogTrace("Unexpected error happened. Telemetry enhancement with Kubernetes info won't happen. Details: {0}", ex.ToString());
-            }
-#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         private void SetCustomDimensions(ISupportProperties telemetry, IK8sEnvironment k8sEnvironment)

@@ -38,15 +38,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// Async factory method to build the instance of a K8sEnvironment.
         /// </summary>
         /// <returns></returns>
-        public async Task<IK8sEnvironment?> CreateAsync(DateTime timeoutAt, CancellationToken cancellationToken)
+        public async Task<IK8sEnvironment?> CreateAsync(CancellationToken cancellationToken)
         {
             try
             {
                 // When my pod become available and it's status become ready, we recognize the container is ready.
 
                 // TODO: See if there's better way to fetch pod
-                V1Pod myPod = await SpinWaitUntilGetPodAsync(timeoutAt, cancellationToken).ConfigureAwait(false);
-                V1ContainerStatus? containerStatus = await SpinWaitContainerReadyAsync(timeoutAt, cancellationToken).ConfigureAwait(false);
+                V1Pod myPod = await SpinWaitUntilGetPodAsync(cancellationToken).ConfigureAwait(false);
+                V1ContainerStatus? containerStatus = await SpinWaitContainerReadyAsync(cancellationToken).ConfigureAwait(false);
 
                 // Fetch replica set info
                 IEnumerable<V1ReplicaSet> allReplicaSet = await _k8sClient.GetReplicaSetsAsync(cancellationToken).ConfigureAwait(false);
@@ -77,13 +77,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 #pragma warning restore CA1031 // Do not catch general exception types
         }
 
-        private async Task<V1Pod> SpinWaitUntilGetPodAsync(DateTime timeoutAt, CancellationToken cancellationToken)
+        private async Task<V1Pod> SpinWaitUntilGetPodAsync(CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             V1Pod? myPod = null;
             do
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
                     myPod = await _podInfoManager.GetMyPodAsync(cancellationToken).ConfigureAwait(false);
@@ -107,28 +109,26 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 // Try invoke a probe on readiness every 500ms until the container is ready
                 // Or it will timeout per the timeout settings.
                 await Task.Delay(500).ConfigureAwait(false);
-            } while (DateTime.Now < timeoutAt);
-
-            _logger.LogDebug($"{nameof(SpinWaitUntilGetPodAsync)} timed out.");
-            throw new InvalidOperationException("Can't find pod information in given time.");
+            } while (true);
         }
 
         /// <summary>
         /// Waits until the container is ready.
         /// Refer document @ https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase for the Pod's lifecycle.
         /// </summary>
-        /// <param name="timeoutAt">A point in time when the wait on container startup is abandoned.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>
         /// Returns the pod with refreshed info on it.
         /// </returns>
-        private async Task<V1ContainerStatus?> SpinWaitContainerReadyAsync(DateTime timeoutAt, CancellationToken cancellationToken)
+        private async Task<V1ContainerStatus?> SpinWaitContainerReadyAsync(CancellationToken cancellationToken)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
             do
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 try
                 {
 
@@ -149,8 +149,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 // Try invoke a probe on readiness every 500ms until the container is ready
                 // Or it will timeout per the timeout settings.
                 await Task.Delay(500).ConfigureAwait(false);
-            } while (DateTime.Now < timeoutAt);
-            throw new InvalidOperationException("Container is not ready within the given period.");
+            } while (true);
         }
 
         private void HandleUnauthorizedAccess(HttpOperationException exception)
