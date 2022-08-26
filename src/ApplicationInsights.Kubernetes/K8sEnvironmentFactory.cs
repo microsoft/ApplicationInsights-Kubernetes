@@ -122,9 +122,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// </returns>
         private async Task<V1ContainerStatus?> SpinWaitContainerReadyAsync(CancellationToken cancellationToken)
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
