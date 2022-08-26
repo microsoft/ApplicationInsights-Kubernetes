@@ -46,10 +46,14 @@ internal class ContainerStatusManager : IContainerStatusManager
         //Known container id
         if (!string.IsNullOrEmpty(containerId))
         {
+            // There is a container id, check the status
             if (_podInfoManager.TryGetContainerStatus(myPod, containerId, out V1ContainerStatus? foundContainerStatus))
             {
+                // Found status
                 return foundContainerStatus;
             }
+            // Container status not ready yet.
+            return null;
         }
 
         // If there's no container id provided by the container id holder, at this moment, try backfill
