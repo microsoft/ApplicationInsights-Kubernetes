@@ -33,8 +33,8 @@ internal class K8sInfoBackgroundService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         TimeSpan interval = _options.ClusterInfoRefreshInterval;
-        
-        while (true)
+
+        while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
