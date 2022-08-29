@@ -15,14 +15,14 @@ internal class K8sInfoBackgroundService : BackgroundService
 {
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     private readonly IServiceProvider _serviceProvider;
-    private readonly K8sEnvironmentHolder _k8SEnvironmentHolder;
+    private readonly IK8sEnvironmentHolder _k8SEnvironmentHolder;
     private readonly AppInsightsForKubernetesOptions _options;
 
     // Notice: This is a background service, the service lifetime will be singleton.
     // Do NOT inject services in scope of Scoped or Transient. Use the injected service provider instead.
     public K8sInfoBackgroundService(
         IServiceProvider serviceProvider,
-        K8sEnvironmentHolder k8SEnvironmentHolder,
+        IK8sEnvironmentHolder k8SEnvironmentHolder,
         IOptions<AppInsightsForKubernetesOptions> options)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
