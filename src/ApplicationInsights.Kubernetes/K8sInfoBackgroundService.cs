@@ -40,7 +40,7 @@ internal class K8sInfoBackgroundService : BackgroundService
             {
                 _logger.LogDebug($"Starting {nameof(UpdateK8sEnvironmentAsync)}");
                 await UpdateK8sEnvironmentAsync(cancellationToken: stoppingToken).ConfigureAwait(false);
-                _logger.LogDebug($"Finished {nameof(UpdateK8sEnvironmentAsync)}, next iteration will happen at {DateTime.Now.Add(interval)} by interval settings of {interval}");
+                _logger.LogDebug($"Finished {nameof(UpdateK8sEnvironmentAsync)}, next iteration will happen at {DateTime.UtcNow.Add(interval)} (UTC) by interval settings of {interval}");
 
                 await Task.Delay(interval, cancellationToken: stoppingToken);
             }
