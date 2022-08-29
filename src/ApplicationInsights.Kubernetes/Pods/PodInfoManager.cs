@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
+using Microsoft.Rest;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 
@@ -92,5 +95,42 @@ internal class PodInfoManager : IPodInfoManager
                         status => !string.IsNullOrEmpty(status.ContainerID) && status.ContainerID.IndexOf(containerId, StringComparison.OrdinalIgnoreCase) != -1);
 
         return containerStatus is not null;
+    }
+
+    /// <inheritdoc />
+    public async Task<V1Pod> WaitUntilMyPodReadyAsync(CancellationToken cancellationToken)
+    {
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        V1Pod? myPod = null;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                myPod = await GetMyPodAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode != HttpStatusCode.Forbidden))
+            {
+                _logger.LogWarning($"Query exception while trying to get pod info: {ex.Message}");
+                _logger.LogDebug(ex.ToString());
+            }
+
+            stopwatch.Stop();
+            if (myPod is not null)
+            {
+                _logger.LogDebug(FormattableString.Invariant($"K8s pod info available in: {stopwatch.ElapsedMilliseconds} ms."));
+                return myPod;
+            }
+
+            // The time to get the container ready depends on how much time will a container to be initialized.
+            // When there is readiness probe, the pod info will not be available until the initial delay of it is elapsed.
+            // When there is no readiness probe, the minimum seems about 1000ms. 
+            // Try invoke a probe on readiness every 500ms until the container is ready
+            // Or it will timeout per the timeout settings.
+            await Task.Delay(TimeSpan.FromMilliseconds(500), cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
     }
 }
