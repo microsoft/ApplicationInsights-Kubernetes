@@ -42,6 +42,7 @@ internal class K8sInfoBackgroundService : BackgroundService
                 await UpdateK8sEnvironmentAsync(cancellationToken: stoppingToken).ConfigureAwait(false);
                 _logger.LogDebug($"Finished {nameof(UpdateK8sEnvironmentAsync)}, next iteration will happen at {DateTime.UtcNow.Add(interval)} (UTC) by interval settings of {interval}");
 
+                // TODO: Consider using PeriodicTimer than delay below when move to .NET 6 +
                 await Task.Delay(interval, cancellationToken: stoppingToken);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
