@@ -19,5 +19,5 @@ internal interface IK8sClientService
 
     Task<IEnumerable<V1Deployment>> GetDeploymentsAsync(CancellationToken cancellationToken);
 
-    Task<IEnumerable<V1Node>> GetNodesAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<V1Node>> GetNodesAsync(bool ignoreForbiddenException, CancellationToken cancellationToken);
 }
