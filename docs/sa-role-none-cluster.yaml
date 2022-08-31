@@ -1,0 +1,24 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: ai-k8s-demo
+  name: appinsights-k8s-property-reader-role
+rules:
+- apiGroups: ["", "apps"]
+  resources: ["pods", "replicasets", "deployments"]
+  verbs: ["get", "list"]
+---
+# Actual RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata: 
+  name: appinsights-k8s-property-reader-binding
+  namespace: ai-k8s-demo
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: ai-k8s-demo
+roleRef:
+  kind: Role
+  name: appinsights-k8s-property-reader-role
+  apiGroup: rbac.authorization.k8s.io
