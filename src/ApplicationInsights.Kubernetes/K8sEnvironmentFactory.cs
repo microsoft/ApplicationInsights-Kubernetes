@@ -106,7 +106,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
                     if (instance.myPod is not null)
                     {
-                        IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync(cancellationToken).ConfigureAwait(false);
+                        IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync(ignoreForbiddenException: true, cancellationToken: cancellationToken).ConfigureAwait(false);
                         string nodeName = instance.myPod.Spec.NodeName;
                         if (!string.IsNullOrEmpty(nodeName))
                         {
