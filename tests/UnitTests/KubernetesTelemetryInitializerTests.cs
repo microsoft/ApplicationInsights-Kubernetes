@@ -1,13 +1,9 @@
-﻿using System;
+using System;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -16,7 +12,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 [Collection(FullLoggingCollection.Name)]
 public class KubernetesTelemetryInitializerTests
 {
-    [Fact(DisplayName = "K8sEnvFactory can't be null in K8sTelemetryInitializer")]
+    [Fact(DisplayName = "K8sEnvironmentHolder can't be null in K8sTelemetryInitializer")]
     public void ConstructorSetsNullGetsNull()
     {
         ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
@@ -24,47 +20,44 @@ public class KubernetesTelemetryInitializerTests
             Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 null,
-                GetOptions(TimeSpan.FromSeconds(1)),
                 SDKVersionUtils.Instance,
                 keyCacheMock.Object
                 );
         });
 
-        Assert.Equal("k8sEnvFactory", ex.ParamName);
+        Assert.Equal("k8sEnvironmentHolder", ex.ParamName);
     }
 
     [Fact(DisplayName = "K8sTelemetryInitializer sets the K8s env correct")]
     public void ConstructorSetK8sEnvironment()
     {
-        var envMock = new Mock<IK8sEnvironment>();
-        var factoryMock = new Mock<IK8sEnvironmentFactory>();
-        factoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
-
+        Mock<IK8sEnvironment> k8sEnvMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
         Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(k8sEnvMock.Object);
+
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            factoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+            k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
 
-        Assert.NotNull(target.K8sEnvironment);
-        Assert.Equal(factoryMock.Object, target.K8sEnvFactory);
-        Assert.Equal(envMock.Object, target.K8sEnvironment);
+        Assert.Equal(k8sEnvironmentHolderMock.Object, target.K8SEnvironmentHolder);
         Assert.Equal(keyCacheMock.Object, target.TelemetryKeyCache);
     }
 
     [Fact(DisplayName = "K8sTelemetryInitializer sets the cloud_RoleName")]
     public void InitializeSetsRoleName()
     {
-        var envMock = new Mock<IK8sEnvironment>();
-        envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
         Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
+        envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
         keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
-        KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+        KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
         ITelemetry telemetry = new TraceTelemetry();
@@ -76,18 +69,19 @@ public class KubernetesTelemetryInitializerTests
     [Fact(DisplayName = "K8sTelemetryInitializer will not overwrite the role name when it exists already.")]
     public void InitializeShouldNotOverwriteExistingRoleName()
     {
-        var envMock = new Mock<IK8sEnvironment>();
-        envMock.Setup(env => env.ContainerName).Returns("New RoleName");
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
         Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
+        envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
         keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+            k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
+
         ITelemetry telemetry = new TraceTelemetry();
         telemetry.Context.Cloud.RoleName = "Existing RoleName";
         target.Initialize(telemetry);
@@ -101,33 +95,31 @@ public class KubernetesTelemetryInitializerTests
         var listener = new TestDiagnosticSourceObserver();
         ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(listener);
 
-        var envMock = new Mock<IK8sEnvironment>();
-        envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
+        // Mocks needed        
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
 
+        // Setup
         envMock.Setup(env => env.ContainerID).Returns("Cid");
         envMock.Setup(env => env.ContainerName).Returns("CName");
         envMock.Setup(env => env.PodID).Returns("Pid");
         envMock.Setup(env => env.PodName).Returns("PName");
         envMock.Setup(env => env.PodLabels).Returns("PLabels");
-
         // The following properties are optional.
         envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
         envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
         envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
         envMock.Setup(env => env.DeploymentName).Returns<string>(null);
         envMock.Setup(env => env.PodNamespace).Returns<string>(null);
-        envMock.Setup(env => env.NodeUid).Returns("Nid");
-        envMock.Setup(env => env.NodeName).Returns("NName");
+        envMock.Setup(env => env.NodeUid).Returns<string>(null);
+        envMock.Setup(env => env.NodeName).Returns<string>(null);
 
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
-
-        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
         keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+            k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
         ITelemetry telemetry = new TraceTelemetry();
@@ -142,9 +134,12 @@ public class KubernetesTelemetryInitializerTests
         var listener = new TestDiagnosticSourceObserver();
         ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(listener);
 
-        var envMock = new Mock<IK8sEnvironment>();
-        envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
+        // Mocks needed        
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
 
+        // Setup
         envMock.Setup(env => env.ContainerID).Returns("Cid");
         envMock.Setup(env => env.ContainerName).Returns("CName");
         envMock.Setup(env => env.PodLabels).Returns("PLabels");
@@ -159,15 +154,11 @@ public class KubernetesTelemetryInitializerTests
         envMock.Setup(env => env.PodID).Returns<string>(null);
         envMock.Setup(env => env.PodName).Returns<string>(null);
 
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
-
-        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
         keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+            k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
         ITelemetry telemetry = new TraceTelemetry();
@@ -179,9 +170,12 @@ public class KubernetesTelemetryInitializerTests
     [Fact(DisplayName = "K8sTelemetryInitializer sets custom dimensions")]
     public void InitializeSetsCustomDimensions()
     {
-        var envMock = new Mock<IK8sEnvironment>();
-        envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
 
+        // Setup
+        envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
         envMock.Setup(env => env.ContainerID).Returns("Cid");
         envMock.Setup(env => env.ContainerName).Returns("CName");
         envMock.Setup(env => env.PodID).Returns("Pid");
@@ -195,16 +189,11 @@ public class KubernetesTelemetryInitializerTests
         envMock.Setup(env => env.NodeName).Returns("NName");
         envMock.Setup(env => env.PodNamespace).Returns("PNS");
 
-
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
-
-        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
         keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+            k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
         ITelemetry telemetry = new TraceTelemetry();
@@ -231,19 +220,19 @@ public class KubernetesTelemetryInitializerTests
     [Fact(DisplayName = "K8sTelemetryInitializer will not overwrite custom dimension when it exists already.")]
     public void InitializeWillNotOverwriteExistingCustomDimension()
     {
-        var envMock = new Mock<IK8sEnvironment>();
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
         envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
         envMock.Setup(env => env.ContainerID).Returns("Cid");
 
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
-
-        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+        keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
         keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+            k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
         ITelemetry telemetry = new TraceTelemetry();
@@ -257,16 +246,13 @@ public class KubernetesTelemetryInitializerTests
     [Fact(DisplayName = "When timeout happens on fetching the Kubernetes properties, initializer fails gracefully")]
     public void TimeoutGettingK8sEnvNoException()
     {
-        var envMock = new Mock<IK8sEnvironment>();
-        envMock.Setup(env => env.ContainerID).Returns("Cid");
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
         Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
         keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
 
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+            k8sEnvironmentHolderMock.Object,    // k8sEnvironmentHolderMock.Object.K8sEnvironment is null
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
 
@@ -279,64 +265,21 @@ public class KubernetesTelemetryInitializerTests
         Assert.Equal("No Crash", telemetryWithProperties.Properties["K8s.Container.ID"]);
     }
 
-    [Fact(DisplayName = "Query Kubernetes Environment will timeout.")]
-    public async Task QueryK8sEnvironmentWillTimeout()
-    {
-        var envMock = new Mock<IK8sEnvironment>();
-        envMock.Setup(env => env.ContainerID).Returns("Cid");
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
-        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-        keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
-
-        KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
-            SDKVersionUtils.Instance,
-            keyCacheMock.Object);
-        Assert.False(target.IsK8sQueryTimeout);
-        await Task.Delay(TimeSpan.FromSeconds(1));
-        Assert.True(target.IsK8sQueryTimeout);
-    }
-
-    [Fact(DisplayName = "Slow K8s Env will not block the TelemetryInitializer")]
-    public void SlowK8sEnvironmentBuildWillNotBlockTelemetryInitializerConstructor()
-    {
-        var envMock = new Mock<IK8sEnvironment>();
-        envMock.Setup(env => env.ContainerID).Returns("Cid");
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(envMock.Object, TimeSpan.FromMinutes(1));
-        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
-        keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input);
-
-        KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(30)),
-            SDKVersionUtils.Instance,
-            keyCacheMock.Object);
-
-        // K8s Environment is still null.
-        Assert.Null(target.K8sEnvironment);
-        // And is not yet timed out.
-        Assert.False(target.IsK8sQueryTimeout);
-    }
-
     [Fact(DisplayName = "K8sTelemetryInitializer make use of the key by the processor provided in the options.")]
     public void ShouldUseTheValueByTheKeyProcessorForTelemetry()
     {
-        var envMock = new Mock<IK8sEnvironment>();
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
         envMock.Setup(env => env.ContainerName).Returns("Hello.RoleName");
         envMock.Setup(env => env.ContainerID).Returns("Hello.Cid");
 
-        var envFactoryMock = new Mock<IK8sEnvironmentFactory>();
-        envFactoryMock.Setup(f => f.CreateAsync(It.IsAny<DateTime>(), It.IsAny<CancellationToken>())).ReturnsAsync(() => envMock.Object);
-
-        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
         keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input.Replace('.', '_'));
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
 
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
-            envFactoryMock.Object,
-            GetOptions(TimeSpan.FromSeconds(1)),
+            k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
             keyCacheMock.Object);
         ITelemetry telemetry = new TraceTelemetry();
@@ -346,19 +289,5 @@ public class KubernetesTelemetryInitializerTests
 
         Assert.False(telemetryWithProperties.Properties.ContainsKey("Kubernetes.Container.ID"));
         Assert.True(telemetryWithProperties.Properties.ContainsKey("Kubernetes_Container_ID"));
-    }
-
-    private IServiceProvider GetTestServiceProvider()
-    {
-        IServiceCollection serviceCollection = new ServiceCollection();
-        return serviceCollection.BuildServiceProvider();
-    }
-
-    private IOptions<AppInsightsForKubernetesOptions> GetOptions(TimeSpan timeout)
-    {
-        return new OptionsWrapper<AppInsightsForKubernetesOptions>(new AppInsightsForKubernetesOptions()
-        {
-            InitializationTimeout = timeout,
-        });
     }
 }

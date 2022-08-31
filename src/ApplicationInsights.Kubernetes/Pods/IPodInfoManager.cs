@@ -7,6 +7,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
 internal interface IPodInfoManager
 {
     /// <summary>
+    /// Waits until the pod is ready and then return it. Returns null when the cancellation token is requested.
+    /// </summary>
+    Task<V1Pod> WaitUntilMyPodReadyAsync(CancellationToken cancellationToken);
+
+    /// <summary>
     /// Tries to get the pod.
     /// </summary>
     /// <returns>Returns the K8s Pod entity when located. Otherwise, null.</returns>

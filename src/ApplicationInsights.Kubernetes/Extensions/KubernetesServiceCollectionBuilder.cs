@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
@@ -133,6 +133,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Registers K8s environment factory.
         /// </summary>
         protected virtual void RegisterK8sEnvironmentFactory(IServiceCollection serviceCollection)
-            => serviceCollection.AddSingleton<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
+        {
+            serviceCollection.TryAddScoped<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
+            serviceCollection.TryAddSingleton<IK8sEnvironmentHolder>(_ => K8sEnvironmentHolder.Instance);
+            serviceCollection.AddHostedService<K8sInfoBackgroundService>();
+        }
     }
 }

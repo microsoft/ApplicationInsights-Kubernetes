@@ -1,9 +1,12 @@
+using System;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
+using Microsoft.Rest;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 
@@ -46,10 +49,14 @@ internal class ContainerStatusManager : IContainerStatusManager
         //Known container id
         if (!string.IsNullOrEmpty(containerId))
         {
+            // There is a container id, check the status
             if (_podInfoManager.TryGetContainerStatus(myPod, containerId, out V1ContainerStatus? foundContainerStatus))
             {
+                // Found status
                 return foundContainerStatus;
             }
+            // Container status not ready yet.
+            return null;
         }
 
         // If there's no container id provided by the container id holder, at this moment, try backfill
@@ -73,6 +80,34 @@ internal class ContainerStatusManager : IContainerStatusManager
     {
         _logger.LogTrace($"Container status object: {containerStatus}, isReady: {containerStatus?.Ready}");
         return containerStatus is not null && containerStatus.Ready;
+    }
+
+    public async Task<V1ContainerStatus?> WaitContainerReadyAsync(CancellationToken cancellationToken)
+    {
+        while(true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                if (await IsContainerReadyAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    return await GetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
+                }
+            }
+            catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode != HttpStatusCode.Forbidden))
+            {
+                _logger.LogWarning($"Query exception while trying to get container info: {ex.Message}");
+                _logger.LogDebug(ex.ToString());
+            }
+
+            // The time to get the container ready depends on how much time will a container to be initialized.
+            // When there is readiness probe, the pod info will not be available until the initial delay of it is elapsed.
+            // When there is no readiness probe, the minimum seems about 1000ms. 
+            // Try invoke a probe on readiness every 500ms until the container is ready
+            // Or it will timeout per the timeout settings.
+            await Task.Delay(TimeSpan.FromMilliseconds(500), cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
     }
 }
 
