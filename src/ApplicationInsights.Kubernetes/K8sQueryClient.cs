@@ -91,14 +91,14 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         #endregion
 
         #region Node
-        public Task<IEnumerable<K8sNode>> GetNodesAsync(bool ignoreForbiddenException, CancellationToken cancellationToken)
+        public async Task<IEnumerable<K8sNode>> GetNodesAsync(bool ignoreForbiddenException, CancellationToken cancellationToken)
         {
             EnsureNotDisposed();
 
             try
             {
                 string url = Invariant($"api/v1/nodes");
-                return GetAllItemsAsync<K8sNode>(url, cancellationToken);
+                return await GetAllItemsAsync<K8sNode>(url, cancellationToken).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -107,7 +107,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 {
                     _logger.LogDebug(ex.Message);
                     _logger.LogTrace(ex.ToString());
-                    return Task.FromResult(Enumerable.Empty<K8sNode>());
+                    return Enumerable.Empty<K8sNode>();
                 }
                 // Otherwise
                 throw;
