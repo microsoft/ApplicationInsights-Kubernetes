@@ -144,17 +144,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             var envMock = new Mock<IK8sEnvironment>();
             envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
 
+            // These 2 properties are required.
+            envMock.Setup(env => env.PodID).Returns<string>(null);
+            envMock.Setup(env => env.PodName).Returns<string>(null);
+            
             envMock.Setup(env => env.ContainerID).Returns("Cid");
             envMock.Setup(env => env.ContainerName).Returns("CName");
-            envMock.Setup(env => env.PodID).Returns("Pid");
-            envMock.Setup(env => env.PodName).Returns("PName");
             envMock.Setup(env => env.PodLabels).Returns("PLabels");
             envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
             envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
             envMock.Setup(env => env.DeploymentUid).Returns<string>(null);
             envMock.Setup(env => env.DeploymentName).Returns<string>(null);
             envMock.Setup(env => env.PodNamespace).Returns<string>(null);
-            // These 2 properties are required.
             envMock.Setup(env => env.NodeUid).Returns<string>(null);
             envMock.Setup(env => env.NodeName).Returns<string>(null);
 
