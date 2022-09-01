@@ -11,48 +11,54 @@ In this demo, we will have the following assumptions. Please change the related 
 * The application will be deployed to namespace of `ai-k8s-demo`.
 * The application will leverage the `default` service account.
 
-## Configure ClusterRole and ClusterRoleBinding for the service account
+## Setup the permissions for the service account
 
-* Create a yaml file, [sa-role.yaml](./sa-role.yaml) for example. We will deploy it when it is ready.
+Depends on various considerations, there could be different strategies to setup the permissions for your service account. Here we list 2 common possibilities, as examples.
 
-    * Write spec to define a cluster role, name it `appinsights-k8s-property-reader` for example:
- 
-        ```yaml
-         kind: ClusterRole
-         apiVersion: rbac.authorization.k8s.io/v1
-         metadata:
-           # "namespace" omitted since ClusterRoles are not namespaced
-           name: appinsights-k8s-property-reader
-         rules:
-         - apiGroups: ["", "apps"]
-           resources: ["pods", "nodes", "replicasets", "deployments"]
-           verbs: ["get", "list"]
-        ```
-        That spec defines the name of the role, and what permission does the role has, for example, list pods.
+* If you want to get the node information along with other info like pod, deployment, and so on, a ClusterRole and a ClusterRoleBinding are required, and here's how to do it:
 
-        You don't have to use the exact name, but you will need to making sure the name is referenced correctly in the following steps.
+  * Create a yaml file, [sa-role.yaml](./sa-role.yaml) for example. We will deploy it when it is ready.
 
-    * Append a Cluster role binding spec:
+      * Write spec to define a cluster role, name it `appinsights-k8s-property-reader` for example:
+   
+          ```yaml
+           kind: ClusterRole
+           apiVersion: rbac.authorization.k8s.io/v1
+           metadata:
+             # "namespace" omitted since ClusterRoles are not namespaced
+             name: appinsights-k8s-property-reader
+           rules:
+           - apiGroups: ["", "apps"]
+             resources: ["pods", "nodes", "replicasets", "deployments"]
+             verbs: ["get", "list"]
+          ```
+          That spec defines the name of the role, and what permission does the role has, for example, list pods.
 
-        ```yaml
-        ---
-        # actual binding to the role
-        kind: ClusterRoleBinding
-        apiVersion: rbac.authorization.k8s.io/v1
-        metadata:
-          name: appinsights-k8s-property-reader-binding
-        subjects:
-        - kind: ServiceAccount
-          name: default
-          namespace: ai-k8s-demo
-        roleRef:
-          kind: ClusterRole
-          name: appinsights-k8s-property-reader
-          apiGroup: rbac.authorization.k8s.io
-        ```
+          You don't have to use the exact name, but you will need to making sure the name is referenced correctly in the following steps.
 
-    That is to grant the role of `appinsights-k8s-property-reader` to the default service account in namespace of `ai-k8s-demo`.
-    
+      * Append a Cluster role binding spec:
+
+          ```yaml
+          ---
+          # actual binding to the role
+          kind: ClusterRoleBinding
+          apiVersion: rbac.authorization.k8s.io/v1
+          metadata:
+            name: appinsights-k8s-property-reader-binding
+          subjects:
+          - kind: ServiceAccount
+            name: default
+            namespace: ai-k8s-demo
+          roleRef:
+            kind: ClusterRole
+            name: appinsights-k8s-property-reader
+            apiGroup: rbac.authorization.k8s.io
+          ```
+
+      That is to grant the role of `appinsights-k8s-property-reader` to the default service account in namespace of `ai-k8s-demo`.
+
+  * If you don't want to create a Cluster Role, it is also possible to use Role and RoleBinding starting 2.0.6+. Follow the example in [sa-role-none-cluster.yaml](./sa-role-none-cluster.yaml). In that case, you will not have node info on the telemetries.
+
 * Now you can deploy it:
 
     ```shell
