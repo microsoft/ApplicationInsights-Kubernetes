@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
@@ -57,10 +58,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
                 // Fetch node info
                 string nodeName = myPod.Spec.NodeName;
-                IEnumerable<V1Node> allNodes = await _k8sClient.GetNodesAsync(cancellationToken).ConfigureAwait(false);
+                IEnumerable<V1Node> allNodes = await _k8sClient.GetNodesAsync(ignoreForbiddenException: true, cancellationToken).ConfigureAwait(false);
                 V1Node? node = allNodes.FirstOrDefault(n => string.Equals(n.Metadata.Name, nodeName, StringComparison.Ordinal));
 
-                return new K8sEnvironment(containerStatus, myPod, replicaSet, deployment, node);
+                K8sEnvironment k8SEnvironment = new K8sEnvironment(containerStatus, myPod, replicaSet, deployment, node);
+                _logger.LogDebug(JsonSerializer.Serialize<K8sEnvironment>(k8SEnvironment).EscapeForLoggingMessage());
+                return k8SEnvironment;
             }
             catch (HttpOperationException ex) when (ex.Response.StatusCode == HttpStatusCode.Forbidden)
             {

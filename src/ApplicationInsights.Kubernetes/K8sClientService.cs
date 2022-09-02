@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
+using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Rest;
 using K8s = k8s.Kubernetes;
 
 namespace Microsoft.ApplicationInsights.Kubernetes;
@@ -15,6 +18,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 /// </summary>
 internal sealed class K8sClientService : IDisposable, IK8sClientService
 {
+    private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+
     private bool _isDisposeCalled = false;
     private readonly string _namespace;
 
@@ -63,9 +68,25 @@ internal sealed class K8sClientService : IDisposable, IK8sClientService
         return deploymentList.AsEnumerable();
     }
 
-    public async Task<IEnumerable<V1Node>> GetNodesAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<V1Node>> GetNodesAsync(bool ignoreForbiddenException, CancellationToken cancellationToken)
     {
-        V1NodeList? nodeList = await _kubernetesClient.ListNodeAsync();
-        return nodeList.AsEnumerable();
+        try
+        {
+            V1NodeList? nodeList = await _kubernetesClient.ListNodeAsync();
+            return nodeList.AsEnumerable();
+        }
+        catch (HttpOperationException ex) when (ex.Response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            // Choose to ignore forbidden exception
+            if (ignoreForbiddenException)
+            {
+                _logger.LogDebug(ex.Message);
+                _logger.LogTrace(ex.ToString());
+                return Enumerable.Empty<V1Node>();
+            }
+
+            // Otherwise
+            throw;
+        }
     }
 }
