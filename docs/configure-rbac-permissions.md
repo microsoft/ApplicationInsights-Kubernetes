@@ -1,6 +1,6 @@
 # Configure RBAC permissions
 
-`Microsoft.ApplicationInsights.Kubernetes` uses the service account to query Kubernetes information to enhance telemetries. It is important to have proper permissions configured for Kubernetes-related information like node, pod, and so on to be fetched correctly.
+`Microsoft.ApplicationInsights.Kubernetes` uses the service account to query Kubernetes information to enhance telemetries. It is important to have proper permissions configured for Kubernetes-related resources like Node, Pod, and so on to be fetched correctly.
 
 In this post, we will start by describing a method to correctly configure the permissions for an RBAC-enabled cluster. And then share troubleshooting guidance.
 
@@ -8,14 +8,14 @@ In this post, we will start by describing a method to correctly configure the pe
 
 In this demo, we will have the following assumptions. Please change the related values accordingly:
 
-* The application will be deployed to the namespace of `ai-k8s-demo`.
+* The application will be deployed to namespace `ai-k8s-demo`.
 * The application will leverage the `default` service account.
 
 ## Setup the permissions for the service account
 
 Depending on various considerations, there could be different strategies to set up the permissions for your service account. Here we list 2 common possibilities, as examples.
 
-* If you want to get the node information along with other info like pod, deployment, and so on, a ClusterRole and a ClusterRoleBinding are required, and here's how to do it:
+* If you want to get the Node information along with other resource info like Pod, Deployment, and so on, a ClusterRole and a ClusterRoleBinding are required, and here's how to do it:
 
   * Create a yaml file, [sa-role.yaml](./sa-role.yaml) for example. We will deploy it when it is ready.
 
@@ -57,7 +57,7 @@ Depending on various considerations, there could be different strategies to set 
 
       That is to grant the role of `appinsights-k8s-property-reader` to the default service account in the namespace of `ai-k8s-demo`.
 
-  * If you don't want to create a Cluster Role, it is also possible to use Role and RoleBinding starting 2.0.6+. Follow the example in [sa-role-none-cluster.yaml](./sa-role-none-cluster.yaml). In that case, you will not have node info on the telemetries.
+  * If you don't want to create a Cluster Role, it is also possible to use Role and RoleBinding starting with Application Insights for Kubernetes 2.0.6+. Follow the example in [sa-role-none-cluster.yaml](./sa-role-none-cluster.yaml). In that case, you will not have node info on the telemetries.
 
 * Now you can deploy it:
 
@@ -66,7 +66,7 @@ Depending on various considerations, there could be different strategies to set 
     ```
     See [sa-role.yaml](sa-role.yaml) for a full example.
 
-> :warning: Check back for various permissions needed. Depending on the implementations, it may change over time.
+> :warning: Check back for various permissions needed. Depending on the properties we try to fetch, it may change over time.
 
 ## Ad-hoc troubleshooting for permission
 

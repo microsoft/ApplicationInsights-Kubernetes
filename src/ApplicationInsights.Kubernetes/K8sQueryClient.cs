@@ -109,7 +109,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     _logger.LogTrace(ex.ToString());
                     return Enumerable.Empty<K8sNode>();
                 }
-                // Otherwise
+                // else
                 throw;
             }
         }
