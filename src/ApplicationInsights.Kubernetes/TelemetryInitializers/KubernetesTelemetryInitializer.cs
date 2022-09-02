@@ -159,8 +159,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             SetCustomDimension(telemetry, Deployment.Name, this._k8sEnvironment.DeploymentName, isValueOptional: true);
 
             // Node
-            SetCustomDimension(telemetry, Node.ID, this._k8sEnvironment.NodeUid);
-            SetCustomDimension(telemetry, Node.Name, this._k8sEnvironment.NodeName);
+            SetCustomDimension(telemetry, Node.ID, this._k8sEnvironment.NodeUid, isValueOptional: true);
+            SetCustomDimension(telemetry, Node.Name, this._k8sEnvironment.NodeName, isValueOptional: true);
         }
 
         private void SetCustomDimension(ISupportProperties telemetry, string key, string value, bool isValueOptional = false)

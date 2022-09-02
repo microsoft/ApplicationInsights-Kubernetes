@@ -106,14 +106,15 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
                     if (instance.myPod is not null)
                     {
-                        IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync(cancellationToken).ConfigureAwait(false);
+                        IEnumerable<K8sNode> nodeList = await queryClient.GetNodesAsync(ignoreForbiddenException: true, cancellationToken: cancellationToken).ConfigureAwait(false);
                         string nodeName = instance.myPod.Spec.NodeName;
-                        if (!string.IsNullOrEmpty(nodeName))
+                        if (!string.IsNullOrEmpty(nodeName) && nodeList.Any())
                         {
                             instance.myNode = nodeList.FirstOrDefault(node => string.Equals(node.Metadata?.Name, nodeName, StringComparison.OrdinalIgnoreCase));
                         }
                     }
                 }
+
                 return instance;
             }
             catch (UnauthorizedAccessException ex)
