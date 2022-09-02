@@ -215,7 +215,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             httpClientMock.Setup(httpClient => httpClient.SendAsync(It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(response));
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                await target.GetNodesAsync(cancellationToken: default);
+                await target.GetNodesAsync(ignoreForbiddenException: true, cancellationToken: default);
             }
 
             httpClientMock.Verify(mock => mock.SendAsync(It.Is<HttpRequestMessage>(m => m.RequestUri.AbsoluteUri.Equals("https://baseaddress/api/v1/nodes")), It.IsAny<CancellationToken>()), Times.Once);
@@ -245,7 +245,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             using (K8sQueryClient target = new K8sQueryClient(httpClientMock.Object))
             {
-                IEnumerable<K8sNode> result = await target.GetNodesAsync(cancellationToken: default);
+                IEnumerable<K8sNode> result = await target.GetNodesAsync(ignoreForbiddenException: true, cancellationToken: default);
 
                 Assert.NotNull(result);
                 Assert.Equal(2, result.Count());
