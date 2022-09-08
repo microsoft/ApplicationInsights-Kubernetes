@@ -49,7 +49,7 @@ internal class PodInfoManager : IPodInfoManager
             V1Pod? targetPod = await GetPodByNameAsync(podName, cancellationToken).ConfigureAwait(false);
             if (targetPod is not null)
             {
-                _logger.LogInformation($"Found pod by name providers: {targetPod.Metadata?.Name}");
+                _logger.LogDebug($"Found pod by name providers: {targetPod.Metadata?.Name}");
                 return targetPod;
             }
         }

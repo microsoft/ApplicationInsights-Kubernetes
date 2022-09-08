@@ -54,7 +54,7 @@ namespace Microsoft.Extensions.DependencyInjection
             IClusterEnvironmentCheck? clusterCheck)
         {
             IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = new KubernetesServiceCollectionBuilder(overwriteOptions, clusterCheck);
-            kubernetesServiceCollectionBuilder.RegisterServices(services);
+            _ = kubernetesServiceCollectionBuilder.RegisterServices(services);
         }
     }
 }

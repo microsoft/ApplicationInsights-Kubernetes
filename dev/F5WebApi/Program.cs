@@ -2,8 +2,14 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Always turn on scope validations for debugging purpose.
+builder.WebHost.UseDefaultServiceProvider((opt) =>
+{
+    opt.ValidateScopes = true;
+    opt.ValidateOnBuild = true;
+});
 
+// Add services to the container.
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
 
 builder.Services.AddApplicationInsightsTelemetry();
