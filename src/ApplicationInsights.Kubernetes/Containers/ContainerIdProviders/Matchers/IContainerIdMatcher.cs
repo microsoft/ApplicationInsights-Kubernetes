@@ -3,7 +3,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 /// <summary>
 /// Matches container id.
 /// </summary>
-public interface IContainerIdMatcher
+internal interface IContainerIdMatcher
 {
     /// <summary>
     /// Matches the container id.
