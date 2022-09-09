@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-k8s-info-code-deployment
+  namespace: ai-k8s-demo
+  labels:
+    app: ai-k8s-info-by-code
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-k8s-info-by-code
+  template:
+    metadata:
+      labels:
+        app: ai-k8s-info-by-code
+    spec:
+      containers:
+      - name: ai-k8s-info-by-code-container
+        image: dockeraccount/ai-k8s-info-by-code:1.0.0
+        ports:
+        - containerPort: 80
