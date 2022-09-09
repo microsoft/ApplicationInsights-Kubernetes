@@ -3,7 +3,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 /// <summary>
 /// A service to return the Kubernetes information.
 /// </summary>
-public interface IK8sInfo
+public interface IK8sInfoService
 {
     /// <summary>
     /// Tries to get the kubernetes info.

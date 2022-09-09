@@ -5,11 +5,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 /// <summary>
 /// A simple implementation to return the Kubernetes information.
 /// </summary>
-internal class K8sInfo : IK8sInfo
+internal class K8sInfoService : IK8sInfoService
 {
     private readonly IK8sEnvironmentHolder _k8SEnvironmentHolder;
 
-    public K8sInfo(IK8sEnvironmentHolder k8SEnvironmentHolder)
+    public K8sInfoService(IK8sEnvironmentHolder k8SEnvironmentHolder)
     {
         _k8SEnvironmentHolder = k8SEnvironmentHolder ?? throw new ArgumentNullException(nameof(k8SEnvironmentHolder));
     }

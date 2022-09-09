@@ -62,6 +62,9 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             else
             {
+                // Avoid dependency injection container resolving failure when running out of a K8s cluster.
+                serviceCollection.AddScoped<IK8sInfoService, K8sInfoServiceStub>();
+
                 _logger.LogError("Application is not running inside a Kubernetes cluster.");
                 return serviceCollection;
             }
@@ -86,6 +89,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             serviceCollection.AddScoped<IPodInfoManager, PodInfoManager>();
             serviceCollection.AddScoped<IContainerStatusManager, ContainerStatusManager>();
+            serviceCollection.AddScoped<IK8sInfoService, K8sInfoService>();
         }
 
         /// <summary>
