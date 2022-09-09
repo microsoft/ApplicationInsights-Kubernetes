@@ -1,4 +1,4 @@
-﻿namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
+﻿namespace Microsoft.ApplicationInsights.Kubernetes.Containers
 {
     internal class EmptyContainerIdProvider : IContainerIdProvider
     {

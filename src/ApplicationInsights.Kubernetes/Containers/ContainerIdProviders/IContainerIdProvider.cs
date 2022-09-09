@@ -1,4 +1,4 @@
-﻿namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
+﻿namespace Microsoft.ApplicationInsights.Kubernetes.Containers
 {
     /// <summary>
     /// A service that tries to get container id.

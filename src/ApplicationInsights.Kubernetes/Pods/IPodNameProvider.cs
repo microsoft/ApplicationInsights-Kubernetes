@@ -1,4 +1,4 @@
-namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
+namespace Microsoft.ApplicationInsights.Kubernetes.Pods;
 
 /// <summary>
 /// A service that provides pod name

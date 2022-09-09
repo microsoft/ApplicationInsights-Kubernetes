@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using k8s.Models;
-using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Containers;

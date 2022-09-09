@@ -1,5 +1,5 @@
 using System;
-using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
+using Microsoft.ApplicationInsights.Kubernetes.Pods;
 using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Tests;

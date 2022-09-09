@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 
 /// <summary>
 /// A common framework to get container id from a file, providing consistent implementation as well as logging.

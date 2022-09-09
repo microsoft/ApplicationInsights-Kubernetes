@@ -1,6 +1,6 @@
 #nullable enable
 
-using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Tests;

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using k8s.Models;
-using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
 using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Moq;
 using Xunit;

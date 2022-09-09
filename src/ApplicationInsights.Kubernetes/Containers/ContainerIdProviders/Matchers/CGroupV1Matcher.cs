@@ -2,7 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 
 internal class CGroupV1Matcher : IContainerIdMatcher
 {

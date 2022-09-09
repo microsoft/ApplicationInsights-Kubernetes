@@ -1,6 +1,6 @@
 ﻿using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders
+namespace Microsoft.ApplicationInsights.Kubernetes.Containers
 {
     /// <summary>
     /// Gets the current container id by using CGroup

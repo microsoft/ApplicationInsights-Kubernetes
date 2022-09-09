@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
+namespace Microsoft.ApplicationInsights.Kubernetes.Pods;
 
 internal interface IPodInfoManager
 {
