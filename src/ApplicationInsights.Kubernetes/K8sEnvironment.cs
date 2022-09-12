@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using k8s.Models;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
     /// <summary>
-    /// An immutable flatten object for application insights or other external caller to fetch K8s properties.
+    /// An immutable flat object for Application Insights or other external caller to fetch K8s properties.
     /// </summary>
     internal record K8sEnvironment : IK8sEnvironment
     {
@@ -16,8 +17,10 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             V1Deployment? deployment,
             V1Node? node)
         {
-            // Pod is required
-            _ = pod ?? throw new System.ArgumentNullException(nameof(pod));
+            if (pod is null)
+            {
+                throw new ArgumentNullException(nameof(pod));
+            }
 
             ContainerID = containerStatus?.ContainerID;
             ContainerName = containerStatus?.Name;
