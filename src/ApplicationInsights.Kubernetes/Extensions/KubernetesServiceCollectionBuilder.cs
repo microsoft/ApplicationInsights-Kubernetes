@@ -44,7 +44,7 @@ internal class KubernetesServiceCollectionBuilder : IKubernetesServiceCollection
     {
         if (_clusterCheck.IsInCluster)
         {
-            if (serviceCollection == null)
+            if (serviceCollection is null)
             {
                 throw new ArgumentNullException(nameof(serviceCollection));
             }
