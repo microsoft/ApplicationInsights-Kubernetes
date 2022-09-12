@@ -1,9 +1,9 @@
-namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 
 /// <summary>
 /// Matches container id.
 /// </summary>
-public interface IContainerIdMatcher
+internal interface IContainerIdMatcher
 {
     /// <summary>
     /// Matches the container id.

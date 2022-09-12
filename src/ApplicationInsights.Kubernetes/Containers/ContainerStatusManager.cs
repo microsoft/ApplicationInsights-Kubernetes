@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
+using Microsoft.ApplicationInsights.Kubernetes.Pods;
 using Microsoft.Rest;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Containers;

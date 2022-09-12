@@ -2,7 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 
 /// <summary>
 /// Ths is a heuristic matcher for container id in containers by containerD using the mount info.

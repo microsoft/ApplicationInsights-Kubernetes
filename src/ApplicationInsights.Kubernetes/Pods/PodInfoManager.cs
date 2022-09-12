@@ -9,7 +9,7 @@ using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Rest;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
+namespace Microsoft.ApplicationInsights.Kubernetes.Pods;
 
 internal class PodInfoManager : IPodInfoManager
 {

@@ -102,7 +102,7 @@ internal class KubernetesTelemetryInitializer : ITelemetryInitializer
     {
         key = TelemetryKeyCache.GetProcessedKey(key);
 
-        if (telemetry == null)
+        if (telemetry is null)
         {
             _logger.LogError("telemetry object is null in telemetry initializer.");
             return;

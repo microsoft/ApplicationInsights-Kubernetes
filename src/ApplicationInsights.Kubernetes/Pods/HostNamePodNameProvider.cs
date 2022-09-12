@@ -1,4 +1,4 @@
-namespace Microsoft.ApplicationInsights.Kubernetes.PodInfoProviders;
+namespace Microsoft.ApplicationInsights.Kubernetes.Pods;
 
 internal class HostNamePodNameProvider : EnvironmentVariablePodNameProviderBase
 {
