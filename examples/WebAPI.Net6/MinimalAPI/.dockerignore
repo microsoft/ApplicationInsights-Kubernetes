@@ -1,0 +1,6 @@
+obj
+bin
+Readme.md
+k8s.yaml
+k8s*.yaml
+secrets.*
