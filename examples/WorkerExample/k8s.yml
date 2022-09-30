@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-k8s-worker-example-deployment
+  namespace: ai-k8s-demo
   labels:
     app: ai-k8s-worker-example
 spec:
@@ -16,4 +17,4 @@ spec:
     spec:
       containers:
       - name: ai-k8s-worker-example
-        image: dockerhub_account_name/ai-k8s-worker-example:0.0.8
+        image: docker_registry_account_name/ai-k8s-worker-example:1.0.0

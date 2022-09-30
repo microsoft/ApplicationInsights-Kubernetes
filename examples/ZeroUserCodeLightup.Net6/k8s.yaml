@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-k8s-app-deployment
+  namespace: ai-k8s-demo  # Change to your namespace
   labels:
     app: ai-k8s-app
 spec:
@@ -16,7 +17,7 @@ spec:
     spec:
       containers:
       - name: ai-k8s-app
-        image: dockerhub_account_name/ai-k8s-app:0.0.8
+        image: container_registry_account/ai-k8s-app:latest # Your container registry account
         env:
         - name: APPLICATIONINSIGHTS_CONNECTION_STRING
           valueFrom:

@@ -67,7 +67,7 @@ There are 6 levels of the events, each is assigned with a number like:
 * Trace - 0
 
 When minimum level is set at the creation of the observer, issues that has a number greater or equal to it will be printed. For example, if the minimum level is set to `Error`(4), logs with the level of critical or error will be printed to the console.
-Set LogLevel to None to complete turn off the logs.
+Set LogLevel to None to completely turn off the logs.
 
 ## About the Diagnostic Source
 
