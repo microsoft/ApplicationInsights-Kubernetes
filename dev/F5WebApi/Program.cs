@@ -2,12 +2,18 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Always turn on scope validations for debugging purpose.
+builder.WebHost.UseDefaultServiceProvider((opt) =>
+{
+    opt.ValidateScopes = true;
+    opt.ValidateOnBuild = true;
+});
 
+// Add services to the container.
 builder.Configuration.AddUserSecrets(Assembly.GetExecutingAssembly());
 
 builder.Services.AddApplicationInsightsTelemetry();
-builder.Services.AddApplicationInsightsKubernetesEnricher(LogLevel.Trace);
+builder.Services.AddApplicationInsightsKubernetesEnricher(diagnosticLogLevel: LogLevel.Debug);
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

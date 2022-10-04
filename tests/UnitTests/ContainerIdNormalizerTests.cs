@@ -1,8 +1,10 @@
 using System;
+using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders.Tests;
+namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 
+[Collection(FullLoggingCollection.Name)]
 public class ContainerIdNormalizerTests
 {
     [Theory]
