@@ -52,11 +52,5 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             public static readonly string ID = Invariant($"{Constant.K8s}.{Constant.Node}.{Constant.ID}");
             public static readonly string Name = Invariant($"{Constant.K8s}.{Constant.Node}.{Constant.Name}");
         }
-
-        public static class ProcessProperty
-        {
-            public static readonly string CPUPrecent = Invariant($"{Constant.ProcessString}.{Constant.CPU}(%)");
-            public static readonly string Memory = Invariant($"{Constant.ProcessString}.{Constant.Memory}");
-        }
     }
 }

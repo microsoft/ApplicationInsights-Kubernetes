@@ -1,17 +1,14 @@
-﻿using System;
+﻿namespace Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Extensions.DependencyInjection
+/// <summary>
+/// Kubernetes service collection builder.
+/// </summary>
+internal interface IKubernetesServiceCollectionBuilder
 {
     /// <summary>
-    /// Kubernetes service collection builder.
+    /// Injects Application Insights for Kubernetes services into the service collection.
     /// </summary>
-    public interface IKubernetesServiceCollectionBuilder
-    {
-        /// <summary>
-        /// Injects Application Insights for Kubernetes services into the service collection.
-        /// </summary>
-        /// <param name="serviceCollection">The collection of service descriptors.</param>
-        /// <returns>The collection of services descriptors we injected into.</returns>
-        IServiceCollection RegisterServices(IServiceCollection serviceCollection);
-    }
+    /// <param name="serviceCollection">The collection of service descriptors.</param>
+    /// <returns>The collection of services descriptors we injected into.</returns>
+    IServiceCollection RegisterServices(IServiceCollection serviceCollection);
 }

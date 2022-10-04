@@ -1,11 +1,11 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Kubernetes
-{
-    public class TelemetryKeyCacheTests
+namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
+
+[Collection(FullLoggingCollection.Name)]
+public class TelemetryKeyCacheTests
     {
         [Theory]
         [InlineData("abc.def", "abc_def")]
@@ -75,4 +75,4 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Equal(expected, actual);
         }
     }
-}
+

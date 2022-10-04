@@ -1,77 +1,98 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.ApplicationInsights.Kubernetes.Entities;
+using k8s.Models;
 
 namespace Microsoft.ApplicationInsights.Kubernetes
 {
     /// <summary>
-    /// Flatten objects for application insights or other external caller to fetch K8s properties.
+    /// An immutable flat object for Application Insights or other external caller to fetch K8s properties.
     /// </summary>
-    internal class K8sEnvironment : IK8sEnvironment
+    internal record K8sEnvironment : IK8sEnvironment
     {
-        // Property holder objects
-        internal K8sPod myPod;
-        internal ContainerStatus myContainerStatus;
-        internal K8sReplicaSet myReplicaSet;
-        internal K8sDeployment myDeployment;
-        internal K8sNode myNode;
+        public K8sEnvironment(
+            V1ContainerStatus? containerStatus,
+            V1Pod pod,
+            V1ReplicaSet? replicaSet,
+            V1Deployment? deployment,
+            V1Node? node)
+        {
+            if (pod is null)
+            {
+                throw new ArgumentNullException(nameof(pod));
+            }
 
-        #region Shorthands to the properties
+            ContainerID = containerStatus?.ContainerID;
+            ContainerName = containerStatus?.Name;
+
+            PodName = pod.Metadata.Name;
+            PodID = pod.Metadata.Uid;
+            PodLabels = CreateLabels(pod);
+            PodNamespace = pod.Metadata.NamespaceProperty;
+
+            ReplicaSetUid = replicaSet?.Metadata?.Uid;
+            ReplicaSetName = replicaSet?.Metadata?.Name;
+
+            DeploymentUid = deployment?.Metadata?.Uid;
+            DeploymentName = deployment?.Metadata?.Name;
+
+            NodeName = node?.Metadata?.Name;
+            NodeUid = node?.Metadata?.Uid;
+        }
+
+
         /// <summary>
         /// ContainerID for the current K8s entity.
         /// </summary>
-        public string ContainerID { get; internal set; }
+        public string? ContainerID { get; }
 
         /// <summary>
         /// Name of the container specified in deployment spec.
         /// </summary>
-        public string ContainerName => this.myContainerStatus?.Name;
+        public string? ContainerName { get; }
 
         /// <summary>
         /// Name of the Pod
         /// </summary>
-        public string PodName => this.myPod?.Metadata?.Name;
+        public string PodName { get; }
 
         /// <summary>
         /// GUID for a Pod
         /// </summary>
-        public string PodID => this.myPod?.Metadata?.Uid;
+        public string PodID { get; }
 
         /// <summary>
-        /// Labels for a pod
+        /// Labels for a pod.
         /// </summary>
-        public string PodLabels
-        {
-            get
-            {
-                string result = null;
-                IDictionary<string, string> labelDict = myPod?.Metadata?.Labels;
-                if (labelDict != null && labelDict.Count > 0)
-                {
-                    result = JoinKeyValuePairs(labelDict);
-                }
-                return result;
-            }
-        }
+        public string? PodLabels { get; }
 
         /// <summary>
         /// Gets the namespace for a pod
         /// </summary>
-        public string PodNamespace => this.myPod?.Metadata?.Namespace;
+        public string? PodNamespace { get; }
 
-        public string ReplicaSetUid => this.myReplicaSet?.Metadata?.Uid;
-        public string ReplicaSetName => this.myReplicaSet?.Metadata?.Name;
+        public string? ReplicaSetUid { get; }
+        public string? ReplicaSetName { get; }
 
-        public string DeploymentUid => this.myDeployment?.Metadata?.Uid;
-        public string DeploymentName => this.myDeployment?.Metadata?.Name;
+        public string? DeploymentUid { get; }
+        public string? DeploymentName { get; }
 
-        public string NodeName => this.myNode?.Metadata?.Name;
-        public string NodeUid => this.myNode?.Metadata?.Uid;
-        #endregion
+        public string? NodeName { get; }
+        public string? NodeUid { get; }
 
         private static string JoinKeyValuePairs(IDictionary<string, string> dictionary)
         {
             return string.Join(",", dictionary.Select(kvp => kvp.Key + ':' + kvp.Value));
+        }
+
+        private static string CreateLabels(V1Pod pod)
+        {
+            IDictionary<string, string>? labelDict = pod.Metadata?.Labels;
+            if (labelDict != null && labelDict.Count > 0)
+            {
+                return JoinKeyValuePairs(labelDict);
+            }
+            return string.Empty;
         }
     }
 }

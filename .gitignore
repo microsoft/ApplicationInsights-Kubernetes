@@ -253,3 +253,6 @@ paket-files/
 
 # Local global.json
 global.json
+
+# Anything that is local
+local.*

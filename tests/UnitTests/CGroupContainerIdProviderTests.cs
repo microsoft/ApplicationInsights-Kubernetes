@@ -1,10 +1,9 @@
-﻿#nullable enable
-
-using Microsoft.ApplicationInsights.Kubernetes.ContainerIdProviders;
+﻿using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Xunit;
 
-namespace Microsoft.ApplicationInsights.Kubernetes;
+namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 
+[Collection(FullLoggingCollection.Name)]
 public class CGroupContainerIdProviderTests
 {
     [Theory]

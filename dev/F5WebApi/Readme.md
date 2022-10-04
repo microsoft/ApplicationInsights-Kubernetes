@@ -48,3 +48,18 @@
     ```shell
     kubectl create -f ./k8s.yml
     ```
+
+1. Port forward to the pod for local testing:
+
+    ```shell
+    // Port forwarding from 127.0.0.1:8080 => 80
+    kubectl port-forward <podName> 8080:80
+    ```
+
+1. Access the `WeatherForecast` endpoint:
+
+    ```shell
+    curl http://localhost:8080/weatherforecast
+    ```
+    If the traffic went through, it will show a message like: Handling connection for 8080.
+
