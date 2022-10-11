@@ -29,7 +29,7 @@ This is a quick guide for ASP.NET Core projects.
 
 ### Instrument an ASP.NET Core application
 
-These are the basic steps to instrument an ASP.NET Core application to enable Application Insights for Kubernetes. You will need to run the application in containers managed by Kubernetes to see the change.
+> ⚠️ This is for ASP.NET Core application. See instructions for workers in the **Walk-through** section below.
 
 1. Add references to **Application Insights SDK** and **Application Insights for Kubernetes**:
 
@@ -58,8 +58,8 @@ These are the basic steps to instrument an ASP.NET Core application to enable Ap
 
 ### Walk-through with example code
 
-* [Enable Application Insights Kubernetes **worker**](./examples/WorkerExample/Readme.md).
-* [Enable Application Insights for Kubernetes on WebAPI for either Controller based or Minimal API](./examples/WebAPI.Net6/Readme.md).
+* [Enable Application Insights for Kubernetes on WebAPI (Controller based or Minimal API)](./examples/WebAPI.Net6/Readme.md).
+* [Enable Application Insights Kubernetes in **worker project**](./examples/WorkerExample/Readme.md).
 
 ### Customize Configurations
 
