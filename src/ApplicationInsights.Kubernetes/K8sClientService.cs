@@ -5,10 +5,10 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s;
+using k8s.Autorest;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
-using Microsoft.Rest;
 using K8s = k8s.Kubernetes;
 
 namespace Microsoft.ApplicationInsights.Kubernetes;

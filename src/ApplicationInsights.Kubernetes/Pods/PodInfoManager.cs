@@ -5,9 +5,9 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using k8s.Autorest;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.Rest;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Pods;
 
