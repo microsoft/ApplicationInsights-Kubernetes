@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 
@@ -11,17 +12,12 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Containers;
 internal class ContainerIdHolder : IContainerIdHolder
 {
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
-
-    private readonly IEnumerable<IContainerIdProvider> _containerIdProviders;
-    private readonly IContainerIdNormalizer _containerIdNormalizer;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private string? _containerId;
 
-    public ContainerIdHolder(
-        IEnumerable<IContainerIdProvider> containerIdProviders,
-        IContainerIdNormalizer containerIdNormalizer)
+    public ContainerIdHolder(IServiceScopeFactory serviceScopeFactory)
     {
-        _containerIdProviders = containerIdProviders ?? throw new System.ArgumentNullException(nameof(containerIdProviders));
-        _containerIdNormalizer = containerIdNormalizer ?? throw new ArgumentNullException(nameof(containerIdNormalizer));
+        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
     }
 
     public string? ContainerId
@@ -30,7 +26,11 @@ internal class ContainerIdHolder : IContainerIdHolder
         {
             if (string.IsNullOrEmpty(_containerId))
             {
-                _ = TryGetContainerId(out _containerId) && _containerIdNormalizer.TryNormalize(_containerId!, out _containerId);
+                using (IServiceScope scope = _serviceScopeFactory.CreateScope())
+                {
+                    IContainerIdNormalizer normalizer = scope.ServiceProvider.GetRequiredService<IContainerIdNormalizer>();
+                    _ = TryGetContainerId(out _containerId) && normalizer.TryNormalize(_containerId!, out _containerId);
+                }
             }
             return _containerId;
         }
@@ -51,10 +51,14 @@ internal class ContainerIdHolder : IContainerIdHolder
             containerStatus = containerStatuses[0];
             _logger.LogInformation(FormattableString.Invariant($"Use the only container inside the pod for container id: {containerStatus.ContainerID}"));
 
-            if (_containerIdNormalizer.TryNormalize(containerStatus.ContainerID, out string? normalizedContainerId))
+            using (IServiceScope scope = _serviceScopeFactory.CreateScope())
             {
-                _containerId = normalizedContainerId;
-                return true;
+                IContainerIdNormalizer normalizer = scope.ServiceProvider.GetRequiredService<IContainerIdNormalizer>();
+                if (normalizer.TryNormalize(containerStatus.ContainerID, out string? normalizedContainerId))
+                {
+                    _containerId = normalizedContainerId;
+                    return true;
+                }
             }
 
             _logger.LogError(FormattableString.Invariant($"Normalization failed for container id: {containerStatus.ContainerID}"));
@@ -65,12 +69,15 @@ internal class ContainerIdHolder : IContainerIdHolder
     private bool TryGetContainerId(out string? containerId)
     {
         containerId = string.Empty;
-        foreach (IContainerIdProvider provider in _containerIdProviders)
+        using (IServiceScope scope = _serviceScopeFactory.CreateScope())
         {
-            if (provider.TryGetMyContainerId(out containerId))
+            foreach (IContainerIdProvider provider in scope.ServiceProvider.GetServices<IContainerIdProvider>())
             {
-                _logger.LogInformation(FormattableString.Invariant($"Get container id by provider: {containerId}"));
-                return true;
+                if (provider.TryGetMyContainerId(out containerId))
+                {
+                    _logger.LogInformation(FormattableString.Invariant($"Get container id by provider: {containerId}"));
+                    return true;
+                }
             }
         }
 

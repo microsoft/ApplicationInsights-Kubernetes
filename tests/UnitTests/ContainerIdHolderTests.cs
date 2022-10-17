@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Containers;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -14,15 +14,18 @@ public class ContainerIdHolderTests
     [InlineData("cri-containerd-5146b2bcd77ab4f2624bc1fbd98cf9751741344a80b043dbd77a4e847bff4f06.scope", "5146b2bcd77ab4f2624bc1fbd98cf9751741344a80b043dbd77a4e847bff4f06")]
     public void ReturnedContainerIdIsNormalized(string input, string expect)
     {
-        Mock<IContainerIdProvider> containerIdProviderMock = new();
-        ContainerIdNormalizer normalizer = new ContainerIdNormalizer();
+        ServiceCollection services = new ServiceCollection();
+        services.AddScoped<IContainerIdProvider>(_ =>
+        {
+            Mock<IContainerIdProvider> containerIdProviderMock = new();
+            // Container id returns pre-normalized container id.
+            containerIdProviderMock.Setup(p => p.TryGetMyContainerId(out input)).Returns(true);
+            return containerIdProviderMock.Object;
+        });
+        services.AddScoped<IContainerIdNormalizer, ContainerIdNormalizer>();
 
-        // Container id returns pre-normalized container id.
-        containerIdProviderMock.Setup(p => p.TryGetMyContainerId(out input)).Returns(true);
 
-        ContainerIdHolder target = new ContainerIdHolder(
-            new IContainerIdProvider[] { containerIdProviderMock.Object },
-            normalizer);
+        ContainerIdHolder target = new ContainerIdHolder(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>());
 
         // The container id returned is normalized.
         Assert.Equal(expect, target.ContainerId);
@@ -32,7 +35,8 @@ public class ContainerIdHolderTests
     [InlineData("cri-containerd-5146b2bcd77ab4f2624bc1fbd98cf9751741344a80b043dbd77a4e847bff4f06.scope", "5146b2bcd77ab4f2624bc1fbd98cf9751741344a80b043dbd77a4e847bff4f06")]
     public void BackfilledContainerIdIsNormalized(string input, string expect)
     {
-        ContainerIdNormalizer normalizer = new ContainerIdNormalizer();
+        ServiceCollection services = new ServiceCollection();
+        services.AddScoped<IContainerIdNormalizer, ContainerIdNormalizer>();
 
         V1Pod pod = new V1Pod()
         {
@@ -44,10 +48,7 @@ public class ContainerIdHolderTests
             }
         };
 
-        ContainerIdHolder target = new ContainerIdHolder(
-            Enumerable.Empty<IContainerIdProvider>(),
-            normalizer);
-
+        ContainerIdHolder target = new ContainerIdHolder(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>());
         bool result = target.TryBackFillContainerId(pod, out V1ContainerStatus status);
 
         Assert.True(result);
@@ -59,16 +60,18 @@ public class ContainerIdHolderTests
     // A regression test to https://github.com/microsoft/ApplicationInsights-Kubernetes/issues/297.
     public void NoContainerIdShouldNotLeadToException()
     {
-        Mock<IContainerIdProvider> containerIdProviderMock = new();
-        ContainerIdNormalizer normalizer = new ContainerIdNormalizer();
+        ServiceCollection services = new ServiceCollection();
+        services.AddScoped<IContainerIdProvider>(_ =>
+        {
+            // No container id matched by the provider.
+            Mock<IContainerIdProvider> containerIdProviderMock = new();
+            string noContainerId = string.Empty;
+            containerIdProviderMock.Setup(p => p.TryGetMyContainerId(out noContainerId)).Returns(false);
+            return containerIdProviderMock.Object;
+        });
+        services.AddScoped<IContainerIdNormalizer, ContainerIdNormalizer>();
 
-        // No container id matched by the provider.
-        string noContainerId = string.Empty;
-        containerIdProviderMock.Setup(p => p.TryGetMyContainerId(out noContainerId)).Returns(false);
-
-        ContainerIdHolder target = new ContainerIdHolder(
-            new IContainerIdProvider[] { containerIdProviderMock.Object },
-            normalizer);
+        ContainerIdHolder target = new ContainerIdHolder(services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>());
 
         // Validate that no exception is thrown.
         Assert.NotNull(target);
