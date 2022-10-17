@@ -6,11 +6,11 @@ using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using k8s.Autorest;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Pods;
-using Microsoft.Rest;
 
 namespace Microsoft.ApplicationInsights.Kubernetes;
 
