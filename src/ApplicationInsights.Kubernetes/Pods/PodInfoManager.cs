@@ -5,9 +5,9 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using k8s.Autorest;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-using Microsoft.Rest;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Pods;
 
@@ -115,7 +115,7 @@ internal class PodInfoManager : IPodInfoManager
             catch (Exception ex) when (ex is not HttpOperationException || (ex is HttpOperationException operationException && operationException.Response.StatusCode != HttpStatusCode.Forbidden))
             {
                 _logger.LogWarning($"Query exception while trying to get pod info: {ex.Message}");
-                _logger.LogDebug(ex.ToString());
+                _logger.LogTrace(ex.ToString());
             }
 
             stopwatch.Stop();
