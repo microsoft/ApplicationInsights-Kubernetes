@@ -1,4 +1,5 @@
 using System;
+using Microsoft.ApplicationInsights.Kubernetes;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -29,5 +30,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// The default value is 10 minutes.
         /// </summary>
         public TimeSpan ClusterInfoRefreshInterval { get; set; } = TimeSpan.FromMinutes(10);
+
+        /// <summary>
+        /// Gets or sets an environment check action to determine if the the current process is inside a Kubernetes cluster.
+        /// When set to null (also the default), a built-in checker will be used.
+        /// </summary>
+        public IClusterEnvironmentCheck? ClusterCheckAction { get; set; } = null;
     }
 }

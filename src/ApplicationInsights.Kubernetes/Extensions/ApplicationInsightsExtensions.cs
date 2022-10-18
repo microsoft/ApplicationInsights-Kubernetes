@@ -18,11 +18,13 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">Collection of service descriptors.</param>
         /// <param name="applyOptions">Action to customize the configuration of Application Insights for Kubernetes.</param>
         /// <param name="diagnosticLogLevel">Sets the diagnostics log levels for the enricher.</param>
+        /// <param name="clusterCheck">Provides a custom implementation to check whether it is inside kubernetes cluster or not.</param>
         /// <returns>The service collection for chaining the next operation.</returns>
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services,
-            Action<AppInsightsForKubernetesOptions>? applyOptions = null,
-            LogLevel? diagnosticLogLevel = LogLevel.None)
+            Action<AppInsightsForKubernetesOptions>? applyOptions = default,
+            LogLevel? diagnosticLogLevel = LogLevel.None,
+            IClusterEnvironmentCheck? clusterCheck = default)
         {
             diagnosticLogLevel ??= LogLevel.None;   // Default to None.
             if (diagnosticLogLevel != LogLevel.None)
@@ -33,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (!KubernetesTelemetryInitializerExists(services))
             {
-                services.ConfigureKubernetesTelemetryInitializer(applyOptions, clusterCheck: default);
+                services.ConfigureKubernetesTelemetryInitializer(applyOptions, clusterCheck);
             }
             return services;
         }

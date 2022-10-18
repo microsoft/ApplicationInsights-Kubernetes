@@ -14,18 +14,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 internal class K8sInfoBackgroundService : BackgroundService
 {
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IK8sEnvironmentHolder _k8SEnvironmentHolder;
     private readonly AppInsightsForKubernetesOptions _options;
 
     // Notice: This is a background service, the service lifetime will be singleton.
     // Do NOT inject services in scope of Scoped or Transient. Use the injected service provider instead.
     public K8sInfoBackgroundService(
-        IServiceProvider serviceProvider,
+        IServiceScopeFactory serviceScopeFactory,
         IK8sEnvironmentHolder k8SEnvironmentHolder,
         IOptions<AppInsightsForKubernetesOptions> options)
     {
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
         _k8SEnvironmentHolder = k8SEnvironmentHolder ?? throw new ArgumentNullException(nameof(k8SEnvironmentHolder));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
@@ -58,7 +58,7 @@ internal class K8sInfoBackgroundService : BackgroundService
 
     private async Task UpdateK8sEnvironmentAsync(CancellationToken cancellationToken)
     {
-        await using (AsyncServiceScope scope = _serviceProvider.CreateAsyncScope())
+        await using (AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope())
         {
             // Get scoped services ready
             IServiceProvider provider = scope.ServiceProvider;
