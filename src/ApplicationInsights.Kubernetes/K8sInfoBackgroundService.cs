@@ -31,8 +31,24 @@ internal class K8sInfoBackgroundService : BackgroundService, IK8sInfoBootstrap
     }
 
     // Allows non-hosted service to bootstrap cluster info fetch.
-    Task IK8sInfoBootstrap.ExecuteAsync(CancellationToken stoppingToken)
-        => ExecuteAsync(stoppingToken);
+    void IK8sInfoBootstrap.Run()
+    {
+        try
+        {
+            // Fire and forget on purpose to avoid blocking the client code's thread.
+            _ = Task.Run(async () =>
+            {
+                using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
+                {
+                    await ExecuteAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Unexpected error bootstrapping Kubernetes cluster info. Please file a bug with details: {0}", ex.ToString());
+        }
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
