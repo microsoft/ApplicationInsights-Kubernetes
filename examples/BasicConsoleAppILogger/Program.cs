@@ -1,7 +1,4 @@
-﻿// using System.Diagnostics;
-// using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,11 +58,14 @@ namespace BasicConsoleAppILogger
 
                 // Enable K8s enricher
                 services.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
-                services.AddApplicationInsightsKubernetesEnricher(diagnosticLogLevel: LogLevel.Debug);
+                services.AddApplicationInsightsKubernetesEnricher(diagnosticLogLevel: LogLevel.Information);
 
                 // Build ServiceProvider.
                 IServiceProvider serviceProvider = services.BuildServiceProvider();
                 ILogger<Program> logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+
+                // Bootstrap k8s cluster info. Only run this once.
+                serviceProvider.StartApplicationInsightsKubernetesEnricher();
 
                 // Output logging info
                 while (true)
