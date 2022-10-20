@@ -44,7 +44,7 @@ namespace BasicConsoleAppILogger
                     builder.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>("", LogLevel.Trace);
 
                     builder.AddApplicationInsights(
-                        configureTelemetryConfiguration: (config) => config.ConnectionString = "InstrumentationKey=5d8258e7-abb2-4066-89a5-8c73071b74ff;IngestionEndpoint=https://westus2-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus2.livediagnostics.monitor.azure.com/",
+                        configureTelemetryConfiguration: (config) => config.ConnectionString = "---- Your-ApplicationInsights-Connection-String ----",
                         configureApplicationInsightsLoggerOptions: (options) => { }
                     );
 
