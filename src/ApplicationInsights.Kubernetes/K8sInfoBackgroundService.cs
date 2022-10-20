@@ -11,7 +11,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 /// <summary>
 /// A bootstrap service to keep updating K8s environment.
 /// </summary>
-internal class K8sInfoBackgroundService : BackgroundService
+internal class K8sInfoBackgroundService : BackgroundService, IK8sInfoBootstrap
 {
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -29,6 +29,10 @@ internal class K8sInfoBackgroundService : BackgroundService
         _k8SEnvironmentHolder = k8SEnvironmentHolder ?? throw new ArgumentNullException(nameof(k8SEnvironmentHolder));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
+
+    // Allows non-hosted service to bootstrap cluster info fetch.
+    Task IK8sInfoBootstrap.ExecuteAsync(CancellationToken stoppingToken)
+        => ExecuteAsync(stoppingToken);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
