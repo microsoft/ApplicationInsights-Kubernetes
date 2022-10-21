@@ -38,10 +38,7 @@ internal class K8sInfoBackgroundService : BackgroundService, IK8sInfoBootstrap
             // Fire and forget on purpose to avoid blocking the client code's thread.
             _ = Task.Run(async () =>
             {
-                using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource())
-                {
-                    await ExecuteAsync(cancellationTokenSource.Token).ConfigureAwait(false);
-                }
+                await ExecuteAsync(stoppingToken: default).ConfigureAwait(false);
             });
         }
         catch (Exception ex)

@@ -43,7 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         /// <summary>
-        /// Bootstraps Application Insights Kubernetes enricher. This is intended to be used in console application, where hosted service are not invoked supported by default.
+        /// Bootstraps Application Insights Kubernetes enricher. This is intended to be used in console application that does not use hosted services.
         /// </summary>
         public static void StartApplicationInsightsKubernetesEnricher(this IServiceProvider serviceProvider)
         {
