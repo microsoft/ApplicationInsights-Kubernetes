@@ -11,7 +11,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 /// <summary>
 /// A bootstrap service to keep updating K8s environment.
 /// </summary>
-internal class K8sInfoBackgroundService : BackgroundService
+internal class K8sInfoBackgroundService : BackgroundService, IK8sInfoBootstrap
 {
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -28,6 +28,23 @@ internal class K8sInfoBackgroundService : BackgroundService
         _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
         _k8SEnvironmentHolder = k8SEnvironmentHolder ?? throw new ArgumentNullException(nameof(k8SEnvironmentHolder));
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+    }
+
+    // Allows non-hosted service to bootstrap cluster info fetch.
+    void IK8sInfoBootstrap.Run()
+    {
+        try
+        {
+            // Fire and forget on purpose to avoid blocking the client code's thread.
+            _ = Task.Run(async () =>
+            {
+                await ExecuteAsync(stoppingToken: default).ConfigureAwait(false);
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Unexpected error bootstrapping Kubernetes cluster info. Please file a bug with details: {0}", ex.ToString());
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

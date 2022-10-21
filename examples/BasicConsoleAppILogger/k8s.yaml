@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ai-k8s-basic-console
+  namespace: ai-k8s-demo
   labels:
     app: consoleapp
 spec:
@@ -16,4 +17,4 @@ spec:
     spec:
       containers:
       - name: ai-k8s-basic-container
-        image: dockeraccount/basicconsole:latest
+        image: containerregistryaccount/basicconsole:1.0.0
