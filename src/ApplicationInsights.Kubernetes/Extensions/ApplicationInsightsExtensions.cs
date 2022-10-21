@@ -12,6 +12,8 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static partial class ApplicationInsightsExtensions
     {
+        private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
+
         /// <summary>
         /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection container with custom options.
         /// </summary>
@@ -38,6 +40,20 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.ConfigureKubernetesTelemetryInitializer(applyOptions, clusterCheck);
             }
             return services;
+        }
+
+        /// <summary>
+        /// Bootstraps Application Insights Kubernetes enricher. This is intended to be used in console application that does not use hosted services.
+        /// </summary>
+        public static void StartApplicationInsightsKubernetesEnricher(this IServiceProvider serviceProvider)
+        {
+            IK8sInfoBootstrap? k8sInfoBootstrap = serviceProvider.GetService<IK8sInfoBootstrap>();
+            if(k8sInfoBootstrap is null)
+            {
+                _logger.LogInformation("No service registered by type {0}. Either not running in a Kubernetes cluster or `{1}()` wasn't called on the service collection.", nameof(IK8sInfoBootstrap), nameof(AddApplicationInsightsKubernetesEnricher));
+                return;
+            }
+            k8sInfoBootstrap.Run();
         }
 
         /// <summary>

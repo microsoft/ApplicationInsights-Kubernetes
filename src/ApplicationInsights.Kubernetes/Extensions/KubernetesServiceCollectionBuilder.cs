@@ -140,6 +140,9 @@ internal class KubernetesServiceCollectionBuilder : IKubernetesServiceCollection
     {
         serviceCollection.TryAddScoped<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
         serviceCollection.TryAddSingleton<IK8sEnvironmentHolder>(_ => K8sEnvironmentHolder.Instance);
-        serviceCollection.AddHostedService<K8sInfoBackgroundService>();
+
+        serviceCollection.TryAddSingleton<K8sInfoBackgroundService>();
+        serviceCollection.TryAddSingleton<IK8sInfoBootstrap>(p => p.GetRequiredService<K8sInfoBackgroundService>());
+        serviceCollection.AddHostedService<K8sInfoBackgroundService>(p => p.GetRequiredService<K8sInfoBackgroundService>());
     }
 }

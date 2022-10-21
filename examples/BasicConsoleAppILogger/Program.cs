@@ -1,9 +1,7 @@
-﻿// using System.Diagnostics;
-// using Microsoft.ApplicationInsights.Kubernetes.Debugging;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
@@ -15,66 +13,81 @@ namespace BasicConsoleAppILogger
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            // Create the DI container.
-            IServiceCollection services = new ServiceCollection();
-            services.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
+            using ITelemetryChannel channel = new InMemoryChannel();
 
-            // Uncomment the following lines for debugging AI.K8s.
-            // Refer to https://github.com/microsoft/ApplicationInsights-Kubernetes/blob/develop/docs/SelfDiagnostics.MD for details.
-            // var observer = new ApplicationInsightsKubernetesDiagnosticObserver(DiagnosticLogLevel.Trace);
-            // ApplicationInsightsKubernetesDiagnosticSource.Instance.Observable.SubscribeWithAdapter(observer);
+            try
+            {
+                // Create the DI container.
+                IServiceCollection services = new ServiceCollection();
 
-            services.AddApplicationInsightsKubernetesEnricher();
-
-            // Channel is explicitly configured to do flush on it later.
-            var channel = new InMemoryChannel();
-            services.AddOptions<TelemetryConfiguration>().Configure<IServiceProvider>((config, p) =>
-                {
-                    // Appending registered telemetry initializers.
-                    foreach (ITelemetryInitializer registeredInitializer in p.GetServices<ITelemetryInitializer>())
+                // Channel is explicitly configured to do flush on it later.
+                services.AddOptions<TelemetryConfiguration>().Configure<IServiceProvider>((config, p) =>
                     {
-                        config.TelemetryInitializers.Add(registeredInitializer);
+                        // Appending registered telemetry initializers.
+                        foreach (ITelemetryInitializer registeredInitializer in p.GetServices<ITelemetryInitializer>())
+                        {
+                            config.TelemetryInitializers.Add(registeredInitializer);
+                        }
+
+                        // Setup up telemetry channels.
+                        config.TelemetryChannel = channel;
+                    }
+                );
+
+                // Add the logging pipelines to use. We are using Application Insights only here.
+                services.AddLogging(builder =>
+                {
+                    // Optional: Apply filters to configure LogLevel Trace or above is sent to
+                    // Application Insights for all categories.
+                    builder.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>("", LogLevel.Trace);
+
+                    builder.AddApplicationInsights(
+                        configureTelemetryConfiguration: (config) => config.ConnectionString = "---- Your-ApplicationInsights-Connection-String ----",
+                        configureApplicationInsightsLoggerOptions: (options) => { }
+                    );
+
+                    // Optional: Show the logs in console at the same time
+                    builder.AddSimpleConsole(opt =>
+                    {
+                        opt.SingleLine = true;
+                        opt.ColorBehavior = LoggerColorBehavior.Disabled;
+                    });
+                });
+
+                // Enable K8s enricher
+                services.AddSingleton<IConfiguration>(p => new ConfigurationBuilder().Build());
+                services.AddApplicationInsightsKubernetesEnricher(diagnosticLogLevel: LogLevel.Information);
+
+                // Build ServiceProvider.
+                IServiceProvider serviceProvider = services.BuildServiceProvider();
+                ILogger<Program> logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+
+                // Bootstrap k8s cluster info. Only run this once.
+                serviceProvider.StartApplicationInsightsKubernetesEnricher();
+
+                // Output logging info
+                while (true)
+                {
+                    // Begin a new scope. This is optional.
+                    using (logger.BeginScope(new Dictionary<string, object> { { "Method", nameof(Main) } }))
+                    {
+                        logger.LogInformation("Logger is working"); // this will be captured by Application Insights.
                     }
 
-                    // Setup up telemetry channels.
-                    config.TelemetryChannel = channel;
+                    channel.Flush();
+                    // Send wait for 10 seconds before going into the next iteration.
+                    Thread.Sleep(TimeSpan.FromSeconds(10));
                 }
-            );
-
-            // Add the logging pipelines to use. We are using Application Insights only here.
-            services.AddLogging(builder =>
+            }
+            finally
             {
-                // Optional: Apply filters to configure LogLevel Trace or above is sent to
-                // Application Insights for all categories.
-                builder.AddFilter<Microsoft.Extensions.Logging.ApplicationInsights.ApplicationInsightsLoggerProvider>("", LogLevel.Trace);
-                builder.AddApplicationInsights("---Your AI instrumentation key---");
-
-                // Optional: Show the logs in console at the same time
-                builder.AddSimpleConsole(opt =>
-                {
-                    opt.SingleLine = true;
-                    opt.ColorBehavior = LoggerColorBehavior.Disabled;
-                });
-            });
-
-            // Build ServiceProvider.
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-            ILogger<Program> logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-
-            while (true)
-            {
-                // Begin a new scope. This is optional.
-                using (logger.BeginScope(new Dictionary<string, object> { { "Method", nameof(Main) } }))
-                {
-                    logger.LogInformation("Logger is working"); // this will be captured by Application Insights.
-                }
-
-                // Explicitly call Flush() followed by sleep is required in Console Apps.
-                // This is to ensure that even if application terminates, telemetry is sent to the back-end.
+                // Explicitly call Flush() followed by Delay, as required in console apps.
+                // This ensures that even if the application terminates, telemetry is sent to the back end.
                 channel.Flush();
-                Thread.Sleep(10000);
+
+                await Task.Delay(TimeSpan.FromMilliseconds(1000));
             }
         }
     }
