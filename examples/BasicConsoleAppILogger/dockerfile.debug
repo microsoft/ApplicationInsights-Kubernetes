@@ -1,5 +1,5 @@
   # syntax=docker/dockerfile:1
-  FROM mcr.microsoft.com/dotnet/aspnet:6.0
+  FROM mcr.microsoft.com/dotnet/runtime:6.0
   COPY bin/Release/net6/publish/ App/
   WORKDIR /App
   ENTRYPOINT ["dotnet", "BasicConsoleAppILogger.dll"]
