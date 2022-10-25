@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Microsoft.ApplicationInsights.Kubernetes;
 
 /// <summary>
@@ -9,6 +12,12 @@ internal interface IK8sInfoBootstrap
 {
     /// <summary>
     /// Bootstrap the fetch of Kubernetes information.
+    /// Run() is should NOT block the current thread.
     /// </summary>
     void Run();
+
+    /// <summary>
+    /// Bootstrap the fetch of Kubernetes information.
+    /// </summary>
+    Task ExecuteAsync(CancellationToken cancellationToken);
 }

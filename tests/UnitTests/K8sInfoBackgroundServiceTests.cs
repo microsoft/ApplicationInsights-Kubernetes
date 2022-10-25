@@ -24,12 +24,12 @@ public class K8sInfoBackgroundServiceTests
 
         AppInsightsForKubernetesOptions options = new AppInsightsForKubernetesOptions();
 
-        K8sInfoBackgroundService target = new K8sInfoBackgroundService(serviceScopeFactoryMock.Object, Options.Create(options));
+        IK8sInfoBootstrap target = new K8sInfoBootstrap(serviceScopeFactoryMock.Object, Options.Create(options));
 
         using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(0.5)))
         {
-            await target.StartAsync(cancellationTokenSource.Token);
-            ((IK8sInfoBootstrap)target).Run();
+            await target.ExecuteAsync(cancellationTokenSource.Token);
+            target.Run();
         }
 
         fetcherMock.Verify(f => f.UpdateK8sEnvironmentAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -48,13 +48,13 @@ public class K8sInfoBackgroundServiceTests
 
         AppInsightsForKubernetesOptions options = new AppInsightsForKubernetesOptions();
 
-        K8sInfoBackgroundService target = new K8sInfoBackgroundService(serviceScopeFactoryMock.Object, Options.Create(options));
+        IK8sInfoBootstrap target = new K8sInfoBootstrap(serviceScopeFactoryMock.Object, Options.Create(options));
 
         using (CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(0.5)))
         {
             await Parallel.ForEachAsync(Enumerable.Range(1, 100), async (_, _) =>
             {
-                await target.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                await target.ExecuteAsync(cancellationTokenSource.Token).ConfigureAwait(false);
                 ((IK8sInfoBootstrap)target).Run();
             });
         }
