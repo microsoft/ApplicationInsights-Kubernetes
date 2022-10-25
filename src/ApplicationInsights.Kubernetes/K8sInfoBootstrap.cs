@@ -74,14 +74,15 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
         try
         {
             // Fire and forget on purpose to avoid blocking the client code's thread.
+            // 
+            // Notice: when
+            //  1. The cancellation token passed to the user delegate and the one to the Task (2nd parameter) is the same token, and
+            //  2. The task is not waited, OperationCancelledException will be handled by Task.Run and it won't propagate.
+            // and we don't need to handle the exception.
             _ = Task.Run(async () =>
             {
                 await ExecuteAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             }, cancellationToken);
-        }
-        catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
-        {
-            _logger.LogInformation("{serviceName}.{methodName} cancelled by the user.", nameof(K8sInfoBootstrap), nameof(Run));
         }
         catch (Exception ex)
         {
