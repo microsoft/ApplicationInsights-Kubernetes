@@ -89,6 +89,7 @@ internal class KubernetesServiceCollectionBuilder : IKubernetesServiceCollection
         serviceCollection.AddScoped<IPodInfoManager, PodInfoManager>();
         serviceCollection.AddScoped<IContainerStatusManager, ContainerStatusManager>();
         serviceCollection.AddScoped<IK8sInfoService, K8sInfoService>();
+        serviceCollection.AddScoped<IK8sEnvironmentFetcher, K8sEnvironmentFetcher>();
     }
 
     /// <summary>
@@ -141,8 +142,7 @@ internal class KubernetesServiceCollectionBuilder : IKubernetesServiceCollection
         serviceCollection.TryAddScoped<IK8sEnvironmentFactory, K8sEnvironmentFactory>();
         serviceCollection.TryAddSingleton<IK8sEnvironmentHolder>(_ => K8sEnvironmentHolder.Instance);
 
-        serviceCollection.TryAddSingleton<K8sInfoBackgroundService>();
-        serviceCollection.TryAddSingleton<IK8sInfoBootstrap>(p => p.GetRequiredService<K8sInfoBackgroundService>());
-        serviceCollection.AddHostedService<K8sInfoBackgroundService>(p => p.GetRequiredService<K8sInfoBackgroundService>());
+        serviceCollection.TryAddSingleton<IK8sInfoBootstrap, K8sInfoBootstrap>();
+        serviceCollection.AddHostedService<K8sInfoBackgroundService>();
     }
 }
