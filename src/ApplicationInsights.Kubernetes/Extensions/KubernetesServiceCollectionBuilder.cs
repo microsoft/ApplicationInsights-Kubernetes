@@ -89,6 +89,7 @@ internal class KubernetesServiceCollectionBuilder : IKubernetesServiceCollection
         serviceCollection.AddScoped<IPodInfoManager, PodInfoManager>();
         serviceCollection.AddScoped<IContainerStatusManager, ContainerStatusManager>();
         serviceCollection.AddScoped<IK8sInfoService, K8sInfoService>();
+        serviceCollection.AddScoped<IK8sEnvironmentFetcher, K8sEnvironmentFetcher>();
     }
 
     /// <summary>
