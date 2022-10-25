@@ -69,15 +69,19 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
 
 
     // Allows non-hosted service to bootstrap cluster property fetch.
-    public void Run()
+    public void Run(CancellationToken cancellationToken)
     {
         try
         {
             // Fire and forget on purpose to avoid blocking the client code's thread.
             _ = Task.Run(async () =>
             {
-                await ExecuteAsync(cancellationToken: default).ConfigureAwait(false);
-            });
+                await ExecuteAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            }, cancellationToken);
+        }
+        catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
+        {
+            _logger.LogInformation("{serviceName}.{methodName} cancelled by the user.", nameof(K8sInfoBootstrap), nameof(Run));
         }
         catch (Exception ex)
         {

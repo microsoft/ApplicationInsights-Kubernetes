@@ -14,7 +14,7 @@ internal interface IK8sInfoBootstrap
     /// Bootstrap the fetch of Kubernetes information.
     /// Run() is should NOT block the current thread.
     /// </summary>
-    void Run();
+    void Run(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Bootstrap the fetch of Kubernetes information.
