@@ -23,8 +23,7 @@
         <DelaySign>True</DelaySign>
         <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)PublicKey.snk</AssemblyOriginatorKeyFile>
         <!--Package-->
-        <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">
-            $([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
+        <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
         <Version Condition=" '$(Version)' == '' ">3.0.0-private-$(VersionSuffix)</Version>
         <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' ">3.0.0.0</AssemblyVersion>
         <Authors>Microsoft</Authors>
