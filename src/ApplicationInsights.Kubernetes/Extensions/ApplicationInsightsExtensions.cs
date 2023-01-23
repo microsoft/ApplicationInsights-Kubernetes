@@ -28,7 +28,6 @@ namespace Microsoft.Extensions.DependencyInjection
             LogLevel? diagnosticLogLevel = LogLevel.None,
             IClusterEnvironmentCheck? clusterCheck = default)
         {
-            diagnosticLogLevel ??= LogLevel.None;   // Default to None.
             if (diagnosticLogLevel != LogLevel.None)
             {
                 ApplicationInsightsKubernetesDiagnosticObserver observer = new ApplicationInsightsKubernetesDiagnosticObserver((DiagnosticLogLevel)diagnosticLogLevel);

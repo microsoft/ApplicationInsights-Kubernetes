@@ -4,6 +4,11 @@
     <PropertyGroup>
         <LangVersion>10.0</LangVersion>
         <Nullable>enable</Nullable>
+
+        <!-- Unified NuGet package reference versions. Pull out to standalone build props file when
+        it grows. -->
+        <!-- Application Insights SDK and Application Insights for ASP.NET Core version. -->
+        <ApplicationInsights_PackageVersion>2.21.0</ApplicationInsights_PackageVersion>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <OutputPath>$(MSBuildThisFileDirectory)..\bin\Debug\</OutputPath>
@@ -18,7 +23,8 @@
         <DelaySign>True</DelaySign>
         <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)PublicKey.snk</AssemblyOriginatorKeyFile>
         <!--Package-->
-        <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
+        <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">
+            $([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
         <Version Condition=" '$(Version)' == '' ">3.0.0-private-$(VersionSuffix)</Version>
         <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' ">3.0.0.0</AssemblyVersion>
         <Authors>Microsoft</Authors>
