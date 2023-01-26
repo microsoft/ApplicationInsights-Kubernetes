@@ -9,20 +9,47 @@ on:
     branches:
       - develop
       - feature/**
-jobs:
-  build:
+  workflow_dispatch:
 
+jobs:
+  debug-build:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Check out Source Code
+      uses: actions/checkout@v3
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.x
+
     - name: Restore dependencies
-      run: dotnet restore src/ApplicationInsights.Kubernetes
-    - name: Build
-      run: dotnet build src/ApplicationInsights.Kubernetes --no-restore
+      run: dotnet restore ApplicationInsights.Kubernetes.sln
+
+    - name: Build ApplicationInsights.Kubernetes
+      run: dotnet build ApplicationInsights.Kubernetes.sln --no-restore --configuration debug
+
     - name: Test
-      run: dotnet test tests/UnitTests --verbosity normal
+      run: dotnet test tests/UnitTests --verbosity normal --no-build --configuration debug
+
+  release-build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Check out Source Code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.x
+
+    - name: Restore dependencies
+      run: dotnet restore ApplicationInsights.Kubernetes.sln
+
+    - name: Build ApplicationInsights.Kubernetes
+      run: dotnet build ApplicationInsights.Kubernetes.sln --no-restore --configuration release
+
+    - name: Test
+      run: dotnet test tests/UnitTests --verbosity normal --no-build --configuration release
