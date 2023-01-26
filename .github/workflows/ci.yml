@@ -12,8 +12,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  debug-build:
-    name: Build Debug
+  build:
+    name: PR Build
+    strategy:
+      matrix:
+        config: [debug, release]
     runs-on: ubuntu-22.04
 
     steps:
@@ -29,30 +32,7 @@ jobs:
       run: dotnet restore ApplicationInsights.Kubernetes.sln
 
     - name: Build ApplicationInsights.Kubernetes
-      run: dotnet build ApplicationInsights.Kubernetes.sln --no-restore --configuration debug
+      run: dotnet build ApplicationInsights.Kubernetes.sln --no-restore --configuration ${{ matrix.config }}
 
     - name: Test
-      run: dotnet test tests/UnitTests --verbosity normal --configuration debug
-
-  release-build:
-    needs: debug-build
-    name: Build Release
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Check out Source Code
-      uses: actions/checkout@v3
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.x
-
-    - name: Restore dependencies
-      run: dotnet restore ApplicationInsights.Kubernetes.sln
-
-    - name: Build ApplicationInsights.Kubernetes
-      run: dotnet build ApplicationInsights.Kubernetes.sln --no-restore --configuration release
-
-    - name: Test
-      run: dotnet test tests/UnitTests --verbosity normal --configuration release
+      run: dotnet test tests/UnitTests --verbosity normal --configuration ${{ matrix.config }}
