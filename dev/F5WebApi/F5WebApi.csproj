@@ -11,7 +11,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.*" />
-    <PackageReference Include="KubernetesClient" Version="10.0.16" />
   </ItemGroup>
 
   <ItemGroup>
