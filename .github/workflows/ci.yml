@@ -32,7 +32,7 @@ jobs:
       run: dotnet build ApplicationInsights.Kubernetes.sln --no-restore --configuration debug
 
     - name: Test
-      run: dotnet test tests/UnitTests --verbosity normal --no-build --configuration debug
+      run: dotnet test tests/UnitTests --verbosity normal --configuration debug
 
   release-build:
     needs: debug-build
@@ -55,4 +55,4 @@ jobs:
       run: dotnet build ApplicationInsights.Kubernetes.sln --no-restore --configuration release
 
     - name: Test
-      run: dotnet test tests/UnitTests --verbosity normal --no-build --configuration release
+      run: dotnet test tests/UnitTests --verbosity normal --configuration release
