@@ -3,7 +3,7 @@
     <Features>IOperation</Features>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Microsoft.ApplicationInsights.Kubernetes</RootNamespace>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KubernetesClient" Version="7.2.19" />
+    <PackageReference Include="KubernetesClient" Version="[10.0.16, 11.0.0)" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
@@ -25,10 +25,6 @@
     <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="3.1.27" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Extensions\ObsoletedExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
