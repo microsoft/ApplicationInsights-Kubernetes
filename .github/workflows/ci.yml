@@ -9,20 +9,30 @@ on:
     branches:
       - develop
       - feature/**
+  workflow_dispatch:
+
 jobs:
   build:
-
+    name: PR Build
+    strategy:
+      matrix:
+        config: [debug, release]
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Check out Source Code
+      uses: actions/checkout@v3
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.x
+
     - name: Restore dependencies
-      run: dotnet restore src/ApplicationInsights.Kubernetes
-    - name: Build
-      run: dotnet build src/ApplicationInsights.Kubernetes --no-restore
+      run: dotnet restore ApplicationInsights.Kubernetes.sln
+
+    - name: Build ApplicationInsights.Kubernetes
+      run: dotnet build ApplicationInsights.Kubernetes.sln --no-restore --configuration ${{ matrix.config }}
+
     - name: Test
-      run: dotnet test tests/UnitTests --verbosity normal
+      run: dotnet test tests/UnitTests --verbosity normal --configuration ${{ matrix.config }}
