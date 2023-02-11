@@ -1,6 +1,9 @@
 using System;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Moq;
 using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
@@ -29,7 +32,7 @@ public class ApplicationInsightsExtensionsTests
         IServiceCollection collection = new ServiceCollection();
 
         // If there's compile error, check if the signature of AddApplicationInsightsKubernetesEnricher was changed.
-        collection = collection.AddApplicationInsightsKubernetesEnricher(opt => opt.InitializationTimeout = TimeSpan.FromMinutes(15));
+        collection = collection.AddApplicationInsightsKubernetesEnricher(applyOptions: opt => opt.InitializationTimeout = TimeSpan.FromMinutes(15));
 
         Assert.NotNull(collection);
     }
@@ -52,9 +55,35 @@ public class ApplicationInsightsExtensionsTests
 
         // If there's compile error, check if the signature of AddApplicationInsightsKubernetesEnricher was changed.
         collection = collection.AddApplicationInsightsKubernetesEnricher(
-            opt => opt.InitializationTimeout = TimeSpan.FromMinutes(15),
-            diagnosticLogLevel: LogLevel.Trace);
+            diagnosticLogLevel: LogLevel.Trace,
+            applyOptions: opt => opt.InitializationTimeout = TimeSpan.FromMinutes(15));
 
         Assert.NotNull(collection);
+    }
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void ShouldNotRegisterHostedServiceWhenSet(bool skipRegisterBackendService, bool expectServiceRegistered)
+    {
+        IServiceCollection collection = new ServiceCollection();
+
+        Mock<IClusterEnvironmentCheck> clusterCheck = new();
+        clusterCheck.Setup(c => c.IsInCluster).Returns(true);
+
+        // If there's compile error, check if the signature of AddApplicationInsightsKubernetesEnricher was changed.
+        collection = collection.AddApplicationInsightsKubernetesEnricher(skipRegisterBackendService: skipRegisterBackendService, clusterCheck: clusterCheck.Object);
+
+        Assert.NotNull(collection);
+        bool registered = collection.Any(serviceDescriptor => serviceDescriptor.ServiceType == typeof(IHostedService));
+
+        if (expectServiceRegistered)
+        {
+            Assert.True(registered);
+        }
+        else
+        {
+            Assert.False(registered);
+        }
     }
 }

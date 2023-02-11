@@ -18,14 +18,16 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Enables Application Insights for Kubernetes on the Default TelemetryConfiguration in the dependency injection container with custom options.
         /// </summary>
         /// <param name="services">Collection of service descriptors.</param>
-        /// <param name="applyOptions">Action to customize the configuration of Application Insights for Kubernetes.</param>
         /// <param name="diagnosticLogLevel">Sets the diagnostics log levels for the enricher.</param>
+        /// <param name="skipRegisterBackendService">Allows skipping register any backend service for constrained environment like InProc Azure Function.</param>
+        /// <param name="applyOptions">Action to customize the configuration of Application Insights for Kubernetes.</param>
         /// <param name="clusterCheck">Provides a custom implementation to check whether it is inside kubernetes cluster or not.</param>
         /// <returns>The service collection for chaining the next operation.</returns>
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services,
-            Action<AppInsightsForKubernetesOptions>? applyOptions = default,
             LogLevel? diagnosticLogLevel = LogLevel.None,
+            bool skipRegisterBackendService = false,
+            Action<AppInsightsForKubernetesOptions>? applyOptions = default,
             IClusterEnvironmentCheck? clusterCheck = default)
         {
             diagnosticLogLevel ??= LogLevel.None;   // Default to None.
@@ -37,7 +39,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (!KubernetesTelemetryInitializerExists(services))
             {
-                services.ConfigureKubernetesTelemetryInitializer(applyOptions, clusterCheck);
+                services.ConfigureKubernetesTelemetryInitializer(applyOptions, clusterCheck, skipRegisterBackendService);
             }
             return services;
         }
@@ -48,7 +50,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static void StartApplicationInsightsKubernetesEnricher(this IServiceProvider serviceProvider)
         {
             IK8sInfoBootstrap? k8sInfoBootstrap = serviceProvider.GetService<IK8sInfoBootstrap>();
-            if(k8sInfoBootstrap is null)
+            if (k8sInfoBootstrap is null)
             {
                 _logger.LogInformation("No service registered by type {0}. Either not running in a Kubernetes cluster or `{1}()` wasn't called on the service collection.", nameof(IK8sInfoBootstrap), nameof(AddApplicationInsightsKubernetesEnricher));
                 return;
@@ -69,9 +71,10 @@ namespace Microsoft.Extensions.DependencyInjection
         internal static void ConfigureKubernetesTelemetryInitializer(
             this IServiceCollection services,
             Action<AppInsightsForKubernetesOptions>? overwriteOptions,
-            IClusterEnvironmentCheck? clusterCheck)
+            IClusterEnvironmentCheck? clusterCheck,
+            bool skipRegisterBackendService = false)
         {
-            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = new KubernetesServiceCollectionBuilder(overwriteOptions, clusterCheck);
+            IKubernetesServiceCollectionBuilder kubernetesServiceCollectionBuilder = new KubernetesServiceCollectionBuilder(overwriteOptions, clusterCheck, skipRegisterBackendService);
             _ = kubernetesServiceCollectionBuilder.RegisterServices(services);
         }
     }

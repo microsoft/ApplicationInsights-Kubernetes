@@ -21,7 +21,7 @@ public class KubernetesEnablementTest
 
         clusterCheckMock.Setup(c => c.IsInCluster).Returns(true);
 
-        KubernetesServiceCollectionBuilder target = new KubernetesServiceCollectionBuilder(customizeOptions: null, clusterCheckMock.Object);
+        KubernetesServiceCollectionBuilder target = new KubernetesServiceCollectionBuilder(customizeOptions: null, clusterCheckMock.Object, skipRegisterBackendService: false);
         target.RegisterServices(services);
 
         Assert.NotNull(services.FirstOrDefault(sd => sd.ImplementationType == typeof(KubernetesTelemetryInitializer)));
