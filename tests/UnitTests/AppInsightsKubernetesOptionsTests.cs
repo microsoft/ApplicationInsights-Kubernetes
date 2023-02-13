@@ -18,7 +18,7 @@ public class AppInsightsKubernetesOptionsTests
 
         clusterCheck.Setup(c => c.IsInCluster).Returns(true);
 
-        KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: default, clusterCheck.Object);
+        KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: default, clusterCheck.Object, skipRegisterBackendService: false);
 
         IServiceCollection services = new ServiceCollection();
         IConfiguration configuration = (new ConfigurationBuilder()).Build();
@@ -44,7 +44,7 @@ public class AppInsightsKubernetesOptionsTests
 
         clusterCheck.Setup(c => c.IsInCluster).Returns(true);
 
-        KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: default, clusterCheck.Object);
+        KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: default, clusterCheck.Object, skipRegisterBackendService: false);
 
         IServiceCollection services = new ServiceCollection();
         IConfiguration configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>()
@@ -71,7 +71,7 @@ public class AppInsightsKubernetesOptionsTests
         KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: opt =>
         {
             opt.InitializationTimeout = TimeSpan.FromSeconds(10);   // The user settings through code will take precedence.
-        }, clusterCheck.Object);
+        }, clusterCheck.Object, skipRegisterBackendService: false);
 
         IServiceCollection services = new ServiceCollection();
         IConfiguration configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>()
@@ -101,7 +101,7 @@ public class AppInsightsKubernetesOptionsTests
         KubernetesServiceCollectionBuilder builder = new KubernetesServiceCollectionBuilder(customizeOptions: opt =>
         {
             opt.TelemetryKeyProcessor = keyTransformer;
-        }, clusterCheck.Object);
+        }, clusterCheck.Object, skipRegisterBackendService: false);
 
         IServiceCollection services = new ServiceCollection();
         IConfiguration configuration = new ConfigurationBuilder().Build();
