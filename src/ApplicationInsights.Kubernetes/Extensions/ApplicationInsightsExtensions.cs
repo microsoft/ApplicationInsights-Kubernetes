@@ -19,14 +19,16 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">Collection of service descriptors.</param>
         /// <param name="diagnosticLogLevel">Sets the diagnostics log levels for the enricher.</param>
-        /// <param name="skipRegisterBackendService">Allows skipping register any backend service for constrained environment like InProc Azure Function.</param>
+        /// <param name="disableBackgroundService">If true, the Application Insights enricher library will not use any background (hosted) services,
+        /// and Kubernetes information will not be fetched automatically. Hosted services are not allowed in some environments, e.g. Azure Function. 
+        /// For more information see https://github.com/Azure/azure-functions-host/issues/5447#issuecomment-575368316</param>
         /// <param name="applyOptions">Action to customize the configuration of Application Insights for Kubernetes.</param>
         /// <param name="clusterCheck">Provides a custom implementation to check whether it is inside kubernetes cluster or not.</param>
         /// <returns>The service collection for chaining the next operation.</returns>
         public static IServiceCollection AddApplicationInsightsKubernetesEnricher(
             this IServiceCollection services,
             LogLevel? diagnosticLogLevel = LogLevel.None,
-            bool skipRegisterBackendService = false,
+            bool disableBackgroundService = false,
             Action<AppInsightsForKubernetesOptions>? applyOptions = default,
             IClusterEnvironmentCheck? clusterCheck = default)
         {
@@ -39,7 +41,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (!KubernetesTelemetryInitializerExists(services))
             {
-                services.ConfigureKubernetesTelemetryInitializer(applyOptions, clusterCheck, skipRegisterBackendService);
+                services.ConfigureKubernetesTelemetryInitializer(applyOptions, clusterCheck, disableBackgroundService);
             }
             return services;
         }

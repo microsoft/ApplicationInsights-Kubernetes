@@ -64,7 +64,7 @@ public class ApplicationInsightsExtensionsTests
     [Theory]
     [InlineData(false, true)]
     [InlineData(true, false)]
-    public void ShouldNotRegisterHostedServiceWhenSet(bool skipRegisterBackendService, bool expectServiceRegistered)
+    public void ShouldNotRegisterHostedServiceWhenSet(bool disableBackgroundService, bool expectServiceRegistered)
     {
         IServiceCollection collection = new ServiceCollection();
 
@@ -72,7 +72,7 @@ public class ApplicationInsightsExtensionsTests
         clusterCheck.Setup(c => c.IsInCluster).Returns(true);
 
         // If there's compile error, check if the signature of AddApplicationInsightsKubernetesEnricher was changed.
-        collection = collection.AddApplicationInsightsKubernetesEnricher(skipRegisterBackendService: skipRegisterBackendService, clusterCheck: clusterCheck.Object);
+        collection = collection.AddApplicationInsightsKubernetesEnricher(disableBackgroundService: disableBackgroundService, clusterCheck: clusterCheck.Object);
 
         Assert.NotNull(collection);
         bool registered = collection.Any(serviceDescriptor => serviceDescriptor.ServiceType == typeof(IHostedService));
