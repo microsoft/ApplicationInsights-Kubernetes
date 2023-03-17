@@ -103,6 +103,7 @@ public class KubernetesTelemetryInitializerTests
         // Setup
         envMock.Setup(env => env.ContainerID).Returns("Cid");
         envMock.Setup(env => env.ContainerName).Returns("CName");
+        envMock.Setup(env => env.ImageName).Returns("IName");
         envMock.Setup(env => env.PodID).Returns("Pid");
         envMock.Setup(env => env.PodName).Returns("PName");
         envMock.Setup(env => env.PodLabels).Returns("PLabels");
@@ -142,6 +143,7 @@ public class KubernetesTelemetryInitializerTests
         // Setup
         envMock.Setup(env => env.ContainerID).Returns("Cid");
         envMock.Setup(env => env.ContainerName).Returns("CName");
+        envMock.Setup(env => env.ImageName).Returns("IName");
         envMock.Setup(env => env.PodLabels).Returns("PLabels");
         envMock.Setup(env => env.ReplicaSetUid).Returns<string>(null);
         envMock.Setup(env => env.ReplicaSetName).Returns<string>(null);
@@ -178,6 +180,7 @@ public class KubernetesTelemetryInitializerTests
         envMock.Setup(env => env.ContainerName).Returns("Hello RoleName");
         envMock.Setup(env => env.ContainerID).Returns("Cid");
         envMock.Setup(env => env.ContainerName).Returns("CName");
+        envMock.Setup(env => env.ImageName).Returns("IName");
         envMock.Setup(env => env.PodID).Returns("Pid");
         envMock.Setup(env => env.PodName).Returns("PName");
         envMock.Setup(env => env.PodLabels).Returns("PLabels");
