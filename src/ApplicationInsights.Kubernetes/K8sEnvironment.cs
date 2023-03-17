@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using k8s.Models;
@@ -24,6 +24,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 
             ContainerID = containerStatus?.ContainerID;
             ContainerName = containerStatus?.Name;
+            ImageName = containerStatus?.Image;
 
             PodName = pod.Metadata.Name;
             PodID = pod.Metadata.Uid;
@@ -50,6 +51,11 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         /// Name of the container specified in deployment spec.
         /// </summary>
         public string? ContainerName { get; }
+
+        /// <summary>
+        /// Name of the image specified in deployment spec.
+        /// </summary>
+        public string? ImageName { get; }
 
         /// <summary>
         /// Name of the Pod
