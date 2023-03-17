@@ -7,6 +7,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         private static class Constant
         {
             public const string Container = "Container";
+            public const string Image = "Image";
             public const string Deployment = "Deployment";
             public const string K8s = "Kubernetes";
             public const string Node = "Node";
@@ -27,6 +28,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         {
             public static readonly string ID = Invariant($"{Constant.K8s}.{Constant.Container}.{Constant.ID}");
             public static readonly string Name = Invariant($"{Constant.K8s}.{Constant.Container}.{Constant.Name}");
+            public static readonly string ImageName = Invariant($"{Constant.K8s}.{Constant.Container}.{Constant.Image}.{Constant.Name}");
         }
 
         public static class Pod

@@ -1,4 +1,4 @@
-﻿namespace Microsoft.ApplicationInsights.Kubernetes;
+namespace Microsoft.ApplicationInsights.Kubernetes;
 
 /// <summary>
 /// An instance contains Kubernetes environment information.
@@ -14,6 +14,11 @@ public interface IK8sEnvironment
     /// Gets the name of the Container. Null when the value is not available.
     /// </summary>
     string? ContainerName { get; }
+
+    /// <summary>
+    /// Name of the image specified in deployment spec.
+    /// </summary>
+    string? ImageName { get; }
 
     /// <summary>
     /// Gets the unique id of the Deployment. Null when the value is not available.
