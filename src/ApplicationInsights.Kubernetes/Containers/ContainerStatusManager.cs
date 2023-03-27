@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,11 +29,23 @@ internal class ContainerStatusManager : IContainerStatusManager
     public async Task<bool> IsContainerReadyAsync(CancellationToken cancellationToken)
     {
         V1ContainerStatus? myContainerStatus = await GetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
+
+        // Found my container status, return if it is ready
         if (myContainerStatus is not null)
         {
             return IsContainerStatusReady(myContainerStatus);
         }
 
+        // Can not locate my container, fall back to any container's status
+        await foreach (V1ContainerStatus status in GetAnyContainerStatusAsync(cancellationToken).ConfigureAwait(false))
+        {
+            if (status.Ready)
+            {
+                return true;
+            }
+        }
+
+        // No container is ready.
         return false;
     }
 
@@ -76,15 +90,40 @@ internal class ContainerStatusManager : IContainerStatusManager
         return null;
     }
 
+    private async IAsyncEnumerable<V1ContainerStatus> GetAnyContainerStatusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        // Always get the latest status by querying the pod object
+        V1Pod? myPod = await _podInfoManager.GetMyPodAsync(cancellationToken).ConfigureAwait(false);
+        if (myPod?.Status?.ContainerStatuses is null)
+        {
+            yield break;
+        }
+
+        foreach (V1ContainerStatus containerStatus in myPod.Status.ContainerStatuses)
+        {
+            yield return containerStatus;
+        }
+    }
+
+    /// <summary>
+    /// Get container readiness.
+    /// </summary>
+    /// <param name="containerStatus">The container status if any.</param>
+    /// <returns></returns>
     private bool IsContainerStatusReady(V1ContainerStatus containerStatus)
     {
         _logger.LogTrace($"Container status object: {containerStatus}, isReady: {containerStatus?.Ready}");
         return containerStatus is not null && containerStatus.Ready;
     }
 
+    /// <summary>
+    /// Wait until the container is ready. In case container id is absent, it waits for any container in the pod got ready.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>My container status or null.</returns>
     public async Task<V1ContainerStatus?> WaitContainerReadyAsync(CancellationToken cancellationToken)
     {
-        while(true)
+        while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -92,6 +131,8 @@ internal class ContainerStatusManager : IContainerStatusManager
             {
                 if (await IsContainerReadyAsync(cancellationToken).ConfigureAwait(false))
                 {
+                    // Notes: it is still possible to my container status to be null, because IsContainerReadyAsync above checks for
+                    // either my container or any container's status when my container id is absent.
                     return await GetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
