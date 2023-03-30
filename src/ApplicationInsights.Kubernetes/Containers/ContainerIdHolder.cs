@@ -60,23 +60,29 @@ internal class ContainerIdHolder : IContainerIdHolder
             {
                 string? containerName = Environment.GetEnvironmentVariable("ContainerName");
                 _logger.LogDebug(FormattableString.Invariant($"Select container by environment variable containerName: {containerName}"));
-                containerStatus = containerStatuses.FirstOrDefault(c => c.Name == containerName);
-                _logger.LogDebug(FormattableString.Invariant($"Selected container by container.name property container id: {containerStatus.ContainerID}"));
-            }
-
-            _logger.LogInformation(FormattableString.Invariant($"Selected container {containerStatus.Name} container id: {containerStatus.ContainerID}"));
-
-            using (IServiceScope scope = _serviceScopeFactory.CreateScope())
-            {
-                IContainerIdNormalizer normalizer = scope.ServiceProvider.GetRequiredService<IContainerIdNormalizer>();
-                if (normalizer.TryNormalize(containerStatus.ContainerID, out string? normalizedContainerId))
-                {
-                    _containerId = normalizedContainerId;
-                    return true;
+                containerStatus = containerStatuses.FirstOrDefault(c => string.Equals(c.Name, containerName, StringComparison.Ordinal));
+                if (containerStatus is not null)
+                { 
+                    _logger.LogDebug(FormattableString.Invariant($"Selected container by container.name property container id: {containerStatus.ContainerID}"));
                 }
+               
             }
+            if (containerStatus is not null)
+            {
+                _logger.LogInformation(FormattableString.Invariant($"Selected container {containerStatus.Name} container id: {containerStatus.ContainerID}"));
 
-            _logger.LogError(FormattableString.Invariant($"Normalization failed for container id: {containerStatus.ContainerID}"));
+                using (IServiceScope scope = _serviceScopeFactory.CreateScope())
+                {
+                    IContainerIdNormalizer normalizer = scope.ServiceProvider.GetRequiredService<IContainerIdNormalizer>();
+                    if (normalizer.TryNormalize(containerStatus.ContainerID, out string? normalizedContainerId))
+                    {
+                        _containerId = normalizedContainerId;
+                        return true;
+                    }
+                }
+                _logger.LogError(FormattableString.Invariant($"Normalization failed for container id: {containerStatus.ContainerID}"));
+            }
+            _logger.LogError(FormattableString.Invariant($"Try back fill ContainerId failed"));
         }
         return false;
     }
