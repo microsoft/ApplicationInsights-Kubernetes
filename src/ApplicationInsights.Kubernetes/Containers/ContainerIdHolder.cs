@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,24 +45,44 @@ internal class ContainerIdHolder : IContainerIdHolder
         }
         containerStatus = null;
 
-        // If there's no container id provided providers, check to see if there's only 1 container inside the pod
+        // If there's no container id provided providers
         IList<V1ContainerStatus>? containerStatuses = pod.Status?.ContainerStatuses;
-        if (containerStatuses is not null && containerStatuses.Count == 1)
+        if (containerStatuses is not null)
         {
-            containerStatus = containerStatuses[0];
-            _logger.LogInformation(FormattableString.Invariant($"Use the only container inside the pod for container id: {containerStatus.ContainerID}"));
-
-            using (IServiceScope scope = _serviceScopeFactory.CreateScope())
+            // check to see if there's only 1 container inside the pod
+            // else select container by environment variable.
+            if (containerStatuses.Count == 1)
             {
-                IContainerIdNormalizer normalizer = scope.ServiceProvider.GetRequiredService<IContainerIdNormalizer>();
-                if (normalizer.TryNormalize(containerStatus.ContainerID, out string? normalizedContainerId))
-                {
-                    _containerId = normalizedContainerId;
-                    return true;
-                }
+                containerStatus = containerStatuses[0];
+                _logger.LogDebug(FormattableString.Invariant($"Use the only container inside the pod for container id: {containerStatus.ContainerID}"));
             }
+            else
+            {
+                string? containerName = Environment.GetEnvironmentVariable("ContainerName");
+                _logger.LogDebug(FormattableString.Invariant($"Select container by environment variable containerName: {containerName}"));
+                containerStatus = containerStatuses.FirstOrDefault(c => string.Equals(c.Name, containerName, StringComparison.Ordinal));
+                if (containerStatus is not null)
+                { 
+                    _logger.LogDebug(FormattableString.Invariant($"Selected container by container.name property container id: {containerStatus.ContainerID}"));
+                }
+               
+            }
+            if (containerStatus is not null)
+            {
+                _logger.LogInformation(FormattableString.Invariant($"Selected container {containerStatus.Name} container id: {containerStatus.ContainerID}"));
 
-            _logger.LogError(FormattableString.Invariant($"Normalization failed for container id: {containerStatus.ContainerID}"));
+                using (IServiceScope scope = _serviceScopeFactory.CreateScope())
+                {
+                    IContainerIdNormalizer normalizer = scope.ServiceProvider.GetRequiredService<IContainerIdNormalizer>();
+                    if (normalizer.TryNormalize(containerStatus.ContainerID, out string? normalizedContainerId))
+                    {
+                        _containerId = normalizedContainerId;
+                        return true;
+                    }
+                }
+                _logger.LogError(FormattableString.Invariant($"Normalization failed for container id: {containerStatus.ContainerID}"));
+            }
+            _logger.LogError(FormattableString.Invariant($"Try back fill ContainerId failed"));
         }
         return false;
     }
