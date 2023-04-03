@@ -26,7 +26,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Utilities
         private static string GetSDKVersion()
         {
             Assembly assembly = typeof(SDKVersionUtils).GetTypeInfo().Assembly;
-            Version version = assembly.GetName().Version;
+            Version version = assembly.GetName().Version!;
             return version.ToString();
         }
 
