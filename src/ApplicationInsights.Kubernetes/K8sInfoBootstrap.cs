@@ -25,7 +25,7 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
     {
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        _exponentialEmitter = new ExponentialEmitter(TimeSpan.FromSeconds(2), _options.ClusterInfoRefreshInterval);
+        _exponentialEmitter = new ExponentialEmitter(_options.ExponentIntervalBase, _options.ClusterInfoRefreshInterval);
     }
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
