@@ -7,28 +7,26 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Utilities;
 /// </summary>
 internal class ExponentialEmitter
 {
-    private TimeSpan _current;
+    private TimeSpan _initial;
+    private int _emitCount = 1;
     private readonly TimeSpan _maximum;
 
     public ExponentialEmitter(TimeSpan initial, TimeSpan maximum)
     {
-        _current = initial;
+        _initial = initial;
         _maximum = maximum;
     }
 
     public TimeSpan GetNext()
     {
-        TimeSpan nextTimeSpan = Min(_current * 2, _maximum);
-        _current = nextTimeSpan;
-        return _current;
-    }
+        TimeSpan nextTimeSpan = TimeSpan.FromSeconds(Math.Pow(_initial.TotalSeconds, _emitCount));
 
-    private TimeSpan Min(TimeSpan item1, TimeSpan item2)
-    {
-        if (item1.TotalSeconds >= item2.TotalSeconds)
+        if (nextTimeSpan > _maximum)
         {
-            return item2;
+            // Stopped at the maximum.
+            return _maximum;
         }
-        return item1;
+        _emitCount++;
+        return nextTimeSpan;
     }
 }
