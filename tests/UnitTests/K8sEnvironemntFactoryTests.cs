@@ -48,7 +48,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Assert.Null(environment);
         }
 
-        [Fact]
+        [Fact(Skip = "The scenario covered is deprecated.")]
         [Obsolete("The scenario covered is deprecated", error: false)]
         public async Task ShouldTimeoutWaitingContainerReady()
         {
