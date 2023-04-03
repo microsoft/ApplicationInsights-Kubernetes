@@ -56,10 +56,7 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
                 TimeSpan interval = _exponentialDelaySource.GetNext();
                 _logger.LogDebug($"Finished update K8sEnvironment, next iteration will happen at {DateTime.UtcNow.Add(interval)} (UTC) by interval settings of {interval}");
 
-                using (PeriodicTimer timer = new PeriodicTimer(interval))
-                {
-                    await timer.WaitForNextTickAsync(cancellationToken).ConfigureAwait(false);
-                }
+                await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
