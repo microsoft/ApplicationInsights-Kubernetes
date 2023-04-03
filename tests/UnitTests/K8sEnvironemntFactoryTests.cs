@@ -49,6 +49,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         }
 
         [Fact]
+        [Obsolete("The scenario covered is deprecated", error: false)]
         public async Task ShouldTimeoutWaitingContainerReady()
         {
             Mock<IContainerIdHolder> containerIdHolderMock = new();
