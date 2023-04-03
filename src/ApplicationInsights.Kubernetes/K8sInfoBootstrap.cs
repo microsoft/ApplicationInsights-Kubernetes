@@ -17,7 +17,7 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
     private readonly object _locker = new object();
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private bool _hasExecuted = false;
-    private readonly ExponentialEmitter _exponentialEmitter;
+    private readonly ExponentialDelaySource _exponentialDelaySource;
 
     public K8sInfoBootstrap(
         IServiceScopeFactory serviceScopeFactory,
@@ -25,7 +25,7 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
     {
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-        _exponentialEmitter = new ExponentialEmitter(_options.ExponentIntervalBase, _options.ClusterInfoRefreshInterval);
+        _exponentialDelaySource = new ExponentialDelaySource(_options.ExponentIntervalBase, _options.ClusterInfoRefreshInterval);
     }
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -53,7 +53,7 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
                     await fetcher.UpdateK8sEnvironmentAsync(cancellationToken);
                 }
 
-                TimeSpan interval = _exponentialEmitter.GetNext();
+                TimeSpan interval = _exponentialDelaySource.GetNext();
                 _logger.LogDebug($"Finished update K8sEnvironment, next iteration will happen at {DateTime.UtcNow.Add(interval)} (UTC) by interval settings of {interval}");
 
                 using (PeriodicTimer timer = new PeriodicTimer(interval))

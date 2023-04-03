@@ -3,15 +3,15 @@ using System;
 namespace Microsoft.ApplicationInsights.Kubernetes.Utilities;
 
 /// <summary>
-/// Responsible for emit delay.
+/// A very simple implementation for emitting delay exponentially.
 /// </summary>
-internal class ExponentialEmitter
+internal class ExponentialDelaySource
 {
     private TimeSpan _initial;
     private int _emitCount = 1;
     private readonly TimeSpan _maximum;
 
-    public ExponentialEmitter(TimeSpan initial, TimeSpan maximum)
+    public ExponentialDelaySource(TimeSpan initial, TimeSpan maximum)
     {
         _initial = initial;
         _maximum = maximum;

@@ -9,7 +9,7 @@ public class ExponentialEmitterTests
     [Fact]
     public void EmitterShouldReturnTheProperTimeSpan()
     {
-        ExponentialEmitter target = new(TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
+        ExponentialDelaySource target = new(TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
 
         TimeSpan firstTime = target.GetNext();
         Assert.Equal(TimeSpan.FromSeconds(5), firstTime);
@@ -24,7 +24,7 @@ public class ExponentialEmitterTests
     [Fact]
     public void EmitterShouldHitTheMaximum()
     {
-        ExponentialEmitter target = new(TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(1));
+        ExponentialDelaySource target = new(TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(1));
 
         TimeSpan firstTime = target.GetNext();
         Assert.Equal(TimeSpan.FromSeconds(5), firstTime);
