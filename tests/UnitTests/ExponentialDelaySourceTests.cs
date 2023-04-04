@@ -4,10 +4,10 @@ using Xunit;
 
 namespace Microsoft.ApplicationInsights.Kubernetes.Tests;
 
-public class ExponentialEmitterTests
+public class ExponentialDelaySourceTests
 {
     [Fact]
-    public void EmitterShouldReturnTheProperTimeSpan()
+    public void ShouldReturnTheProperTimeSpan()
     {
         ExponentialDelaySource target = new(TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(5));
 
@@ -22,7 +22,7 @@ public class ExponentialEmitterTests
     }
 
     [Fact]
-    public void EmitterShouldHitTheMaximum()
+    public void ShouldHitTheMaximum()
     {
         ExponentialDelaySource target = new(TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(1));
 
