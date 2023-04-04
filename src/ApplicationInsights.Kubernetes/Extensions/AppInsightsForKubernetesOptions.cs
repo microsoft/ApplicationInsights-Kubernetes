@@ -25,6 +25,14 @@ namespace Microsoft.Extensions.DependencyInjection
         public Func<string, string>? TelemetryKeyProcessor { get; set; }
 
         /// <summary>
+        /// Gets or sets the time-span for exponent interval base. This will be used as the interval between querying the Kubernetes cluster for properties.
+        /// For example, in y = power(2, x), 2 is the base, and the interval will then be 2 seconds, 4 seconds, 8 seconds, 16 seconds ... until it reached the
+        /// <see cref="ClusterInfoRefreshInterval" />.
+        /// The base is default to 2 seconds.
+        /// </summary>
+        public TimeSpan ExponentIntervalBase { get; set; } = TimeSpan.FromSeconds(2);
+
+        /// <summary>
         /// Get or sets how frequent to refresh the cluster info.
         /// For example: 00:10:00 for 10 minutes.
         /// The default value is 10 minutes.

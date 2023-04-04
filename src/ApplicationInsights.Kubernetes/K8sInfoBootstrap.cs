@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
+using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -16,6 +17,7 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
     private readonly object _locker = new object();
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private bool _hasExecuted = false;
+    private readonly ExponentialDelaySource _exponentialDelaySource;
 
     public K8sInfoBootstrap(
         IServiceScopeFactory serviceScopeFactory,
@@ -23,6 +25,7 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
     {
         _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+        _exponentialDelaySource = new ExponentialDelaySource(_options.ExponentIntervalBase, _options.ClusterInfoRefreshInterval);
     }
 
     public async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -37,7 +40,6 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
             _hasExecuted = true;
         }
 
-        TimeSpan interval = _options.ClusterInfoRefreshInterval;
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -51,10 +53,10 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
                     await fetcher.UpdateK8sEnvironmentAsync(cancellationToken);
                 }
 
+                TimeSpan interval = _exponentialDelaySource.GetNext();
                 _logger.LogDebug($"Finished update K8sEnvironment, next iteration will happen at {DateTime.UtcNow.Add(interval)} (UTC) by interval settings of {interval}");
 
-                // TODO: Consider using PeriodicTimer than delay below when move to .NET 6 +
-                await Task.Delay(interval, cancellationToken: cancellationToken);
+                await Task.Delay(interval, cancellationToken).ConfigureAwait(false);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)

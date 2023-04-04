@@ -37,7 +37,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 return originalKey;
             }
 
-            return _telemetryKeyCache.GetOrAdd(originalKey, valueFactory: _options.TelemetryKeyProcessor);
+            return _telemetryKeyCache.GetOrAdd(originalKey, valueFactory: telemetryKeyProcessor);
         }
     }
 }

@@ -7,6 +7,7 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\src\PublicKey.snk</AssemblyOriginatorKeyFile>
     <DelaySign>True</DelaySign>
+    <NoWarn>CS8002</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

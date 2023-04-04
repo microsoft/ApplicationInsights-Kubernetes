@@ -27,6 +27,8 @@ internal class KubernetesServiceCollectionBuilder : IKubernetesServiceCollection
     /// <param name="customizeOptions">An optional delegate to overwrite app insights for kubernetes options.</param>
     /// <param name="clusterCheck">A service to check if the current process is inside a K8s cluster. This is intended to be used by tests. 
     /// A default checker will be provided when null.
+    /// <param name="skipRegisterBackendService">To skip register backend service when set to true. This is intended to use be used in some
+    /// environment that hosted services is not supported, for example, in Azure Function.</param>
     /// </param>
     public KubernetesServiceCollectionBuilder(
         Action<AppInsightsForKubernetesOptions>? customizeOptions,
