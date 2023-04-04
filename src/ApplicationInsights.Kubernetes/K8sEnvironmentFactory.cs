@@ -46,7 +46,7 @@ internal class K8sEnvironmentFactory : IK8sEnvironmentFactory
             V1Pod myPod = await _podInfoManager.WaitUntilMyPodReadyAsync(cancellationToken).ConfigureAwait(false);
 
             // Wait until the container is ready.
-            V1ContainerStatus? containerStatus = await _containerStatusManager.WaitContainerReadyAsync(cancellationToken).ConfigureAwait(false);
+            V1ContainerStatus? containerStatus = await _containerStatusManager.GetMyContainerStatusAsync(cancellationToken).ConfigureAwait(false);
 
             // Fetch replica set info
             IEnumerable<V1ReplicaSet> allReplicaSet = await _k8sClient.GetReplicaSetsAsync(cancellationToken).ConfigureAwait(false);

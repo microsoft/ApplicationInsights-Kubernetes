@@ -46,7 +46,7 @@ internal abstract class FileBasedContainerIdProvider : IContainerIdProvider
         using StreamReader reader = File.OpenText(_targetFile);
         while (!reader.EndOfStream)
         {
-            string line = reader.ReadLine();
+            string? line = reader.ReadLine();
             if(string.IsNullOrEmpty(line))
             {
                 continue;
