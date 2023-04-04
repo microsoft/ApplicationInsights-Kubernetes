@@ -7,7 +7,7 @@ Application Insights for Kubernetes enhances telemetries with K8s properties, wo
 
 ![Screenshot for Application Insights for Kubernetes enhanced telemetry](./docs/TelemetryEnhancement.png)
 
-> ⚠️ `Microsoft Application Insights for Kubernetes` (this library) is an enhancement to the [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore). You can choose to run **Application Insights** without this library in a Kubernetes cluster. However, with `Microsoft Application Insights for Kubernetes`, you will see Kubernetes-related properties like *Pod-Name, Deployment ...* on all your telemetry entries. Proper values will also be set to make use of the rich features like enabling the Application Map to show the multiple microservices/roles on the same application insights map.
+> ⚠️ `Microsoft Application Insights for Kubernetes` (this library) is designed to improve the functionality of [Microsoft Application Insights](https://github.com/Microsoft/ApplicationInsights-aspnetcore). While **it is possible** to run Application Insights on a Kubernetes cluster **without** this library, it allows for Kubernetes-specific properties such as Pod-Name and Deployment to be included in all telemetry entries. Additionally, the library ensures that appropriate values are assigned, enabling advanced features like the Application Map to display multiple microservices or roles on a single Application Insights map.
 
 ## Continuous Integration Status
 
@@ -17,7 +17,7 @@ Application Insights for Kubernetes enhances telemetries with K8s properties, wo
 
 ## Get Started
 
-This is a quick guide for ASP.NET Core projects.
+This is a quick guide for **ASP.NET Core** projects. If you want to run it **in a worker**, see the instructions in the **[Walk-through](#walk-through-with-example-code)** section.
 
 ### Prerequisite
 
@@ -29,16 +29,14 @@ This is a quick guide for ASP.NET Core projects.
 
 ### Instrument an ASP.NET Core application
 
-> ⚠️ This is for ASP.NET Core application. See instructions for workers in the **Walk-through** section below.
-
-1. Add references to **Application Insights SDK** and **Application Insights for Kubernetes**:
+1. Add references to **Application Insights SDK** and **Application Insights for Kubernetes** by running:
 
     ```shell
     dotnet add package Microsoft.ApplicationInsights.AspNetCore
     dotnet add package Microsoft.ApplicationInsights.Kubernetes
     ```
 
-2. Enable **Application Insights** and **Application Insights for Kubernetes Enricher** in `Startup.cs`:
+2. Enable **Application Insights** and **Application Insights for Kubernetes Enricher** in `Startup.cs` / `Program.cs`:
 
     ```csharp
     public void ConfigureServices(IServiceCollection services)
