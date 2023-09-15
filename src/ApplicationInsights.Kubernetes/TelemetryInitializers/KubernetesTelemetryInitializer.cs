@@ -49,7 +49,7 @@ internal class KubernetesTelemetryInitializer : ITelemetryInitializer
         }
         else
         {
-            _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is used but the content has not ready yet.");
+            _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is used but the content is not ready yet.");
         }
 
         telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
