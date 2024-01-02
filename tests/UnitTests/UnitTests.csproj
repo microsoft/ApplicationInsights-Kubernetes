@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6</TargetFramework>
+    <TargetFramework>net8</TargetFramework>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes.UnitTests</AssemblyName>
     <RootNamespace>Microsoft.ApplicationInsights.Kubernetes</RootNamespace>
     <SignAssembly>True</SignAssembly>

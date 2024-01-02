@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Kubernetes;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.Extensions.Logging;
@@ -65,7 +66,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
         private static bool KubernetesTelemetryInitializerExists(IServiceCollection serviceCollection)
-            => serviceCollection.Any<ServiceDescriptor>(t => t.ImplementationType == typeof(KubernetesTelemetryInitializer));
+            => serviceCollection.Any<ServiceDescriptor>(t => !t.IsKeyedService && t.ImplementationType == typeof(KubernetesTelemetryInitializer));
 
         /// <summary>
         /// Configure the KubernetesTelemetryInitializer and its dependencies.
