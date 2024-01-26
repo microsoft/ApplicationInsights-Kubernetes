@@ -14,7 +14,7 @@ internal class K8sInfoBootstrap : IK8sInfoBootstrap
 
     private readonly AppInsightsForKubernetesOptions _options;
 
-    private readonly object _locker = new object();
+    private readonly object _locker = new();
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private bool _hasExecuted = false;
     private readonly ExponentialDelaySource _exponentialDelaySource;
