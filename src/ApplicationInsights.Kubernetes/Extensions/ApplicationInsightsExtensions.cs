@@ -65,7 +65,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection">The service collection.</param>
         private static bool KubernetesTelemetryInitializerExists(IServiceCollection serviceCollection)
-            => serviceCollection.Any<ServiceDescriptor>(t => t.ImplementationType == typeof(KubernetesTelemetryInitializer));
+            => serviceCollection.Any(t => !t.IsKeyedService && t.ImplementationType == typeof(KubernetesTelemetryInitializer));
 
         /// <summary>
         /// Configure the KubernetesTelemetryInitializer and its dependencies.
