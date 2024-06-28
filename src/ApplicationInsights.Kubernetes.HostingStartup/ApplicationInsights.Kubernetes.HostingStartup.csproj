@@ -15,7 +15,7 @@
     <!-- Explicit reference Microsoft.AspNetCore.Hosting even though it would be brought in by dependencies. -->
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
     
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
   </ItemGroup>
 
   <ItemGroup>

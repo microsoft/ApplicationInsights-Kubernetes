@@ -19,8 +19,8 @@
         <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)PublicKey.snk</AssemblyOriginatorKeyFile>
         <!--Package-->
         <VersionSuffix Condition=" '$(VersionSuffix)' == '' ">$([System.DateTime]::Now.ToString(yyyyMMddHHmm))</VersionSuffix>
-        <Version Condition=" '$(Version)' == '' ">6.0.0-private-$(VersionSuffix)</Version>
-        <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' ">6.0.0.0</AssemblyVersion>
+        <Version Condition=" '$(Version)' == '' ">7.0.0-private-$(VersionSuffix)</Version>
+        <AssemblyVersion Condition=" '$(AssemblyVersion)' == '' ">7.0.0.0</AssemblyVersion>
         <Authors>Microsoft</Authors>
         <Company>Microsoft</Company>
         <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>

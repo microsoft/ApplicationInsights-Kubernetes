@@ -62,14 +62,14 @@ internal class ContainerIdHolder : IContainerIdHolder
                 _logger.LogDebug(FormattableString.Invariant($"Select container by environment variable containerName: {containerName}"));
                 containerStatus = containerStatuses.FirstOrDefault(c => string.Equals(c.Name, containerName, StringComparison.Ordinal));
                 if (containerStatus is not null)
-                { 
+                {
                     _logger.LogDebug(FormattableString.Invariant($"Selected container by container.name property container id: {containerStatus.ContainerID}"));
                 }
-               
+
             }
             if (containerStatus is not null)
             {
-                _logger.LogInformation(FormattableString.Invariant($"Selected container {containerStatus.Name} container id: {containerStatus.ContainerID}"));
+                _logger.LogInformation(FormattableString.Invariant($"Selected container id: {containerStatus.ContainerID}, name: {containerStatus.Name}"));
 
                 using (IServiceScope scope = _serviceScopeFactory.CreateScope())
                 {
@@ -96,7 +96,7 @@ internal class ContainerIdHolder : IContainerIdHolder
             {
                 if (provider.TryGetMyContainerId(out containerId))
                 {
-                    _logger.LogInformation(FormattableString.Invariant($"Get container id by provider: {containerId}"));
+                    _logger.LogInformation(FormattableString.Invariant($"Got container id {containerId} by provider: {provider.GetType().Name}"));
                     return true;
                 }
             }

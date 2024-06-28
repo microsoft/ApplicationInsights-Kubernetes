@@ -59,15 +59,17 @@ internal class ContainerStatusManager : IContainerStatusManager
             return null;
         }
 
-        // If there's no container id provided by the container id holder, at this moment, try backfill
+        // Container Id is null. There's no container id provided by the container id holder, try backfill.
+
         // Give out warnings on Linux in case the auto detect has a bug.
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            _logger.LogWarning("Can't fetch container id. Container id info will be missing. Please file an issue at https://github.com/microsoft/ApplicationInsights-Kubernetes/issues.");
+            _logger.LogWarning("Failed to auto detect container id. Will try back-filling. Please file an issue at https://github.com/microsoft/ApplicationInsights-Kubernetes/issues for investigation.");
         }
 
         if (_containerIdHolder.TryBackFillContainerId(myPod, out V1ContainerStatus? inferredContainerStatus))
         {
+            _logger.LogInformation("Backfill container id succeeded. Container id: {0}", inferredContainerStatus?.ContainerID ?? "Empty");
             // Back fill success, return the status.
             return inferredContainerStatus;
         }
@@ -84,7 +86,7 @@ internal class ContainerStatusManager : IContainerStatusManager
 
     public async Task<V1ContainerStatus?> WaitContainerReadyAsync(CancellationToken cancellationToken)
     {
-        while(true)
+        while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
