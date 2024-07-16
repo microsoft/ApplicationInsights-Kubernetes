@@ -143,7 +143,7 @@ Now that the image is in the container registry, it is time to deploy it to Kube
 
 1. Deploy the application
 
-    Create a Kubernetes deployment file. Reference [k8s.yaml](./k8s.yaml) as an example, pay attention to **namespace**, **image**, and **environment variables**, making sure they are properly set up.
+    Create a Kubernetes deployment file. Reference [k8s.yaml](./WebAPI/k8s.yaml) as an example, pay attention to **namespace**, **image**, and **environment variables**, making sure they are properly set up.
 
     Then run the following command to deploy the app:
 
