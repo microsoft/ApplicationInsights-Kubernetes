@@ -44,7 +44,6 @@ This is a quick guide for **ASP.NET Core** projects. If you want to run it **in 
         ...
         services.AddApplicationInsightsTelemetry("----Your Application Insights Instrumentation Key ----");
         services.AddApplicationInsightsKubernetesEnricher();
-        services.AddMvc();
         ...
     }
     ```
