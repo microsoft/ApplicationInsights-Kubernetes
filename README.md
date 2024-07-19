@@ -95,8 +95,8 @@ Customize configurations are supported. There are several ways to customize the 
     | Key                        | Value/Types | Default Value | Description                                                                                  |
     | -------------------------- | ----------- | ------------- | -------------------------------------------------------------------------------------------- |
     | InitializationTimeout      | TimeSpan    | 00:02:00      | Maximum time to wait for spinning up the container. Accepted format: [d.]hh:mm:ss[.fffffff]. |
-    | ClusterInfoRefreshInterval | TimeSpan    | 00:10:00      | For 3.x only. Get or sets how frequent to refresh the Kubernetes cluster properties.         |
-    | DisablePerformanceCounters | Boolean     | false         | Deprecated. Sets to true to avoid adding performance counter telemetry initializer.          |
+    | ClusterInfoRefreshInterval | TimeSpan    | 00:10:00      | Get or sets how frequent to refresh the Kubernetes cluster properties.         |
+    | ~~DisablePerformanceCounters~~ | ~~Boolean~~     | ~~false~~         | Deprecated. Sets to true to avoid adding performance counter telemetry initializer.          |
 
 > Tips: Refer to [AppInsightsForKubernetesOptions.cs](./src/ApplicationInsights.Kubernetes/Extensions/AppInsightsForKubernetesOptions.cs) for the latest customization supported.
 
