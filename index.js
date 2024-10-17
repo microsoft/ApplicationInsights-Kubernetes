@@ -1,3 +1,11 @@
+const core = require('@actions/core');
+const github = require('@actions/github');
+const fetch = require('node-fetch');
+var base64 = require('js-base64').Base64;
+const { Octokit } = require('@octokit/core');
+const { createPullRequest } = require('octokit-plugin-create-pull-request');
+const MyOctokit = Octokit.plugin(createPullRequest);
+
 async function run() {
     try {
         const repo_token = core.getInput('repo-token');
