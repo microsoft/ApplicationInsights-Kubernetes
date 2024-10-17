@@ -1,0 +1,88 @@
+name: Add comment
+on:
+  issues:
+    types:
+      - labeled
+  issue_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+jobs:
+  add-comment:
+    if: github.event.label.name == 'perf'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write
+      pull-requests: write
+      actions: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Fix Perf Issue
+        uses: ./ # Uses an action in the root directory
+        id: fix
+        with:
+          issue-title: ${{ github.event.issue.title }}
+          issue-body: ${{ github.event.issue.body }}
+          issue-number: ${{ github.event.issue.number }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
+          body: |
+            This issue is available for anyone to work on. **Make sure to reference this issue in your pull request.** :sparkles: Thank you for your contribution! :sparkles:
+  respond:
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/devbot')
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write
+      pull-requests: write
+      actions: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Get comments
+        id: get-comments
+        uses: actions/github-script@v3
+        with:
+          script: |
+            const { data: comments } = await github.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            console.log(comments);
+            return { comments };
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Respond To Comment
+        uses: ./
+        id: respond
+        with:
+          repo: ${{ github.event.repository.full_name }}
+          pr-number: ${{ github.event.issue.number }}
+          pr-body: ${{ github.event.issue.body }}
+          comment: ${{ github.event.comment.body }}
+          comment-id: ${{ github.event.comment.id }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
+  respond-to-code-review:
+    if: github.event_name == 'pull_request_review'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: write
+      pull-requests: write
+      actions: read
+      security-events: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Respond To Review
+        uses: ./
+        id: respond1
+        with:
+          repo: ${{ github.event.repository.full_name }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
