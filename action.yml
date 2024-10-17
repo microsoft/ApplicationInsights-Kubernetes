@@ -1,0 +1,5 @@
+name: 'Fix Perf Issue'
+description: 'Start PR fixing an issue tagged with [perf]'
+runs:
+  using: 'node16'
+  main: 'index.js'
