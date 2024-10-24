@@ -256,3 +256,6 @@ global.json
 
 # Anything that is local
 local.*
+
+# BenchmarkDotNet Results
+BenchmarkDotNet.Artifacts/
