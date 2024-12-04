@@ -12,9 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Explicit reference Microsoft.AspNetCore.Hosting even though it would be brought in by dependencies. -->
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" />
-    
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" />
   </ItemGroup>
 
