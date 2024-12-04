@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
     <!-- <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /> -->
     <!--Build-->
     <PropertyGroup>
@@ -32,7 +32,7 @@
         <RepositoryType />
     </PropertyGroup>
     <ItemGroup Condition=" '$(IsCIBuild)' == 'true' ">
-        <PackageReference Include="MicroBuild.Core" Version="0.3.0">
+        <PackageReference Include="MicroBuild.Core">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
