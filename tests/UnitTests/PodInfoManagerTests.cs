@@ -31,7 +31,7 @@ public class PodInfoManagerTests
         containerIdHolderMock.Setup(c => c.ContainerId).Returns("containerId");
 
         PodInfoManager target = new PodInfoManager(k8sQueryClientMock.Object, containerIdHolderMock.Object, new IPodNameProvider[] { podNameProviderMock.Object });
-        V1Pod result = await target.GetMyPodAsync(default).ConfigureAwait(false);
+        V1Pod result = await target.GetMyPodAsync(default);
 
         Assert.NotNull(result);
         Assert.Single(result.Status.ContainerStatuses);
@@ -58,7 +58,7 @@ public class PodInfoManagerTests
         k8sQueryClientMock.Setup(c => c.GetPodByNameAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(podsArray.FirstOrDefault(item => item.Metadata.Name == providerPodName)));
 
         PodInfoManager target = new PodInfoManager(k8sQueryClientMock.Object, containerIdHolderMock.Object, new IPodNameProvider[] { podNameProviderMock.Object });
-        V1Pod result = await target.GetMyPodAsync(default).ConfigureAwait(false);
+        V1Pod result = await target.GetMyPodAsync(default);
 
         Assert.NotNull(result);
         Assert.Single(result.Status.ContainerStatuses);
@@ -88,7 +88,7 @@ public class PodInfoManagerTests
         containerIdHolderMock.Setup(c => c.ContainerId).Returns(targetContainerId);
 
         PodInfoManager target = new PodInfoManager(k8sQueryClientMock.Object, containerIdHolderMock.Object, new IPodNameProvider[] { podNameProviderMock.Object });
-        V1Pod result = await target.GetMyPodAsync(default).ConfigureAwait(false);
+        V1Pod result = await target.GetMyPodAsync(default);
 
         Assert.NotNull(result);
         Assert.Single(result.Status.ContainerStatuses);
@@ -119,7 +119,7 @@ public class PodInfoManagerTests
         podNameProviderMock2.Setup(p => p.TryGetPodName(out providerPodName2)).Returns(true); // the provider returns true with pod name.
 
         PodInfoManager target = new PodInfoManager(k8sQueryClientMock.Object, containerIdHolderMock.Object, new IPodNameProvider[] { podNameProviderMock.Object, podNameProviderMock2.Object });
-        V1Pod result = await target.GetMyPodAsync(default).ConfigureAwait(false);
+        V1Pod result = await target.GetMyPodAsync(default);
 
         Assert.NotNull(result);
         Assert.Single(result.Status.ContainerStatuses);
