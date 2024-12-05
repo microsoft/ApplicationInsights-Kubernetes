@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ApplicationInsights.Kubernetes\ApplicationInsights.Kubernetes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchMarkDotNet" Version="0.14.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\src\PublicKey.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>True</DelaySign>
+  </PropertyGroup>
+
+</Project>
