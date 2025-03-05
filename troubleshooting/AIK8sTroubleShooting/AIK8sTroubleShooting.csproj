@@ -8,9 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.*" />
-    <PackageReference Include="Microsoft.ApplicationInsights.Kubernetes" Version="2.*" />
+    <!-- <PackageReference Include="Microsoft.ApplicationInsights.Kubernetes" Version="2.*" /> -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-    
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference
+      Include="../../src/ApplicationInsights.Kubernetes/ApplicationInsights.Kubernetes.csproj" />
+  </ItemGroup>
 </Project>
