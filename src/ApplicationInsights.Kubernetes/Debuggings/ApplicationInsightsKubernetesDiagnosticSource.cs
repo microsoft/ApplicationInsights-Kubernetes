@@ -98,7 +98,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes.Debugging
                 string timedFormat = "[" + DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture) + "] " + message;
                 _innerSource.Write(level.ToString(), new
                 {
-                    content = string.Format(CultureInfo.InvariantCulture, timedFormat, args),
+                    content = args.Length > 0
+                        ? string.Format(CultureInfo.InvariantCulture, timedFormat, args)
+                        : timedFormat,
                 });
             }
         }
