@@ -34,6 +34,9 @@ public class AppInsightsKubernetesOptionsTests
 
             // No telemetry key processor
             Assert.Null(options.TelemetryKeyProcessor);
+
+            // Do NOT overwrite SDK version by default
+            Assert.False(options.OverwriteSDKVersion);
         }
     }
 
