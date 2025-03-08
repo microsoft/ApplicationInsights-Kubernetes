@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
 using Microsoft.Extensions.DependencyInjection;
@@ -304,5 +305,61 @@ public class KubernetesTelemetryInitializerTests
 
         Assert.False(telemetryWithProperties.Properties.ContainsKey("Kubernetes.Container.ID"));
         Assert.True(telemetryWithProperties.Properties.ContainsKey("Kubernetes_Container_ID"));
+    }
+
+    [Fact(DisplayName = "K8sTelemetryInitializer will not overwrite sdk version.")]
+    public void ShouldNotOverwriteInternalSDK()
+    {
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
+        envMock.Setup(env => env.ContainerName).Returns("Hello.RoleName");
+        envMock.Setup(env => env.ContainerID).Returns("Hello.Cid");
+
+        keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input.Replace('.', '_'));
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
+
+        // By default the SDK version should not be overwritten.
+        KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
+            k8sEnvironmentHolderMock.Object,
+            SDKVersionUtils.Instance,
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
+        ITelemetry telemetry = new TraceTelemetry();
+        
+        string originalSdkVersion = telemetry.Context.GetInternalContext().SdkVersion;
+        target.Initialize(telemetry);
+        
+        Assert.Equal(originalSdkVersion, telemetry.Context.GetInternalContext().SdkVersion);
+        Assert.NotEqual(SDKVersionUtils.Instance.CurrentSDKVersion, telemetry.Context.GetInternalContext().SdkVersion); 
+    }
+
+    [Fact(DisplayName = "K8sTelemetryInitializer will overwrite sdk version by options.")]
+    public void ShouldOverwriteInternalSDKByOptions()
+    {
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
+        envMock.Setup(env => env.ContainerName).Returns("Hello.RoleName");
+        envMock.Setup(env => env.ContainerID).Returns("Hello.Cid");
+
+        keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input.Replace('.', '_'));
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
+
+        // By default the SDK version should not be overwritten.
+        KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
+            k8sEnvironmentHolderMock.Object,
+            SDKVersionUtils.Instance,
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions() { OverwriteSDKVersion = true }));
+        ITelemetry telemetry = new TraceTelemetry();
+
+        string originalSdkVersion = telemetry.Context.GetInternalContext().SdkVersion;
+        target.Initialize(telemetry);
+
+        Assert.NotEqual(originalSdkVersion, telemetry.Context.GetInternalContext().SdkVersion);
+        Assert.Equal(SDKVersionUtils.Instance.CurrentSDKVersion, telemetry.Context.GetInternalContext().SdkVersion);
     }
 }
