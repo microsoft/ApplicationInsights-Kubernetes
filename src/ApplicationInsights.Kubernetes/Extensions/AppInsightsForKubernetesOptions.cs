@@ -44,5 +44,14 @@ namespace Microsoft.Extensions.DependencyInjection
         /// When set to null (also the default), a built-in checker will be used.
         /// </summary>
         public IClusterEnvironmentCheck? ClusterCheckAction { get; set; } = null;
+
+        /// <summary>
+        /// For backward compatibility reason to allow the user to opt-in to 
+        /// keep overwriting the SDK version in telemetry. It doesn't make too
+        /// much sense to use it and has caused quite a confusion on the support
+        /// side.
+        /// Default to false and look into totally get rid of it in the future.
+        /// </summary>
+        public bool OverwriteSDKVersion { get; set; }
     }
 }
