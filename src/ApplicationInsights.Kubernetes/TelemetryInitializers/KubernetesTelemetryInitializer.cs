@@ -5,6 +5,8 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using static Microsoft.ApplicationInsights.Kubernetes.TelemetryProperty;
 
 namespace Microsoft.ApplicationInsights.Kubernetes;
@@ -16,15 +18,19 @@ internal class KubernetesTelemetryInitializer : ITelemetryInitializer
 {
     private static readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
     private readonly SDKVersionUtils _sdkVersionUtils;
+    private readonly AppInsightsForKubernetesOptions _options;
+
     internal IK8sEnvironmentHolder K8SEnvironmentHolder { get; }
     internal ITelemetryKeyCache TelemetryKeyCache { get; }
 
     public KubernetesTelemetryInitializer(
         IK8sEnvironmentHolder k8sEnvironmentHolder,
         SDKVersionUtils sdkVersionUtils,
-        ITelemetryKeyCache telemetryKeyCache)
+        ITelemetryKeyCache telemetryKeyCache,
+        IOptions<AppInsightsForKubernetesOptions> options)
     {
         TelemetryKeyCache = telemetryKeyCache ?? throw new ArgumentNullException(nameof(telemetryKeyCache));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
         K8SEnvironmentHolder = k8sEnvironmentHolder ?? throw new ArgumentNullException(nameof(k8sEnvironmentHolder));
         _sdkVersionUtils = sdkVersionUtils ?? throw new ArgumentNullException(nameof(sdkVersionUtils));
     }
@@ -52,7 +58,10 @@ internal class KubernetesTelemetryInitializer : ITelemetryInitializer
             _logger.LogTrace("Application Insights for Kubernetes telemetry initializer is used but the content is not ready yet.");
         }
 
-        telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
+        if (_options.OverwriteSDKVersion)
+        {
+            telemetry.Context.GetInternalContext().SdkVersion = _sdkVersionUtils.CurrentSDKVersion;
+        }
     }
 
     private void InitializeTelemetry(ITelemetry telemetry, IK8sEnvironment k8sEnv)
