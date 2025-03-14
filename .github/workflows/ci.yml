@@ -26,7 +26,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.x
+        dotnet-version: 8.x
 
     - name: Restore dependencies
       run: dotnet restore ApplicationInsights.Kubernetes.sln

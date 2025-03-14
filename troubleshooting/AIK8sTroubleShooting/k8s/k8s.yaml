@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ai-k8s-troubleshooting-container
-        image: saars/aik8s_troubleshoot:latest
+        image: ghcr.io/microsoft/applicationinsights-kubernetes:latest
         ports:
         - containerPort: 80
         env:

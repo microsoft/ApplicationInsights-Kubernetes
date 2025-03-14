@@ -3,7 +3,7 @@
     <Features>IOperation</Features>
   </PropertyGroup>
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>Microsoft.ApplicationInsights.Kubernetes</RootNamespace>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
