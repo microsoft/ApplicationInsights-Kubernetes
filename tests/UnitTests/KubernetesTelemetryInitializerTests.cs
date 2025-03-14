@@ -2,8 +2,11 @@ using System;
 using System.Diagnostics;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Extensibility.Implementation;
 using Microsoft.ApplicationInsights.Kubernetes.Debugging;
 using Microsoft.ApplicationInsights.Kubernetes.Utilities;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -21,7 +24,8 @@ public class KubernetesTelemetryInitializerTests
             KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
                 null,
                 SDKVersionUtils.Instance,
-                keyCacheMock.Object
+                keyCacheMock.Object,
+                Options.Create(new AppInsightsForKubernetesOptions())
                 );
         });
 
@@ -40,7 +44,8 @@ public class KubernetesTelemetryInitializerTests
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
             k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
 
         Assert.Equal(k8sEnvironmentHolderMock.Object, target.K8SEnvironmentHolder);
         Assert.Equal(keyCacheMock.Object, target.TelemetryKeyCache);
@@ -59,7 +64,8 @@ public class KubernetesTelemetryInitializerTests
 
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
         ITelemetry telemetry = new TraceTelemetry();
         target.Initialize(telemetry);
 
@@ -80,7 +86,8 @@ public class KubernetesTelemetryInitializerTests
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
             k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
 
         ITelemetry telemetry = new TraceTelemetry();
         telemetry.Context.Cloud.RoleName = "Existing RoleName";
@@ -122,7 +129,8 @@ public class KubernetesTelemetryInitializerTests
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
             k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
         ITelemetry telemetry = new TraceTelemetry();
         target.Initialize(telemetry);
 
@@ -162,7 +170,8 @@ public class KubernetesTelemetryInitializerTests
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
             k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
         ITelemetry telemetry = new TraceTelemetry();
         target.Initialize(telemetry);
 
@@ -198,7 +207,8 @@ public class KubernetesTelemetryInitializerTests
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
             k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
         ITelemetry telemetry = new TraceTelemetry();
         target.Initialize(telemetry);
 
@@ -237,7 +247,8 @@ public class KubernetesTelemetryInitializerTests
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
             k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
         ITelemetry telemetry = new TraceTelemetry();
         ISupportProperties telemetryWithProperties = telemetry as ISupportProperties;
         telemetryWithProperties.Properties["K8s.Container.ID"] = "Existing Cid";
@@ -257,7 +268,8 @@ public class KubernetesTelemetryInitializerTests
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
             k8sEnvironmentHolderMock.Object,    // k8sEnvironmentHolderMock.Object.K8sEnvironment is null
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
 
         ITelemetry telemetry = new TraceTelemetry();
         ISupportProperties telemetryWithProperties = telemetry as ISupportProperties;
@@ -284,7 +296,8 @@ public class KubernetesTelemetryInitializerTests
         KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
             k8sEnvironmentHolderMock.Object,
             SDKVersionUtils.Instance,
-            keyCacheMock.Object);
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
         ITelemetry telemetry = new TraceTelemetry();
         target.Initialize(telemetry);
 
@@ -292,5 +305,61 @@ public class KubernetesTelemetryInitializerTests
 
         Assert.False(telemetryWithProperties.Properties.ContainsKey("Kubernetes.Container.ID"));
         Assert.True(telemetryWithProperties.Properties.ContainsKey("Kubernetes_Container_ID"));
+    }
+
+    [Fact(DisplayName = "K8sTelemetryInitializer will not overwrite sdk version.")]
+    public void ShouldNotOverwriteInternalSDK()
+    {
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
+        envMock.Setup(env => env.ContainerName).Returns("Hello.RoleName");
+        envMock.Setup(env => env.ContainerID).Returns("Hello.Cid");
+
+        keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input.Replace('.', '_'));
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
+
+        // By default the SDK version should not be overwritten.
+        KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
+            k8sEnvironmentHolderMock.Object,
+            SDKVersionUtils.Instance,
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions()));
+        ITelemetry telemetry = new TraceTelemetry();
+        
+        string originalSdkVersion = telemetry.Context.GetInternalContext().SdkVersion;
+        target.Initialize(telemetry);
+        
+        Assert.Equal(originalSdkVersion, telemetry.Context.GetInternalContext().SdkVersion);
+        Assert.NotEqual(SDKVersionUtils.Instance.CurrentSDKVersion, telemetry.Context.GetInternalContext().SdkVersion); 
+    }
+
+    [Fact(DisplayName = "K8sTelemetryInitializer will overwrite sdk version by options.")]
+    public void ShouldOverwriteInternalSDKByOptions()
+    {
+        Mock<IK8sEnvironment> envMock = new();
+        Mock<IK8sEnvironmentHolder> k8sEnvironmentHolderMock = new();
+        Mock<ITelemetryKeyCache> keyCacheMock = new Mock<ITelemetryKeyCache>();
+
+        envMock.Setup(env => env.ContainerName).Returns("Hello.RoleName");
+        envMock.Setup(env => env.ContainerID).Returns("Hello.Cid");
+
+        keyCacheMock.Setup(c => c.GetProcessedKey(It.IsAny<string>())).Returns<string>(input => input.Replace('.', '_'));
+        k8sEnvironmentHolderMock.Setup(h => h.K8sEnvironment).Returns(envMock.Object);
+
+        // By default the SDK version should not be overwritten.
+        KubernetesTelemetryInitializer target = new KubernetesTelemetryInitializer(
+            k8sEnvironmentHolderMock.Object,
+            SDKVersionUtils.Instance,
+            keyCacheMock.Object,
+            Options.Create(new AppInsightsForKubernetesOptions() { OverwriteSDKVersion = true }));
+        ITelemetry telemetry = new TraceTelemetry();
+
+        string originalSdkVersion = telemetry.Context.GetInternalContext().SdkVersion;
+        target.Initialize(telemetry);
+
+        Assert.NotEqual(originalSdkVersion, telemetry.Context.GetInternalContext().SdkVersion);
+        Assert.Equal(SDKVersionUtils.Instance.CurrentSDKVersion, telemetry.Context.GetInternalContext().SdkVersion);
     }
 }
