@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6</TargetFramework>
+    <TargetFramework>net8</TargetFramework>
     <AssemblyName>Microsoft.ApplicationInsights.Kubernetes.UnitTests</AssemblyName>
     <RootNamespace>Microsoft.ApplicationInsights.Kubernetes</RootNamespace>
     <SignAssembly>True</SignAssembly>
@@ -13,8 +13,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
     <PackageReference Include="Moq" Version="4.*" />
-    <PackageReference Include="xunit" Version="2.8.*" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.*" />
+    <PackageReference Include="xunit" Version="2.9.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.9.*" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.*" />
   </ItemGroup>
 
