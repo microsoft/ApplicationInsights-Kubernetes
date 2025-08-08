@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.ApplicationInsights.Kubernetes.Containers;
 using Microsoft.ApplicationInsights.Kubernetes.Pods;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -18,6 +20,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Mock<IPodInfoManager> podInfoManagerMock = new();
             Mock<IContainerStatusManager> containerStatusManagerMock = new();
             Mock<IK8sClientService> k8sClientServiceMock = new();
+            Mock<IOptions<AppInsightsForKubernetesOptions>> appInsightsForKubernetesOptionsMock = new();
 
             // Timeout
             TimeSpan timeout = TimeSpan.FromMilliseconds(1);
@@ -34,8 +37,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                 });
 
-            K8sEnvironmentFactory target = new K8sEnvironmentFactory(containerIdHolderMock.Object, podInfoManagerMock.Object, containerStatusManagerMock.Object, k8sClientServiceMock.Object);
-
+            K8sEnvironmentFactory target = new K8sEnvironmentFactory(containerIdHolderMock.Object,
+                podInfoManagerMock.Object, containerStatusManagerMock.Object, k8sClientServiceMock.Object,
+                appInsightsForKubernetesOptionsMock.Object);
             IK8sEnvironment environment = null;
             CancellationToken timeoutToken;
             using (CancellationTokenSource timeoutSource = new CancellationTokenSource(TimeSpan.FromMilliseconds(1)))
@@ -56,6 +60,7 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Mock<IPodInfoManager> podInfoManagerMock = new();
             Mock<IContainerStatusManager> containerStatusManagerMock = new();
             Mock<IK8sClientService> k8sClientServiceMock = new();
+            Mock<IOptions<AppInsightsForKubernetesOptions>> appInsightsForKubernetesOptionsMock = new();
 
             // Timeout
             TimeSpan timeout = TimeSpan.FromMilliseconds(1);
@@ -76,7 +81,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
             });
 
-            K8sEnvironmentFactory target = new K8sEnvironmentFactory(containerIdHolderMock.Object, podInfoManagerMock.Object, containerStatusManagerMock.Object, k8sClientServiceMock.Object);
+            K8sEnvironmentFactory target = new K8sEnvironmentFactory(containerIdHolderMock.Object,
+                podInfoManagerMock.Object, containerStatusManagerMock.Object, k8sClientServiceMock.Object,
+                appInsightsForKubernetesOptionsMock.Object);
 
             IK8sEnvironment environment = null;
             CancellationToken timeoutToken;
