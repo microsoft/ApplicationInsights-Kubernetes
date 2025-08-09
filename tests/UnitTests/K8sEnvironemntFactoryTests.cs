@@ -16,7 +16,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Fact]
         public async Task ShouldTimeoutWaitingPodReady()
         {
-            Mock<IContainerIdHolder> containerIdHolderMock = new();
             Mock<IPodInfoManager> podInfoManagerMock = new();
             Mock<IContainerStatusManager> containerStatusManagerMock = new();
             Mock<IK8sClientService> k8sClientServiceMock = new();
@@ -37,8 +36,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                     }
                 });
 
-            K8sEnvironmentFactory target = new K8sEnvironmentFactory(containerIdHolderMock.Object,
-                podInfoManagerMock.Object, containerStatusManagerMock.Object, k8sClientServiceMock.Object,
+            K8sEnvironmentFactory target = new K8sEnvironmentFactory(podInfoManagerMock.Object,
+                containerStatusManagerMock.Object, k8sClientServiceMock.Object,
                 appInsightsForKubernetesOptionsMock.Object);
             IK8sEnvironment environment = null;
             CancellationToken timeoutToken;
@@ -56,7 +55,6 @@ namespace Microsoft.ApplicationInsights.Kubernetes
         [Obsolete("The scenario covered is deprecated", error: false)]
         public async Task ShouldTimeoutWaitingContainerReady()
         {
-            Mock<IContainerIdHolder> containerIdHolderMock = new();
             Mock<IPodInfoManager> podInfoManagerMock = new();
             Mock<IContainerStatusManager> containerStatusManagerMock = new();
             Mock<IK8sClientService> k8sClientServiceMock = new();
@@ -81,8 +79,8 @@ namespace Microsoft.ApplicationInsights.Kubernetes
                 }
             });
 
-            K8sEnvironmentFactory target = new K8sEnvironmentFactory(containerIdHolderMock.Object,
-                podInfoManagerMock.Object, containerStatusManagerMock.Object, k8sClientServiceMock.Object,
+            K8sEnvironmentFactory target = new K8sEnvironmentFactory(podInfoManagerMock.Object,
+                containerStatusManagerMock.Object, k8sClientServiceMock.Object,
                 appInsightsForKubernetesOptionsMock.Object);
 
             IK8sEnvironment environment = null;

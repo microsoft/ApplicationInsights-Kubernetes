@@ -19,20 +19,17 @@ namespace Microsoft.ApplicationInsights.Kubernetes;
 internal class K8sEnvironmentFactory : IK8sEnvironmentFactory
 {
     private readonly ApplicationInsightsKubernetesDiagnosticSource _logger = ApplicationInsightsKubernetesDiagnosticSource.Instance;
-    private readonly IContainerIdHolder _containerIdHolder;
     private readonly IPodInfoManager _podInfoManager;
     private readonly IContainerStatusManager _containerStatusManager;
     private readonly IK8sClientService _k8sClient;
     private readonly AppInsightsForKubernetesOptions _options;
 
     public K8sEnvironmentFactory(
-        IContainerIdHolder containerIdHolder,
         IPodInfoManager podInfoManager,
         IContainerStatusManager containerStatusManager,
         IK8sClientService k8sClient,
         IOptions<AppInsightsForKubernetesOptions> options)
     {
-        _containerIdHolder = containerIdHolder ?? throw new ArgumentNullException(nameof(containerIdHolder));
         _podInfoManager = podInfoManager ?? throw new ArgumentNullException(nameof(podInfoManager));
         _containerStatusManager = containerStatusManager ?? throw new ArgumentNullException(nameof(containerStatusManager));
         _k8sClient = k8sClient ?? throw new ArgumentNullException(nameof(k8sClient));
