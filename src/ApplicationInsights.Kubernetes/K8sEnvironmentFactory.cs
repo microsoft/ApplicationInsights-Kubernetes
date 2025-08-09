@@ -23,7 +23,7 @@ internal class K8sEnvironmentFactory : IK8sEnvironmentFactory
     private readonly IPodInfoManager _podInfoManager;
     private readonly IContainerStatusManager _containerStatusManager;
     private readonly IK8sClientService _k8sClient;
-    private readonly IOptions<AppInsightsForKubernetesOptions> _options;
+    private readonly AppInsightsForKubernetesOptions _options;
 
     public K8sEnvironmentFactory(
         IContainerIdHolder containerIdHolder,
@@ -36,7 +36,7 @@ internal class K8sEnvironmentFactory : IK8sEnvironmentFactory
         _podInfoManager = podInfoManager ?? throw new ArgumentNullException(nameof(podInfoManager));
         _containerStatusManager = containerStatusManager ?? throw new ArgumentNullException(nameof(containerStatusManager));
         _k8sClient = k8sClient ?? throw new ArgumentNullException(nameof(k8sClient));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ internal class K8sEnvironmentFactory : IK8sEnvironmentFactory
 
             // Fetch node info
             V1Node? node = null;
-            if (!_options.Value.ExcludeNodeInformation)
+            if (!_options.ExcludeNodeInformation)
             {
                 string nodeName = myPod.Spec.NodeName;
                 IEnumerable<V1Node> allNodes = await _k8sClient.GetNodesAsync(ignoreForbiddenException: true, cancellationToken).ConfigureAwait(false);
