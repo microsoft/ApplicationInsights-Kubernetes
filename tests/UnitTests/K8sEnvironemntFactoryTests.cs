@@ -13,13 +13,18 @@ namespace Microsoft.ApplicationInsights.Kubernetes
 {
     public class K8sEnvironemntFactoryTests
     {
-        [Fact]
-        public async Task ShouldTimeoutWaitingPodReady()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ShouldTimeoutWaitingPodReady(bool excludeNodeInformation)
         {
             Mock<IPodInfoManager> podInfoManagerMock = new();
             Mock<IContainerStatusManager> containerStatusManagerMock = new();
             Mock<IK8sClientService> k8sClientServiceMock = new();
             Mock<IOptions<AppInsightsForKubernetesOptions>> appInsightsForKubernetesOptionsMock = new();
+            appInsightsForKubernetesOptionsMock
+                .Setup(o => o.Value)
+                .Returns(new AppInsightsForKubernetesOptions { ExcludeNodeInformation = excludeNodeInformation });
 
             // Timeout
             TimeSpan timeout = TimeSpan.FromMilliseconds(1);
@@ -59,6 +64,9 @@ namespace Microsoft.ApplicationInsights.Kubernetes
             Mock<IContainerStatusManager> containerStatusManagerMock = new();
             Mock<IK8sClientService> k8sClientServiceMock = new();
             Mock<IOptions<AppInsightsForKubernetesOptions>> appInsightsForKubernetesOptionsMock = new();
+            appInsightsForKubernetesOptionsMock
+                .Setup(o => o.Value)
+                .Returns(new AppInsightsForKubernetesOptions());
 
             // Timeout
             TimeSpan timeout = TimeSpan.FromMilliseconds(1);
