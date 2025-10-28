@@ -13,7 +13,7 @@ Application Insights for Kubernetes enhances telemetries with K8s properties, wo
 
 | Rolling Build                                                                                                                           | Nightly Build                                                                                                                           |
 | --------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Rolling-Build Status](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5974/badge) | ![Nightly-Build Status](https://devdiv.visualstudio.com/_apis/public/build/definitions/0bdbc590-a062-4c3f-b0f6-9383f67865ee/5976/badge) |
+| ![Rolling-Build Status](https://github-private.visualstudio.com/microsoft/_apis/build/status%2FOneBranch%2FAI-K8s-github%2FAI-K8S-PR-Build?repoName=Microsoft.ApplicationInsights.Kubernetes) | ![Nightly-Build Status](https://github-private.visualstudio.com/microsoft/_apis/build/status%2FOneBranch%2FAI-K8s-github%2FAI-K8s-Official-Build?repoName=Microsoft.ApplicationInsights.Kubernetes) |
 
 ## Get Started
 

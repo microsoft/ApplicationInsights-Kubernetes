@@ -53,5 +53,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Default to false and look into totally get rid of it in the future.
         /// </summary>
         public bool OverwriteSDKVersion { get; set; }
+
+        /// <summary>
+        /// Exclude node information from cluster info by skipping calls to the nodes endpoint.
+        /// Default is false.
+        /// </summary>
+        public bool ExcludeNodeInformation { get; set; }
     }
 }
