@@ -35,7 +35,7 @@ jobs:
       # Uses the `docker/login-action` action to log in to the Container registry using the account and password that 
       # will publish the packages. Once published, the packages are scoped to the account defined here.
       - name: Log in to the Container registry
-        uses: docker/login-action@783ae9cac559640a24c9212dfa6cd9e998252f9a
+        uses: docker/login-action@d0b8297dd55199249f38268efae35fcb03f75aab
         with:
           registry: ${{ env.ACR_NAME }}
           username: ${{ github.actor }}
@@ -48,7 +48,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@8e671d84a3bd81afdfc4fdbb96a42b07c2a80934
+        uses: docker/metadata-action@1ec73021df0717d8bef7700a897c064453280439
         with:
           images: ${{ env.ACR_NAME }}/${{ steps.image-name.outputs.IMAGE_NAME_NO_TAG }}
           labels: |
